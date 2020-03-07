@@ -1,0 +1,24 @@
+.tbt-flex-container {
+    display: flex;
+}
+
+.tbt-grid-container {
+    display: grid;
+    height: inherit;
+    width: inherit;
+}
+
+.tbt-grid-header { grid-area: header; }
+.tbt-grid-footer { grid-area: footer; }
+.tbt-grid-main { grid-area: main; }
+.tbt-grid-sidebar { grid-area: sidebar; }
+
+.tbt-circle {
+    border-radius: 50%;
+    height: auto;
+    width: auto;
+}
+
+.tbt-navbar {
+    width: 100%;
+}
