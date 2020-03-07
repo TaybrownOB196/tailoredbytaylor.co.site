@@ -32,7 +32,7 @@ class App extends React.Component {
                 <div className='grid-main'>
                     <Route exact path='/' render={props => (<MainContent {...props} blurbs={this.state.blurbs}/>) }/>
                     <Route path='/aboutme' component={AboutMe} />
-                    <Route path='/projects' component={Projects} />
+                    {/* <Route path='/projects' component={Projects} /> */}
                 </div>
             </div>
         </Router>

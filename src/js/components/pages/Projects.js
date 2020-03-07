@@ -2,10 +2,10 @@ import React from 'react';
 
 function Projects () {
     return (
-        <React.Fragment>
+        <div id='projects'>
             <p>Projects Page</p>
-            
-        </React.Fragment>
+
+        </div>
     );
 }
 

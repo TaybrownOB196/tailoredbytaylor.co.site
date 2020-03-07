@@ -9,7 +9,7 @@ function Sidebar() {
             <div style={navbarStyle} className='tbt-navbar'>
                 <Link to='/'>Home</Link>
                 <Link to='/aboutme'>About</Link>
-                <Link to='/projects'>Projects</Link>
+                {/* <Link to='/projects'>Projects</Link> */}
             </div>
         </div>
     );
