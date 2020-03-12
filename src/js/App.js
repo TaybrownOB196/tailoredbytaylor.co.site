@@ -49,7 +49,7 @@ const appStyle = {
     gridColumnGap: '5px',
     gridRowGap: '10px',
     gridTemplateRows: '10% 90%',
-    gridTemplateColumns: '25% 100%',
+    gridTemplateColumns: '25% 75%',
     gridTemplateAreas:
       `'header header'
       'sidebar main'`,
