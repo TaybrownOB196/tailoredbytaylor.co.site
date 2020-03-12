@@ -7,10 +7,6 @@
   font-family: Brush Script MT, Brush Script Std, cursive;
 }
 
-body {
-    background-color: lightsteelblue;
-}
-
 header {
     display: flex;
     align-items: center;
@@ -30,7 +26,8 @@ header {
     height: fit-content;
     display: flex;
     align-items: center;
-    background-color: lightsteelblue;
+    color: white;
+    background-color: blue;
     border-radius: 0px 15px 15px 15px;
 }
 
@@ -46,17 +43,18 @@ header {
 
 .grid-main {
     @extend .tbt-grid-main;
-    background-color: $blue-3;
+    // background-color: $blue-3;
     color: $blue-4;
     border-radius: 15px 0px 0px 0px;
     padding-top: 10px;
     padding-left: 10px;
     overflow: scroll;
+    overflow-x: hidden;
 }
 
 .grid-sidebar {
     @extend .tbt-grid-sidebar;
-    background-color: $blue-2;
+    background-color: blue;
 }
 
 .grid-main p {
@@ -66,7 +64,7 @@ header {
 .tbt-navbar a {
     float: left;
     clear: left;
-    color: lightsteelblue;
+    color: white;
     margin-top: 5px;
     padding-top: 2.5px;
     padding-bottom: 2.5px;
@@ -77,7 +75,7 @@ header {
     text-decoration: none;
 
     &:hover, &:focus, &:focus-within {
-        color: white;
+        color: lightsteelblue;
         border: 2.5px inset $blue-4;
     }
 }
@@ -96,6 +94,15 @@ header {
 
 #aboutMe p {
     font-weight: bold;
+}
+
+#blurbsContainer {
+    padding-top: 25.5%;
+}
+
+#blurbsContainer:first-child {
+    font-size: larger;
+    color: $blue-1;
 }
 
 #projects {

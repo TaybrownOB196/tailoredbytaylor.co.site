@@ -30,7 +30,11 @@ class App extends React.Component {
                 </header>
                 <Sidebar />
                 <div className='grid-main'>
-                    <Route exact path='/' render={props => (<MainContent {...props} blurbs={this.state.blurbs}/>) }/>
+                    <Route exact path='/' render={props => (
+                        <div id='blurbsContainer'>
+                            <h3>Recent Posts</h3>
+                            <MainContent {...props} blurbs={this.state.blurbs}/>
+                        </div>) }/>
                     <Route path='/aboutme' component={AboutMe} />
                     {/* <Route path='/projects' component={Projects} /> */}
                 </div>
