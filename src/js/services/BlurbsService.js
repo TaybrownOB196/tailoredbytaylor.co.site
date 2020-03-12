@@ -1,6 +1,6 @@
 class BlurbsService {
     constructor() {
-        this.url = 'https://jsonplaceholder.typicode.com/posts?_limit=20';
+        this.url = 'https://localhost:5001/blurbs';
     }
 
     async getBlurbs() {
@@ -9,7 +9,6 @@ class BlurbsService {
                 return res.json();
             })
             .then((json) => {
-                console.log(json);
                 return json;
             })
             .catch((err) => {
