@@ -157,6 +157,11 @@ header {
         padding-top: 50px;
     }
 
+    .bust_img {
+        -webkit-transform: scaleX(-1);
+        transform: scaleX(-1);
+    }
+
     .bust_circle {
         width: initial;
         height: 100%;
