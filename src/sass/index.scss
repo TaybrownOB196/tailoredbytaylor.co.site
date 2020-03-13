@@ -14,11 +14,18 @@ header {
 }
 
 .bust_circle {
+    @extend .tbt-circle;
+    width: 100%;
     background-color: lightsteelblue;
 }
 
+.bust_img {
+    width: 100%;
+    height: auto;
+}
+
 .blurb {
-    width: 66%;
+    width: 75%;
     padding-top: 5px;
     padding-bottom: 5px;
     padding-left: 5px;
@@ -31,8 +38,16 @@ header {
     border-radius: 0px 15px 15px 15px;
 }
 
-.blurb h6, p {
-    font-size: 1em;
+.grid-container {
+    @extend .tbt-grid-container;
+    align-content: center;
+    grid-column-gap: 5px;
+    grid-row-gap: 10px;
+    grid-template-rows: 10% 90%;
+    grid-template-columns: 25% 75%;
+    grid-template-areas:
+      'header header'
+      'sidebar main';
 }
 
 .grid-header {
@@ -73,6 +88,7 @@ header {
     width: 100%;
     text-align: center;
     text-decoration: none;
+    margin-left: -5px;
 
     &:hover, &:focus, &:focus-within {
         color: lightsteelblue;
@@ -127,4 +143,67 @@ header {
     margin-right: 10px;
     margin-left: 10px;
     position: fixed;
+}
+
+@media only screen and (min-width: 600px) {
+    .blurb {
+        margin-left: 20px;
+        height: 33px;
+        width: 90%;
+        border-radius: 15px;
+    }
+
+    #blurbsContainer {
+        padding-top: 50px;
+    }
+
+    .bust_circle {
+        width: initial;
+        height: 100%;
+    }
+
+    .bust_img {
+        height: 100%;
+    }
+
+    .grid-container {
+        align-content: center;
+        grid-column-gap: 0px;
+        grid-row-gap: 5px;
+        grid-template-rows: 5% 15% 80%;
+        grid-template-columns: 100%;
+        grid-template-areas:
+          'header'
+          'sidebar'
+          'main';
+    }
+
+    .grid-main {
+        padding-left: 20px;
+    }
+
+    .grid-header h3 {
+        flex: auto;
+    }
+
+    .grid-sidebar {
+        padding: 0px;
+    }
+
+    .tbt-navbar {
+        margin: 0px;
+    }
+
+    .tbt-navbar a {
+        float: initial;
+        clear: initial;
+        margin-left: 15px;
+        padding: 5px 10px;
+    }
+    
+    #root {
+        height: 100%;
+        margin-right: initial;
+        margin-left: initial;
+    }
 }
