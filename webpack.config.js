@@ -19,8 +19,8 @@ module.exports = {
     new MiniCssExtractPlugin(), 
     new FaviconsWebpackPlugin('./src/svg/taylor_bust_bowtie.svg'),
     new HtmlWebPackPlugin({
-      template: "./src/index.html",
-      filename: "./index.html"
+      template: './src/index.html',
+      filename: './index.html'
     })
   ],
   module: {
@@ -33,14 +33,14 @@ module.exports = {
        test: /\.(js|jsx)$/,
         exclude: /node_modules/,
         use: {
-          loader: "babel-loader",
+          loader: 'babel-loader',
           options: {
-            "presets": [
-              "@babel/preset-env", 
-              "@babel/preset-react",
+            'presets': [
+              '@babel/preset-env', 
+              '@babel/preset-react',
               {
-                "plugins": [
-                  "@babel/plugin-proposal-class-properties"
+                'plugins': [
+                  '@babel/plugin-proposal-class-properties'
                 ]
               }
             ],
@@ -54,10 +54,18 @@ module.exports = {
         ],
       },
       {
+        test: /\.pdf$/,
+        use: [
+          {
+            loader: 'file-loader',
+          }
+        ]
+      },
+      {
         test: /\.html$/,
         use: [
           {
-            loader: "html-loader"
+            loader: 'html-loader'
           }
         ]
       }

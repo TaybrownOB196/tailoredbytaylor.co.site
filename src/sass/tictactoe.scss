@@ -1,0 +1,15 @@
+.tictactoe {
+    .row {
+        width: 200px;
+        height: 66px;
+
+        div {
+            border: 1px solid black;
+            width: 64px;
+            height: 64px;
+            float: left;
+            align-content: center;
+            display: grid;
+        }
+    }
+}

@@ -1,0 +1,12 @@
+.battleship {
+    display: flex;
+    align-self: center;
+
+    .gridboard:nth-child(1) {
+        margin-right: 16px;
+    }
+
+    .gridboard:last-child {
+        margin-left: 16px;
+    }
+}
