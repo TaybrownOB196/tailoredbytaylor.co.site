@@ -38,7 +38,7 @@ header {
 }
 
 footer {
-    h3 {
+    * {
         flex: auto;
     }
 }
@@ -54,7 +54,7 @@ footer {
 
 .grid-bust { 
     align-content: center;
-    display: grid;
+    display: inline-flex;
     grid-area: bust;
     align-items: center;
     grid-template-rows: 100%;
@@ -86,7 +86,7 @@ footer {
       'main'
       'footer';
     grid-template-columns: 100%;
-    grid-template-rows: 15% 70% 15%;
+    grid-template-rows: 10% 70% 20%;
     // grid-template-rows: 10% 10% 70% 10%;
 }
 
@@ -96,7 +96,7 @@ footer {
     background-color: $blue-0;
     color: white;
     display: flex;
-    margin-bottom: 16px;
+    // margin-bottom: 16px;
     text-align: center;
 }
 
@@ -106,9 +106,10 @@ footer {
     background-color: $blue-0;
     color: white;
     display: flex;
-    padding-bottom: 16px;
-    padding-top: 16px;
+    padding-bottom: 8px;
+    padding-top: 8px;
     text-align: center;
+    flex-direction: column;
 }
 
 .grid-main {
@@ -202,7 +203,28 @@ footer {
     display: flex;
     height: 66%;
     justify-content: space-evenly;
-    width: auto;
+    width: 66%;
+    // margin-right: 32px;
+}
+
+// ::-webkit-scrollbar the scrollbar.
+// ::-webkit-scrollbar-button the buttons on the scrollbar (arrows pointing upwards and downwards).
+// ::-webkit-scrollbar-thumb the draggable scrolling handle.
+// ::-webkit-scrollbar-track the track (progress bar) of the scrollbar.
+// ::-webkit-scrollbar-track-piece the track (progress bar) NOT covered by the handle.
+// ::-webkit-scrollbar-corner the bottom corner of the scrollbar, where both horizontal and vertical scrollbars meet.
+// ::-webkit-resizer the draggable resizing handle that appears at the bottom corner of some elements
+
+@media only screen and (max-height: 550px) {
+    .grid-bust {
+        display: none;
+    }
+
+    #navSection {
+        p {
+            font-size: .8em;
+        }
+    }
 }
 
 @media only screen and (min-width: 500px) {
@@ -238,7 +260,7 @@ footer {
         margin-top: 8px;
         
         nav {
-            column-gap: 0px;
+            // column-gap: 0px;
             padding: 16px 0px;
         }
     }

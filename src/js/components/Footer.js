@@ -4,7 +4,7 @@ import SocialMediaTray from './banners/SocialMediaTray';
 function Footer() {
     return (
         <footer className='grid-footer'>
-            <h3>tailoredbytaylor</h3>
+            <h5>tailoredbytaylor</h5>
             <SocialMediaTray />
         </footer>
     );

@@ -14,7 +14,7 @@ class EngineBase {
         this.canvas = document.createElement('canvas');
         this.container.append(this.canvas);
         console.log(this.canvas.clientWidth, this.canvas.clientHeight);
-
+        this.isHorizontal = this.canvas.clientWidth > this.canvas.clientHeight;
         this.gameRect = new Rect(new Vector2d(0, 0), this.canvas.clientWidth, this.canvas.clientHeight);
         console.log(this.gameRect.width, this.gameRect.height);
         this.context = this.canvas.getContext('2d');

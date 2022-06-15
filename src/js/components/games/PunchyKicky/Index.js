@@ -1,6 +1,6 @@
 import { Rect, Vector2d, Sprite, Spritephysicsobject } from '../../../lib/gaming/common';
 import { Keyboardhandler, Pointerhandler } from './../../../lib/gaming/input';
-import './../../../../sass/kickypunchy.scss';
+import './../../../../sass/punchykicky.scss';
 import Utility from '../../../lib/Utility';
 import EngineBase from '../../../lib/gaming/EngineBase';
 

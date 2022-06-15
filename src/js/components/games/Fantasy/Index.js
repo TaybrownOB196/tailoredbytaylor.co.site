@@ -1,13 +1,13 @@
 import { Rect, Vector2d, Physics2d, Sprite, Spritesheet, IDGenerator, Gameobject } from '../../../lib/gaming/common';
 import { Keyboardhandler, Pointerhandler } from './../../../lib/gaming/input';
-import enemysheet from './../../../../png/enemy_ss_1.png';
+import Grid from '../../../lib/grid/Grid';
+import EngineBase from '../../../lib/gaming/EngineBase';
+import Hud from './hud';
+import { PlayerEntity, LivingEntity } from './entities';
+
+import charactersheet from './../../../../png/character_ss_1.png';
 import tilesheet from './../../../../png/tiles_ss_0.png';
 import '../../../../sass/fantasy.scss';
-import Utility from '../../../lib/Utility';
-import Grid from '../../../lib/grid/Grid';
-import GridCell from './../../../lib/grid/Gridcell';
-import Pathfinder from '../../../lib/grid/Pathfinder';
-import EngineBase from '../../../lib/gaming/EngineBase';
 
 class Race {
     constructor(name, lifeSpan, power, intelligence) {
@@ -17,42 +17,6 @@ class Race {
         this.intelligence = intelligence;
     }
 }
-
-class Weapon {
-    constructor(name, damage) {
-        this.name = name;
-        this.baseDamage = damage;
-        this.damage = damage;
-    }
-
-    canWield() {
-        return true;
-    }
-}
-
-class Armor {
-    constructor(name, value) {
-        this.name = name;
-        this.defense = value;
-    }
-
-    canWield() {
-        return true;
-    }
-}
-
-const WHITE = '#FFFFFF';
-const BLACK = '#000000';
-const YELLOW = '#FFFF00';
-const RED = '#FF0000';
-const GREEN = '#00FF00';
-const BLUE = '#0000FF';
-
-const tileWidth = 16;
-const tileGap = 2;
-const SPEED = 10;
-const HEALTH_MOD = 25;
-const POWER_MOD = 2;
 
 //Any trait above level 4 unlocks special skills within that trait
 //Level 5 is the highest level for a trait
@@ -72,6 +36,7 @@ class GridTile {
         this.entity = null;
     }
 
+    draw(context, spritesheet) { spritesheet.draw(context, this.rect, this.clipRect); }
     isOccupied() { return this.entity !== null; }
     setEntity(entity) {
         if (this.isOccupied())
@@ -84,137 +49,26 @@ class GridTile {
         this.entity = null;
         entity.gridTile = null;
     }
-
-    draw(context, spritesheet) {
-        spritesheet.draw(context, this.rect, this.clipRect);
-    }
-}
-
-class GridObject extends Gameobject {
-    constructor(rect, clipRect) {
-        super(rect.position);
-        this.rect = rect;
-        this.clipRect = clipRect;
-        this.gridTile = null;
-    }
-
-    setPosition(position, gridTile) {
-        super.setPosition(position);
-        this.rect.position = position;
-
-        if (this.gridTile)
-            this.gridTile.unsetEntity(this);
-        gridTile.setEntity(this);
-    }
-
-    draw(context, spritesheet) {
-        spritesheet.draw(context, this.rect, this.clipRect);
-    }
-}
-
-
-class GridEntity extends GridObject {
-    constructor(rect, clipRect, health) {
-        super(rect, clipRect);
-        this.baseHealth = health;
-        this.health = health;
-        this.isAlive = true;
-    }
-
-    updateHealth(deltaValue) {
-        let tempValue = this.health + deltaValue;
-        if (tempValue <= 0) {
-            this.isAlive = false;
-            this.health = 0;
-        } else {
-            this.health = tempValue;
-        }
-    }
-
-    defend(damage) {
-        this.updateHealth(damage);
-    }
-}
-
-class LivingEntity extends GridEntity {
-    constructor(rect, clipRect, race) {
-        super(rect, clipRect, HEALTH_MOD * race.lifeSpan);
-        this.race = race;
-    }
-
-    draw(context, spritesheet) {
-        if (!this.isAlive)
-            return;
-        super.draw(context, spritesheet);
-
-        context.fillStyle = '#D03733';
-        context.fillRect(this.rect.position.x, this.rect.position.y, this.rect.width, 2);
-        
-        context.fillStyle = '#33B23B';
-        context.fillRect(this.rect.position.x, this.rect.position.y, this.rect.width * this.health/this.baseHealth, 2);
-    }
-
-    attack(gridTile) {
-        gridTile.entity.defend(POWER_MOD * this.race.power);
-    }
-}
-
-class PlayerEntity extends LivingEntity {
-    constructor(rect, clipRect, race) {
-        super(rect, clipRect, race);
-        this.weapon = null;
-    }
-
-    equipWeapon(weapon) {
-        this.weapon = weapon;
-    }
-
-    equipArmor(armor) {
-        this.armor = armor;
-    }
-
-    defend(damage) {
-        if (this.armor !== null) {
-            damage += Utility.getRandomIntInclusive(0, this.armor.defense);
-            if (damage <= 0) {
-                this.updateHealth(damage);
-            }
-        } else {
-            this.updateHealth(damage);
-        }
-    }
-
-    canAttack(gridTile) {
-        return true;
-    }
-
-    getDamage() {
-        if (this.weapon !== null)
-            return (POWER_MOD * this.race.power) + Utility.getRandomIntInclusive(0, this.weapon.damage);
-        else
-            return POWER_MOD * this.race.power;
-    }
-
-    attack(gridTile) {
-        gridTile.entity.defend(-this.getDamage())
-    }
 }
 
 class Fantasy extends EngineBase {
     constructor() {
         super('Fantasy', 'FantasyContainer');
 
+        let tileWidth = 16;
+        let tileGap = 2;
+
         this.tileSpritesheet = new Spritesheet(tilesheet);
-        this.enemySpritesheet = new Spritesheet(enemysheet);
+        this.characterSpritesheet = new Spritesheet(charactersheet);
 
         this.gameObjects.player = new PlayerEntity(
             new Rect(new Vector2d(0,0), tileWidth, tileWidth),
-            new Rect(new Vector2d(0,0), 128, 128), 
+            new Rect(new Vector2d(0, 384), 128, 128), 
             HUMAN);
             
         let EYEBALL = new LivingEntity(
             new Rect(new Vector2d(0,0), tileWidth, tileWidth), 
-            new Rect(new Vector2d(256, 256), 128, 128), 
+            new Rect(new Vector2d(0, 256), 128, 128), 
             LESSERDEMON);
         
         this.gameObjects.enemies = [];
@@ -223,8 +77,14 @@ class Fantasy extends EngineBase {
         this.backgroundGrid = new Grid(0, 7, 7);
 
         this.roomGrid = new Grid(0, 7, 7);
+        // let _x = (6 * (tileWidth + tileGap)) / 2,
+        //     _y = (6 * (tileWidth + tileGap)) / 2;
+        let _x = 0,
+            _y = 0;
         this.roomGrid.ExecuteGrid((row, column) => {
-            let rectPosition = new Vector2d(column * (tileWidth + tileGap), row * (tileWidth + tileGap));
+            let rectPosition = new Vector2d(
+                column * (tileWidth + tileGap) + _x, 
+                row * (tileWidth + tileGap) + _y);
             let rect = new Rect(
                 rectPosition,
                 tileWidth,
@@ -240,6 +100,14 @@ class Fantasy extends EngineBase {
                 this.gameObjects.player.setPosition(rectPosition, tile);
             }
         });
+
+        let xOffset = 16;
+        let yOffset = 16;
+        let rect = new Rect(
+            new Vector2d(this.roomGrid.Get(6,6).rect.position.x + this.roomGrid.Get(6,6).rect.width + xOffset, this.roomGrid.Get(0,6).rect.position.y + yOffset),
+            this.gameRect.width/2 - xOffset,
+            this.gameRect.height - yOffset*2);
+        this.hud = new Hud(rect);
 
         this.keyboardhandler = new Keyboardhandler();
         this.keyboardhandler.pubsub.subscribe('keydown', (ev) => {
@@ -276,30 +144,41 @@ class Fantasy extends EngineBase {
 
         this.pointerhandler = new Pointerhandler();
         this.pointerhandler.pubsub.subscribe('pointerdown', (ev) => {
-            // console.log(ev);
-            // console.log(ev.x, ev.y);
-            // console.log(this.canvas.offsetTop, this.canvas.offsetLeft);
-            this.roomGrid.ExecuteGrid((row, column) => {
-                let tile = this.roomGrid.Get(row, column);
-                if (tile.rect.contains(
-                    new Vector2d(
-                        (ev.x - this.canvas.offsetLeft)/(this.gameRect.width/this.DEFAULT_CANVAS_WIDTH), 
-                        (ev.y - this.canvas.offsetTop)/(this.gameRect.height/this.DEFAULT_CANVAS_HEIGHT)))) {
-
-                    if (this.roomGrid.IsInRange(
-                        this.gameObjects.player.gridTile.position.x, 
-                        this.gameObjects.player.gridTile.position.y, 
-                        column, 
-                        row)
-                    ) {
+            let click = new Vector2d(
+                (ev.x - this.canvas.offsetLeft)/(this.gameRect.width/this.DEFAULT_CANVAS_WIDTH), 
+                (ev.y - this.canvas.offsetTop)/(this.gameRect.height/this.DEFAULT_CANVAS_HEIGHT));
+            if (this.hud.rect.contains(click)) {
+                this.hud.inventory.ExecuteGrid((row, column) => {
+                    let tile = this.hud.inventory.Get(row, column);
+                    if (tile.rect.contains(click)) {
                         if (tile.isOccupied()) {
-                            this.gameObjects.player.attack(tile);
-                        } else {
-                            this.gameObjects.player.setPosition(tile.rect.position, tile);
+                            console.log(tile.equipable);
+                            if (tile.equipable.canWield(this.gameObjects.player.race.power)) {
+                                console.log('can wield');
+                                // this.gameObjects.player
+                            }
                         }
                     }
-                }
-            });
+                });
+            } else {
+                this.roomGrid.ExecuteGrid((row, column) => {
+                    let tile = this.roomGrid.Get(row, column);
+                    if (tile.rect.contains(click)) {
+                        if (this.roomGrid.IsInRange(
+                            this.gameObjects.player.gridTile.position.x, 
+                            this.gameObjects.player.gridTile.position.y, 
+                            column, 
+                            row)
+                        ) {
+                            if (tile.isOccupied()) {
+                                this.gameObjects.player.attack(tile);
+                            } else {
+                                this.gameObjects.player.setPosition(tile.rect.position, tile);
+                            }
+                        }
+                    }
+                });
+            }
         });
     }
 
@@ -311,9 +190,10 @@ class Fantasy extends EngineBase {
             tile.draw(this.context, this.tileSpritesheet);
         });
 
-        this.gameObjects.player.draw(this.context, this.enemySpritesheet);
+        this.hud.draw(this.context, this.characterSpritesheet, this.gameObjects.player);
+        this.gameObjects.player.draw(this.context, this.characterSpritesheet);
         for(let enemy of this.gameObjects.enemies) {
-            enemy.draw(this.context, this.enemySpritesheet);
+            enemy.draw(this.context, this.characterSpritesheet);
         }
     }
 }

@@ -9,16 +9,19 @@ class PunchyKickyComponent extends React.Component {
 
     onClickStart() {
         new PunchyKicky().run();
+        let startButton = document.getElementById('PunchyKickyContainer-Start');
+        startButton.remove();
     }
 
     render() {
         return (
-            <React.Fragment>
+            <div id='PunchyKickyComponent'>
                 <div id='PunchyKickyContainer'></div>
-                <button onClick={this.onClickStart}>Start</button>
-            </React.Fragment>
+                <button id='PunchyKickyContainer-Start' onClick={this.onClickStart}>Start</button>
+            </div>
         )
     }
+
 }
 
 export default PunchyKickyComponent;

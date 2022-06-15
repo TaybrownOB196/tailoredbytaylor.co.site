@@ -12,6 +12,44 @@ class Vector2d {
         this.x = x;
         this.y = y;
     }
+
+    static getLinearBezierVector(vector0, vector1, fraction) {
+        return new Vector2d(
+            vector0.x + (fraction * (vector1.x - vector0.x)),
+            vector0.y + (fraction * (vector1.y - vector0.y)));
+    }
+
+    static getQuadraticBezierVector(vector0, vector1, vector2, fraction) {
+        let v0p = Math.pow(1 - fraction, 2);
+        let v0 = new Vector2d(v0p * vector0.x, v0p * vector0.y);
+
+        let v1p = 2 * (1 - fraction) * fraction;
+        let v1 = new Vector2d(v1p * vector1.x, v1p * vector1.y);
+
+        let v2p = Math.pow(fraction, 2);
+        let v2 = new Vector2d(v2p * vector2.x, v2p * vector2.y);
+
+        return new Vector2d(
+            v0.x + v1.x + v2.x,
+            v0.y + v1.y + v2.y
+        );
+    }
+
+    static getQuadraticBezierVectorEnd(vector0, vector1, vector2, fraction) {
+        let v0p = Math.pow(1 - fraction, 2);
+        let v0 = new Vector2d(v0p * vector0.x, v0p * vector0.y);
+
+        let v1p = 2 * (1 - fraction) * fraction;
+        let v1 = new Vector2d(v1p * vector1.x, v1p * vector1.y);
+
+        let v2p = Math.pow(fraction, 2);
+        let v2 = new Vector2d(v2p * vector2.x, v2p * vector2.y);
+        
+        return new Vector2d(
+            v0.x + v1.x + v2.x,
+            v0.y + v1.y + v2.y
+        );
+    }
 }
 
 class Rect {
