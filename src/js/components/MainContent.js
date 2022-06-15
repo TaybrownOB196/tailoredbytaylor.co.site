@@ -19,7 +19,7 @@ class MainContent extends React.Component {
                     <Routes>
                         <Route path='/' element={<NavSection />}>
                             <Route path='/' element={<About />} />
-                            <Route path='/Fantasy' element={<FantasyComponent />} />
+                            {/* <Route path='/Fantasy' element={<FantasyComponent />} /> */}
                             {/* <Route path='/Battleship' element={<Battleship />} /> */}
                             {/* <Route path='/PunchyKicky' element={<PunchyKickyComponent />} /> */}
                             <Route path='/Resume' element={<Resume />} />
