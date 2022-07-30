@@ -1,30 +1,35 @@
-import { Rect, Vector2d, Physics2d, Sprite, Spritesheet, IDGenerator, Gameobject } from '../../../lib/gaming/common';
+import { Rect, Vector2d, PhysicsRect2d, Fill, Spritesheet, IDGenerator, Gameobject } from '../../../lib/gaming/common';
 
 const HEALTH_MOD = 25;
 const POWER_MOD = 2;
 
 class GridObject extends Gameobject {
-    constructor(rect, clipRect) {
+    constructor(rect, clipRect, spritesheet) {
         super(rect.position);
         this.rect = rect;
         this.clipRect = clipRect;
+        this.spritesheet = spritesheet;
         this.gridTile = null;
     }
 
-    draw(context, spritesheet) { spritesheet.draw(context, this.rect, this.clipRect); }
+    draw(context) { this.spritesheet.draw(context, this.rect, this.clipRect); }
     setPosition(position, gridTile) {
         super.setPosition(position);
         this.rect.position = position;
 
+        console.log(gridTile);
+        console.log(this);
+
         if (this.gridTile)
-            this.gridTile.unsetEntity(this);
-        gridTile.setEntity(this);
+            this.gridTile.unsetOccupant(this);
+        
+        gridTile.setOccupant(this);
     }
 }
 
 class GridEntity extends GridObject {
-    constructor(rect, clipRect, health) {
-        super(rect, clipRect);
+    constructor(rect, clipRect, spritesheet, health) {
+        super(rect, clipRect, spritesheet);
         this.baseHealth = health;
         this.health = health;
         this.isAlive = true;
@@ -35,6 +40,9 @@ class GridEntity extends GridObject {
         if (tempValue <= 0) {
             this.isAlive = false;
             this.health = 0;
+
+            if (this.gridTile)
+                this.gridTile.unsetOccupant(this);
         } else {
             this.health = tempValue;
         }
@@ -46,15 +54,15 @@ class GridEntity extends GridObject {
 }
 
 class LivingEntity extends GridEntity {
-    constructor(rect, clipRect, race) {
-        super(rect, clipRect, HEALTH_MOD * race.lifeSpan);
+    constructor(rect, clipRect, spritesheet, race) {
+        super(rect, clipRect, spritesheet, HEALTH_MOD * race.lifeSpan);
         this.race = race;
     }
 
-    draw(context, spritesheet) {
+    draw(context) {
         if (!this.isAlive)
             return;
-        super.draw(context, spritesheet);
+        super.draw(context);
 
         context.fillStyle = '#D03733';
         context.fillRect(this.rect.position.x, this.rect.position.y, this.rect.width, 2);
@@ -64,19 +72,19 @@ class LivingEntity extends GridEntity {
     }
 
     attack(gridTile) {
-        gridTile.entity.defend(POWER_MOD * this.race.power);
+        gridTile.occupant.defend(POWER_MOD * this.race.power);
     }
 }
 
 class PlayerEntity extends LivingEntity {
-    constructor(rect, clipRect, race) {
-        super(rect, clipRect, race);
+    constructor(rect, clipRect, spritesheet, race) {
+        super(rect, clipRect, spritesheet, race);
         this.weapon = null;
         this.armor = null;
     }
 
-    hasArmorEquipped() { return this.armor === true; }
-    hasWeaponEquipped() { return this.weapon === true; }
+    hasArmorEquipped() { return this.armor != null; }
+    hasWeaponEquipped() { return this.weapon != null; }
 
     equipWeapon(weapon) {
         this.weapon = weapon;
@@ -109,11 +117,12 @@ class PlayerEntity extends LivingEntity {
     }
 
     attack(gridTile) {
-        gridTile.entity.defend(-this.getDamage())
+        gridTile.occupant.defend(-this.getDamage())
     }
 }
 
 export {
+    GridObject,
     PlayerEntity,
     LivingEntity
 }

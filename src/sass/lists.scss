@@ -1,0 +1,58 @@
+.bordered-list {
+    #list-header {
+        font-size: 1.2em;
+        border-top: 2px solid black;
+        border-left: 2px solid black;
+        border-right: 2px solid black;
+        border-bottom: 2px solid black;        
+    }
+    
+    ul:first-of-type li {
+        border-top: 1px solid black;
+        border-left: 1px solid black;
+        border-right: 1px solid black;
+    }
+    
+    ul:first-of-type li:last-child {
+        border-bottom: 1px solid black;
+    }
+}
+
+.scrolling-list {
+    #list-header {
+        font-size: 1.2em;        
+    }
+    
+    ul:first-of-type {
+        overflow-y: auto;
+    }
+}
+
+.collapsible-list {
+    #list-header {
+        font-size: 1.2em;
+        cursor: pointer;       
+    }
+
+    ul:first-of-type {
+        overflow-y: hidden
+    }
+}
+
+.tooltip-list {
+    li {
+        position: relative;
+
+        span {
+            position: absolute;
+            color: black;
+            z-index: 5;
+            border: 2px solid red;
+            width: 100px;
+            height: 100px;
+            background-color: azure;
+            top: 10px;
+            right: 10px;
+        }
+    }
+}

@@ -1,11 +1,11 @@
 import React from 'react';
-import SocialMediaTray from './banners/SocialMediaTray';
+import SocialMediaTrayComponent from './banners/SocialMediaTrayComponent';
 
 function Footer() {
     return (
         <footer className='grid-footer'>
-            <h5>tailoredbytaylor</h5>
-            <SocialMediaTray />
+            <h5>ttuck101@gmail.com</h5>
+            <SocialMediaTrayComponent />
         </footer>
     );
 }

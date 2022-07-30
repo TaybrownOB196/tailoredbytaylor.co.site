@@ -1,6 +1,6 @@
 import React from 'react';
-import resume from './../../staticfiles/TaybrownResume.pdf';
-import resumeImg from './../../png/TaybrownResume.png';
+import resume from './../../../staticfiles/TaybrownResume.pdf';
+import resumeImg from './../../../png/TaybrownResume.png';
 
 function Resume() {
     return (

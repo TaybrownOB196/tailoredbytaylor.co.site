@@ -1,102 +1,7 @@
 import Grid from '../../../lib/grid/Grid';
 import Utility from '../../../lib/Utility';
 import { Rect, Vector2d } from '../../../lib/gaming/common';
-
-class Equipable {
-    constructor(name, power, clipRect) {
-        this.name = name;
-        this.clipRect = clipRect;
-        this.power = power;
-    }
-    canWield(power) { return power >= this.power; }
-    getValue() { return 0; }
-    
-}
-
-class InventoryItem extends Equipable {
-    constructor(name, power, clipRect) {
-        super(name, power, clipRect);
-        this.gridEquipable = null;
-    }
-    setPosition(gridEquipable) {
-        if (this.gridEquipable)
-            this.gridEquipable.unsetEquipable(this);
-        gridEquipable.setEquipable(this);
-    }
-}
-
-class Weapon extends InventoryItem {
-    constructor(name, power, clipRect, damage) {
-        super(name, power, clipRect);
-        this.baseDamage = damage;
-        this.damage = damage;
-    }
-
-    getValue() { return damage; }
-}
-
-class Armor extends InventoryItem {
-    constructor(name, power, clipRect, value) {
-        super(name, power, clipRect);
-        this.baseDefense = value;
-        this.defense = value;
-    }
-
-    getValue() { return defense; }
-}
-
-class GridEquipable {
-    constructor(gridPosition, rect, clipRect) {
-        this.position = gridPosition;
-        this.rect = rect;
-        this.clipRect = clipRect;
-        this.equipable = null;
-    }
-
-    draw(context, spritesheet) {
-        if (this.isOccupied()) {
-            spritesheet.draw(context, this.rect, this.equipable.clipRect); 
-        }
-
-        context.strokeRect(
-            this.rect.position.x, 
-            this.rect.position.y, 
-            this.rect.width, 
-            this.rect.height);
-    }
-
-    isOccupied() { return this.equipable !== null; }
-    setEquipable(equipable) {
-        if (this.isOccupied())
-            return;
-
-        this.equipable = equipable;
-        equipable.gridEquipable = this;
-    }
-    unsetEquipable(equipable) {
-        this.equipable = null;
-        equipable.gridEquipable = null;
-    }
-}
-
-const LICHSWORD = new Weapon('lichsword', 5, 
-    new Rect(
-        new Vector2d(256, 384), 
-        128, 
-        128), 
-    5);
-const GREATSWORD = new Weapon('greatsword', 3, 
-    new Rect(
-        new Vector2d(384, 384), 
-        128, 
-        128), 
-    4);
-const RUSTEDARMOR = new Armor('rustedarmor', 1, 
-    new Rect(
-        new Vector2d(128, 384), 
-        128, 
-        128), 
-    1);
+import GridTile from './gridTile';
 
 class Hud {
     constructor(rect) {
@@ -123,17 +28,19 @@ class Hud {
                 tileWidth,
                 tileWidth);
 
-            let gridEquipable = new GridEquipable(rect, new Rect(rectPosition, tileWidth, tileWidth));
-            if (row == 0 && column == 0) {
-                LICHSWORD.setPosition(gridEquipable);
+            let gridTile = new GridTile(rect, new Rect(rectPosition, tileWidth, tileWidth));
+            this.inventory.Set(row, column, gridTile);
+        });
+    }
+
+    addToInventory(occupant) {
+        this.inventory.ExecuteGrid((row, column) => {
+            let gridTile = this.inventory.Get(row, column);
+            if (!gridTile.isOccupied()) {
+                console.log('adding', occupant.name ,'to inventory');
+                gridTile.setOccupant(occupant);
+                return true;
             }
-            if (row == 0 && column == 1) {
-                RUSTEDARMOR.setPosition(gridEquipable);
-            }
-            if (row == 0 && column == 2) {
-                GREATSWORD.setPosition(gridEquipable);
-            }
-            this.inventory.Set(row, column, gridEquipable);
         });
     }
 
@@ -193,10 +100,7 @@ class Hud {
                         this.rect.position.y + yOffset + 1),
                     equipBoxWidth - 1, 
                     equipBoxWidth - 1), 
-                new Rect(
-                    new Vector2d(256, 384), 
-                    128, 
-                    128));
+                player.weapon.clipRect);
         }
 
         //armor box
@@ -212,16 +116,13 @@ class Hud {
                         this.rect.position.y  + yOffset + equipBoxWidth + 1),
                         equipBoxWidth - 1, 
                         equipBoxWidth - 1), 
-                new Rect(
-                    new Vector2d(128, 384), 
-                    128, 
-                    128));
+                player.armor.clipRect);
         }
 
         //inventory
         this.inventory.ExecuteGrid((row, column) => {
             let tile = this.inventory.Get(row, column);
-            tile.draw(context, spritesheet);
+            tile.draw(context);
         });
     }
 }

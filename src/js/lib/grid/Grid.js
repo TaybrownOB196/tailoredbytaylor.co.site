@@ -23,10 +23,14 @@ class Grid {
         }
     }
 
+    ///Returning false from the action will short cirtuit the rest of the loop
     ExecuteGrid(action) {
-        for(let c = 0; c<this.ColCount; c++) {
-            for(let r = 0; r<this.RowCount; r++) {
-                action(r, c);
+        let _continue = true; 
+        for(let c = 0; c<this.ColCount && _continue; c++) {
+            for(let r = 0; r<this.RowCount && _continue; r++) {
+                let res = action(r, c);
+                if (res === true)
+                    _continue = false;
             }
         }
     }

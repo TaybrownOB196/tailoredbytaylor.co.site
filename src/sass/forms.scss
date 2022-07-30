@@ -1,0 +1,15 @@
+.baseForm {
+    width: 75%;
+    display: grid;
+
+    label {
+        width: 75%;
+        text-align: left;
+        grid-column: 1fr 1fr;
+    }
+    
+    input[type='submit'] {
+        width: 100%;
+        grid-column: 2;
+    }
+}

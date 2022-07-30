@@ -1,10 +1,12 @@
 @import '_colors.scss';
 @import 'tbt.scss';
+@import 'lists.scss';
 
 * {
   margin: 0;
   padding: 0;
   font-family: Copperplate;// Brush Script MT, Brush Script Std, cursive;
+//   box-sizing: border-box;
 }
 
 p {
@@ -32,12 +34,44 @@ header {
     align-items: center;
     display: flex;
     text-align: center;
-    h3 {
+    background-color: $blue-0;
+    
+    * {
         flex: auto;
     }
 }
 
+#familyOlympics {
+    li {
+        background-color: azure;
+    }
+    
+    #details{
+        display: grid;
+
+        div:nth-of-type(2n+1) {
+            font-weight: bold;
+            grid-column: 1;
+            border: 1px solid black;
+        }
+
+        div:nth-of-type(2n) {
+            background-color: azure;
+            grid-column: 2;
+            border: 1px solid black;
+        
+        }
+    }
+}
+
+.bold {
+    font-weight: bold;
+}
+
 footer {
+    display: flex;
+    background-color: black;
+
     * {
         flex: auto;
     }
@@ -93,7 +127,6 @@ footer {
 .grid-header {
     @extend .tbt-grid-header;
     align-items: center;
-    background-color: $blue-0;
     color: white;
     display: flex;
     // margin-bottom: 16px;
@@ -103,7 +136,6 @@ footer {
 .grid-footer {
     @extend .tbt-grid-footer;
     align-items: center;
-    background-color: $blue-0;
     color: white;
     display: flex;
     padding-bottom: 8px;

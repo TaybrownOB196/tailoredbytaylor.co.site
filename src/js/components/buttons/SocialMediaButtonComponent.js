@@ -1,6 +1,6 @@
 import React from 'react';
 
-class SocialMediaButton extends React.Component {
+class SocialMediaButtonComponent extends React.Component {
     constructor(props) {
         super(props);
 
@@ -18,4 +18,4 @@ class SocialMediaButton extends React.Component {
     }
 }
 
-export default SocialMediaButton;
+export default SocialMediaButtonComponent;

@@ -1,0 +1,191 @@
+
+{
+    "name": "Family Games",
+    "who": "The Brown Family and Friends",
+    "what": "Competition for sport or bragging rights, you decide!",
+    "why": "To enjoy a picnic together and get active all at the same time",
+    "when": "TBD",
+    "where": "TBD",
+    "how": "TBD",
+    "rules": [
+        "Team captains will be selected based upon Player count",
+        "Team captains will select their teams for best chance of winning at overall event pool",
+        "6 event(s) will be selected randomly after teams are selected",
+        "Games will be played and score will be tallied by the committee"
+    ],
+    "events": [
+        {
+            "name": "Board Games",
+            "IsActive": true,
+            "Text": "Games to test your mental",
+            "Games": [    
+                {
+                    "name": "Trivia",
+                    "order": 8,
+                    "rules": [
+                        "All Teams compete",
+                        "3 point(s) for every question correct",
+                        "10 rounds"
+                    ]
+                },
+                {
+                    "name": "Chess",
+                    "order": 6,
+                    "rules": [
+                        "1 Player(s) per team",
+                        "Bracket tournament",
+                        "Losers bracket w/ reset"
+                    ]
+                },
+                {
+                    "name": "Couples Game",
+                    "order": 12,
+                    "rules": [
+                        "2 Players per team",
+                        "Players cannot have grown up in the same household",
+                        "Team get 2 veto(s)",
+                        "5 round(s) (or questions)"
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Card Games",
+            "IsActive": true,
+            "Text": "Games to test your luck and probability",
+            "Games": [ 
+                {
+                    "name": "Uno",
+                    "order": 3,
+                    "rules": [
+                        "1 Player(s) per team",
+                        "Stacking on reverse -> reverse, skip -> skip, draw2 -> draw2, draw4 -> draw4",
+                        "Same number different color",
+                        "First 3 winners get points",
+                        "5 points for 1st",
+                        "3 points for 2nd",
+                        "1 point for 3rd"
+                    ]
+                },
+                {
+                    "name": "Dominoes",
+                    "order": 20,
+                    "rules": [
+                        "Texas Hold Em",
+                        "1 player(s) per team",
+                        "2 point(s) per win"
+                    ]
+                },
+                {
+                    "name": "Poker (Texas Hold Em)",
+                    "order": 99999,
+                    "rules": [
+                        "Texas Hold Em",
+                        "1 player(s) per team",
+                        "Wager against Team points",
+                        "You may only wager points that your team has"
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Athletic Games",
+            "IsActive": true,
+            "Text": "Games to test your strength and dexterity",
+            "Games": [
+                {
+                    "name": "10 Yard Dash",
+                    "order": 1,
+                    "rules": [
+                        "1-2 Player(s) per team",
+                        "Timed",
+                        "Top 3 ranked speeds get points",
+                        "5 points for 1st",
+                        "3 points for 2nd",
+                        "1 point for 3rd"
+                    ]
+                },
+                {
+                    "name": "Egg Dash",
+                    "order": 2,
+                    "rules": [
+                        "1-2 Player(s) per team",
+                        "Race to the finish",
+                        "Egg and Player must cross the finish-line unscathed",
+                        "7 points for 1st"
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Sports",
+            "IsActive": true,
+            "Text": "Games to test your athleticism",
+            "Games": [
+                {
+                    "name": "Free Throw Shootout",
+                    "order": 10,
+                    "rules": [
+                        "1-2 Player(s) per team",
+                        "Best of 10",
+                        "1 point(s) per basket"
+                    ]
+                },
+                {
+                    "name": "Football Target Practice",
+                    "order": 5,
+                    "rules": [
+                        "1-2 Player(s) per team",
+                        "3 Pin(s) one football",
+                        "1 point(s) per pin"
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Video Games",
+            "IsActive": true,
+            "Text": "*Pending equipment is available\nGames to show off your VG prowess",
+            "Games": [
+                {
+                    "name": "GoldenEye",
+                    "order": 999,
+                    "rules": [
+                        "1 Player(s) per team",
+                        "If more than 4 players participating, then rotate out winner",
+                        "All players keep their kills",
+                        "1 point per kill",
+                        "Winner gets extra 2 points"
+                    ]
+                },
+                {
+                    "name": "MortalKombat",
+                    "order": 9999,
+                    "rules": [
+                        "1 Player(s) per team",
+                        "Round Robin (everybody player everybody)",
+                        "Loser stays on the sticks",
+                        "2 point(s) per win"
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Bonus",
+            "IsActive": false,
+            "Text": "Bonus Game",
+            "Games": [
+                {
+                    "name": "BINGO",
+                    "order": 99999999,
+                    "rules": [
+                        "All players can play",
+                        "MAXIMUM 5 BINGO winners will be called",
+                        "Each BINGO win is worth 3 points",
+                        "Teams will be able to wager points (1 point per card)"
+                    ]
+                }
+            ]
+        }
+    ]
+}

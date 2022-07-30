@@ -4,8 +4,8 @@ class EngineBase {
     constructor(name, containerID) {
         this.container = document.getElementById(containerID);
         if (!this.container) {
-            console.log(`unable to load "${name}" game`);
-            throw `unable to load "${name}" game`;
+            console.log(`unable to load "${name}" game using "${containerID}"`);
+            throw `unable to load "${name}" game using "${containerID}`;
         }
         this.name = name;
         this.DEFAULT_CANVAS_WIDTH = 300;

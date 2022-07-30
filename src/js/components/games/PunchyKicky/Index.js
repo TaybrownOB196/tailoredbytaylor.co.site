@@ -1,4 +1,4 @@
-import { Rect, Vector2d, Sprite, Spritephysicsobject } from '../../../lib/gaming/common';
+import { Circle,Rect, Vector2d, Fill, FillPhysicsRect, FillPhysicsCircle } from '../../../lib/gaming/common';
 import { Keyboardhandler, Pointerhandler } from './../../../lib/gaming/input';
 import './../../../../sass/punchykicky.scss';
 import Utility from '../../../lib/Utility';
@@ -7,9 +7,9 @@ import EngineBase from '../../../lib/gaming/EngineBase';
 const SPEED = 10;
 const JUMP = SPEED * 1.5;
 
-class Fighter extends Spritephysicsobject {
-    constructor(rect, sprite) {
-        super(rect, sprite);
+class Fighter extends FillPhysicsRect {
+    constructor(rect, fill) {
+        super(rect, fill);
         this.jumpCount = 0;
         this.maxJumpCount = 2;
     }
@@ -109,60 +109,31 @@ class PunchyKicky extends EngineBase {
             }
         });
 
-        this.player = new Fighter(new Rect(new Vector2d(0,0), 32, 32), new Sprite('#fff'));
+        //this.player = new Fighter(new Rect(new Vector2d(0,0), 32, 32), new Fill('#fff'));
+        this.box1 = new FillPhysicsRect(new Rect(new Vector2d(0,0), 16, 16), new Fill('#fff'));
+       this.box2 = new FillPhysicsRect(new Rect(new Vector2d(0,32), 16, 16), new Fill('#aaa'));
 
-        this.run = this.run.bind(this);
-    }
-
-    run() {        
-        this.player.update(this.tickDelta/60, this.context, this.gameRect);
-        for(let index=0; index<this.gameObjects.length; index++) {
-            this.gameObjects[index].update(this.tickDelta/60, this.context, this.gameRect);
-        }
-        
-        this.collitionDetection();
+       //console.log(this.box2);
+       // this.ball1 = new FillPhysicsCircle(new Circle(new Vector2d(16,8), 8), 1, 0.7, '#fff');
+       // this.ball2 = new FillPhysicsCircle(new Circle(new Vector2d(16,32), 16), 2, 0.7, '#fff');
     }
     
-    collitionDetection() {
-        // console.log(this.player.ID, this.gameObjects[0].ID);
-        for(let gameObject of this.gameObjects) {
-            let gameObjectIndex = this.playerColliderIndexes.indexOf(gameObject.ID);
-            //If gameObject is in list and the player is not colliding on the Y axis with the object
-            if (gameObjectIndex !== -1 && !this.player.areCollidingY(gameObject.rect)) {
-                this.playerColliderIndexes = Utility.RemoveAll(this.playerColliderIndexes, gameObject.ID);
-                this.player.isGrounded = false;
-                this.player.velocity.y = 0;
-            } 
-            
-            if (this.player.areColliding(gameObject.rect)) {
-                if (this.playerColliderIndexes.indexOf(gameObject.ID) === -1 && this.player.areCollidingY(gameObject.rect)) {
-                    this.playerColliderIndexes.push(gameObject.ID);
-                    if (!this.player.isGrounded && this.player.isAffectedByGravity) {
-                        // this.player.rect.position.y -= gameObject.rect.height;
-                        this.player.velocity.y = 0;
-                        this.player.land();
-                    }
-                }
-            }
-
-
-            // if (this.player.areCollidingX(gameObject.rect) && (this.player.rect.bottomRight().y > gameObject.rect.position.y || this.player.rect.position.y < gameObject.rect.bottomRight().y)) {
-            //     if (this.player.rect.position.x > gameObject.rect.position.x + gameObject.rect.width/2) {
-            //         this.player.rect.position.x = gameObject.rect.position.x + gameObject.rect.width;
-            //     } else {
-            //         this.player.rect.position.x = gameObject.rect.position.x - this.player.rect.width;
-            //     }
+    run() {
+        super.run();     
+        // this.player.update(this.tickDelta/60, this.context, this.gameRect);
+        // for(let index=0; index<this.gameObjects.length; index++) {
+            //     this.gameObjects[index].update(this.tickDelta/60, this.context, this.gameRect);
             // }
-        }
+            
+        this.box1.update(this.tickDelta/60, this.context, this.gameRect);
+        this.box2.update(this.tickDelta/60, this.context, this.gameRect);
+
+        // this.ball1.update(this.tickDelta/60, this.context, this.gameRect);
+        // this.ball2.update(this.tickDelta/60, this.context, this.gameRect);
+       
+        this.box1.rect2dCollision(this.box2);
+        // this.ball2.circle2dCollision(this.ball1);
     }
 }
-
-
-try {
-    new PunchyKicky().run();
-} catch(ex) {
-
-}
-
 
 export default PunchyKicky;
