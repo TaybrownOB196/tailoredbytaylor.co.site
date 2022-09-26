@@ -34,8 +34,20 @@ class Grid {
             }
         }
     }
+    ExecuteGridR(action) {
+        let _continue = true; 
+        for(let r = 0; r<this.RowCount && _continue; r++) {
+            for(let c = 0; c<this.ColCount && _continue; c++) {
+                let res = action(r, c);
+                if (res === true)
+                    _continue = false;
+            }
+        }
+    }
     Set(col, row, obj) { this.Container[col][row] = obj; }
+    SetR(col, row, obj) { this.Container[row][col] = obj; }
     Get(col, row) { return this.Container[col][row]; }
+    GetR(col, row) { return this.Container[row][col]; }
     IsInBounds(col, row) { return col >= 0 && col < this.ColCount && row >= 0 && row < this.RowCount; }
     IsPlaceAvailable(col, row) { return this.Container[col][row] === this.Default; }   
     IsPlaceAvailableAndInbouns(col, row) { return this.IsInBounds(col, row) && (this.Container[col][row] === this.Default); }

@@ -49,8 +49,8 @@ class PunchyKicky extends EngineBase {
         this.playerColliderIndexes = [];
         this.previousDirKey = '';
         this.gameObjects = [];
-        this.pointerhandler = new Pointerhandler();
-        this.keyboardhandler = new Keyboardhandler();
+        this.pointerhandler = new Pointerhandler(this.canvas);
+        this.keyboardhandler = new Keyboardhandler(window);
         this.keyboardhandler.pubsub.subscribe('keydown', (ev) => {
             switch (ev.key) {
                 case 'w':

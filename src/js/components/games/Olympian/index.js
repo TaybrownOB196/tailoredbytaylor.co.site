@@ -1,5 +1,5 @@
 import { Rect, Vector2d, Spritesheet } from '../../../lib/gaming/common';
-import { Keyboardhandler, Pointerhandler } from './../../../lib/gaming/input';
+import { Keyboardhandler, Pointerhandler } from '../../../lib/gaming/input';
 import EngineBase from '../../../lib/gaming/EngineBase';
 import { ParallaxX, ParallaxY } from '../../../lib/gaming/parallax';
 
@@ -19,7 +19,7 @@ class Olympian extends EngineBase {
             new Rect(new Vector2d(0,0), 128, 64),
             .1);
 
-        this.keyboardhandler = new Keyboardhandler();
+        this.keyboardhandler = new Keyboardhandler(window);
         this.keyboardhandler.pubsub.subscribe('keydown', (ev) => {
             switch (ev.key) {
                 case 'w':
@@ -52,7 +52,7 @@ class Olympian extends EngineBase {
             }
         });
 
-        this.pointerhandler = new Pointerhandler();
+        this.pointerhandler = new Pointerhandler(this.canvas);
         this.pointerhandler.pubsub.subscribe('pointerdown', (ev) => {
             // let click = new Vector2d(
             //     (ev.x - this.canvas.offsetLeft)/(this.gameRect.width/this.DEFAULT_CANVAS_WIDTH), 

@@ -1,7 +1,6 @@
 import Grid from '../../../lib/grid/Grid';
-import Utility from '../../../lib/Utility';
 import { Rect, Vector2d } from '../../../lib/gaming/common';
-import GridTile from './gridTile';
+import GridTile from './GridTile';
 
 class Hud {
     constructor(rect) {

@@ -85,7 +85,7 @@ class Basketball extends EngineBase {
         ];
         this.anim = new Animationclip(this.spritesheet, rects, true, 5);
 
-        this.keyboardhandler = new Keyboardhandler();
+        this.keyboardhandler = new Keyboardhandler(window);
         this.keyboardhandler.pubsub.subscribe('keydown', (ev) => {
             switch (ev.key) {
                 case 'w':
@@ -118,7 +118,7 @@ class Basketball extends EngineBase {
             }
         });
 
-        this.pointerhandler = new Pointerhandler();
+        this.pointerhandler = new Pointerhandler(this.canvas);
         this.pointerhandler.pubsub.subscribe('pointerdown', (ev) => {
             // let click = new Vector2d(
             //     (ev.x - this.canvas.offsetLeft)/(this.gameRect.width/this.DEFAULT_CANVAS_WIDTH), 

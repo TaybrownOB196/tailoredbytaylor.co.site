@@ -1,5 +1,5 @@
 import React from 'react';
-import Gamegrid from './../Gamegrid';
+import GamegridComponent from '../GamegridComponent';
 import { Shotgrid } from './grids';
 
 const marks = {
@@ -16,7 +16,7 @@ class ShotgridC extends React.Component {
     }
 
     render() {
-        return <Gamegrid grid={new Shotgrid(0, this.props.boardSize, this.props.boardSize, [0])} handleClick={this.handleClick}/>
+        return <GamegridComponent grid={new Shotgrid(0, this.props.boardSize, this.props.boardSize, [0])} handleClick={this.handleClick}/>
     }
 
     handleClick(e, grid) {

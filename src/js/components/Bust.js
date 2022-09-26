@@ -1,5 +1,4 @@
 import React from 'react';
-// import taylor_bust from './../../svg/taylor_bust_bowtie.svg'
 import taylor_bust from './../../png/bust.png'
 
 function Bust() {

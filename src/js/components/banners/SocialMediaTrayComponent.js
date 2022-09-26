@@ -1,8 +1,8 @@
 import React from 'react';
 import SocialMediaButtonComponent from '../buttons/SocialMediaButtonComponent';
-import facebookSvg from './../../../svg/5365678_fb_facebook_facebook_logo_icon.svg'
+import facebookSvg from './../../../svg/5365678_fb_facebook_facebook_logo_icon_black.svg'
 import linkedinSvg from './../../../svg/5296501_linkedin_network_linkedin_logo_icon.svg'
-import githubSvg from './../../../svg/github.svg'
+import githubSvg from './../../../svg/github_black.svg'
 
 class SocialMediaTrayComponent extends React.Component {
     constructor(props) {

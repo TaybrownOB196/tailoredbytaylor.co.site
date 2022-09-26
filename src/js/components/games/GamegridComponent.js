@@ -1,9 +1,9 @@
 import React from 'react';
-import Gridrow from './Gridrow';
-import Utility from './../../lib/Utility';
+import GridrowComponent from './GridrowComponent';
+import Utility from '../../lib/Utility';
 import './../../../sass/grid.scss';
 
-class Gamegrid extends React.Component {
+class GamegridComponent extends React.Component {
     constructor(props) {
         super(props);
         
@@ -23,7 +23,7 @@ class Gamegrid extends React.Component {
         return (
             <div className='gridboard'> {
                     Array.apply(0, Array(this.state.Grid.ColCount)).map(function (c, ci) {
-                        return <Gridrow 
+                        return <GridrowComponent 
                                     key={ci}
                                     ID={self.state.ID}
                                     handleClick={self.handleClick} 
@@ -39,4 +39,4 @@ class Gamegrid extends React.Component {
     
 }
 
-export default Gamegrid;
+export default GamegridComponent;

@@ -9,6 +9,75 @@ class IDGenerator {
     }
 }
 
+class Rgb {
+    constructor(r, g, b) {
+        this.r = r % 256;
+        this.g = g % 256;
+        this.b = b % 256;
+    }
+
+    toRgbString() {
+        return `rgb(${this.r}, ${this.g}, ${this.b})`;
+    }
+
+    toHexString() {
+        return `#${this.r.toString(16).padStart(2, '0')}${this.g.toString(16).padStart(2, '0')}${this.b.toString(16).padStart(2, '0')}`;
+    }
+
+    mix(rgb) {
+        let r = (this.r + rgb.r)/2;
+        let g = (this.g + rgb.g)/2;
+        let b = (this.b + rgb.b)/2;
+        return new Rgb(r, g, b);
+    }
+}
+
+class LayeredCanvas {
+    constructor(containerElementID, layerCount=2, canvasWidth=300, canvasHeight=150, context='2d') {
+        this.canvasWidth = canvasWidth;
+        this.canvasHeight = canvasHeight;
+
+        this.canvases = [];
+        let container = document.getElementById(containerElementID);
+        this.offsetTop = container.offsetTop;
+        this.offsetLeft = container.offsetLeft;
+        container.style.position = 'relative';
+        for (let idx=0; idx<layerCount; idx++) {
+            let canvas = document.createElement('canvas');
+            canvas.id = `${containerElementID}|canvas|${idx}`;
+            canvas.style.zIndex = idx + 1;
+            canvas.style.top = 0;
+            canvas.style.left = 0;
+            canvas.style.width = this.canvasWidth;
+            canvas.style.height = this.canvasHeight;
+            canvas.style.position = 'absolute';
+            if (idx == 0) {
+                canvas.style.background = 'white';
+            } else {
+                canvas.style.background = '#ffffff00';
+            }
+            container.append(canvas);
+            this.canvases.push({
+                canvas: canvas,
+                context: canvas.getContext(context)
+            });
+        }
+    }
+
+    getOffsetTopLeft() {
+        return { top: this.offsetTop, left: this.offsetLeft };
+    }
+
+    getWidthHeight() {
+        return { width: this.canvases[0].canvas.clientWidth, height: this.canvases[0].canvas.clientHeight }
+    }
+
+    getContext(index) {
+        if (index >= this.canvases.length || index < 0) throw 'index out of range'
+        return this.canvases[index].context;
+    }
+}
+
 class Vector2d {
     constructor(x,y) {
         this.x = x;
@@ -94,9 +163,13 @@ class Gameobject {
 }
 
 class Spritesheet {
-    constructor(sheet) {
+    constructor(sheet, imageElem = null) {
         this.sheet = new Image();
-        this.sheet.src = sheet;
+        if (imageElem) {
+            this.sheet = imageElem;
+        } else {
+            this.sheet.src = sheet;
+        }
         this.clipMap = {};
     }
 
@@ -106,20 +179,6 @@ class Spritesheet {
             clipRect.position.x, clipRect.position.y, clipRect.width, clipRect.height,
             rect.position.x, rect.position.y, rect.width, rect.height);
     }
-
-    // drawFill(context, rect, clipRect, fill) {
-    //     context.globalCompositeOperation = "source-over";
-
-    //     context.drawImage(
-    //         this.sheet, 
-    //         clipRect.position.x, clipRect.position.y, clipRect.width, clipRect.height,
-    //         rect.position.x, rect.position.y, rect.width, rect.height);
-
-    //     context.globalCompositeOperation = "source-in";
-        
-    //     context.fillStyle = fill;
-    //     context.fillRect(rect.position.x, rect.position.y, rect.width, rect.height);
-    // }
 }
 
 class Fill {
@@ -133,10 +192,29 @@ class Fill {
     }
 }
 
+class Text {
+    constructor(value, font='16px Arial', colorHex='#ffffff') {
+        this.value = value;
+        this.font = font;
+        this.fillStyle = colorHex;
+    }
+
+    getWidth(context) {
+        // console.log(context.measureText(this.value));
+        return context.measureText(this.value).width;
+    }
+
+    draw(context, position) {
+        context.font = this.font;
+        context.fillStyle = this.fillStyle;
+        context.fillText(this.value, position.x, position.y);
+    }
+}
+
 class Fillobject extends Gameobject {
-    constructor(rect, fill) {
+    constructor(rect, colorHex) {
         super(rect);
-        this.fill = fill;
+        this.fill = new Fill(colorHex);
     }
 
     setPosition(position) {
@@ -379,13 +457,16 @@ class FillPhysicsRect extends PhysicsRect2d {
 }
 
 export {
+    LayeredCanvas,
+    Rgb,
     Gameobject,
     PhysicsRect2d,
     PhysicsCircle2d,
     Rect,
     Circle,
-    Fill,
     Fillobject,
+    Fill,
+    Text,
     FillPhysicsCircle,
     FillPhysicsRect,
     Spritesheet,

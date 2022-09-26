@@ -2,7 +2,7 @@ import { Rect, Vector2d, Spritesheet } from '../../../lib/gaming/common';
 import { Keyboardhandler, Pointerhandler } from './../../../lib/gaming/input';
 import Grid from '../../../lib/grid/Grid';
 import EngineBase from '../../../lib/gaming/EngineBase';
-import GridTile from './gridTile';
+import GridTile from './GridTile';
 import Hud from './hud';
 import { PlayerEntity, LivingEntity } from './entities';
 import { Race } from './types';
@@ -126,7 +126,7 @@ class Fantasy extends EngineBase {
             this.gameRect.height - yOffset*2);
         this.hud = new Hud(rect);
 
-        this.keyboardhandler = new Keyboardhandler();
+        this.keyboardhandler = new Keyboardhandler(window);
         this.keyboardhandler.pubsub.subscribe('keydown', (ev) => {
             switch (ev.key) {
                 case 'w':
@@ -159,7 +159,7 @@ class Fantasy extends EngineBase {
             }
         });
 
-        this.pointerhandler = new Pointerhandler();
+        this.pointerhandler = new Pointerhandler(this.canvas);
         this.pointerhandler.pubsub.subscribe('pointerdown', (ev) => {
             let click = new Vector2d(
                 (ev.x - this.canvas.offsetLeft)/(this.gameRect.width/this.DEFAULT_CANVAS_WIDTH), 

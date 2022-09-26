@@ -1,5 +1,5 @@
 import React from 'react';
-import Gamegrid from './../Gamegrid';
+import GamegridComponent from '../GamegridComponent';
 import { Shipgrid } from './grids';
 
 const marks = {
@@ -17,7 +17,7 @@ class ShipgridC extends React.Component {
 
     render() {
         let shipGrid = new Shipgrid(0, this.props.boardSize, this.props.boardSize, [0]);
-        return <Gamegrid grid={shipGrid} handleClick={this.handleClick}/>
+        return <GamegridComponent grid={shipGrid} handleClick={this.handleClick}/>
     }
 
     handleClick(e, grid) {

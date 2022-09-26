@@ -1,15 +1,19 @@
 import React from 'react';
-import NavSection from './nav/NavSection';
-import { HashRouter as Router, Route, Routes } from 'react-router-dom';
+import MainNavComponent from './MainNavComponent';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Battleship from './games/Battleship/Battleship';
 import FantasyComponent from './games/Fantasy/FantasyComponent';
 import BasketballComponent from './games/Basketball/BasketballComponent';
 import OlympianComponent from './games/Olympian/OlympianComponent';
 import PunchyKickyComponent from './games/PunchyKicky/PunchyKickyComponent';
+import GuessTheWordComponent from './games/GuessTheWord/GuessTheWordComponent';
+import MathGamesComponent from './games/MathGames/MathGamesComponent';
+import MLCComponent from './games/MLC/MLCComponent';
 import Resume from './routes/Resume';
 import Home from './routes/Home';
 import About from './routes/About';
 import FamilyOlympics from './routes/FamilyOlympics';
+import GamesNav from './GamesNav';
 
 class MainContent extends React.Component {
     constructor(props) {
@@ -19,18 +23,22 @@ class MainContent extends React.Component {
     render() {
         return (
             <div className='grid-main detroit-skyline-bg'>
-                {/* <canvas style={canvasStyle}></canvas> */}
-                <Router>
-                    <Routes>
-                        <Route path='/' element={<NavSection />}>
+                <Router id='router'>
+                    <Routes id='routes'>
+                        <Route id='mainNav' path='/' element={<MainNavComponent />}>
                             <Route path='/' element={<Home />} />
                             <Route path='/about' element={<About />} />
                             <Route path='/familyolympics' element={<FamilyOlympics />} />
-                            {/* <Route path='/fantasy' element={<FantasyComponent />} /> */}
-                            {/* <Route path='/olympian' element={<OlympianComponent />} /> */}
-                            {/* <Route path='/basketball' element={<BasketballComponent />} /> */}
-                            {/* <Route path='/Battleship' element={<Battleship />} /> */}
-                            {/* <Route path='/PunchyKicky' element={<PunchyKickyComponent />} /> */}
+                            <Route path='/games' element={<GamesNav />}>
+                                <Route path='fantasy' element={<FantasyComponent />} />
+                                <Route path='guesstheword' element={<GuessTheWordComponent word='pizza' />} />
+                                <Route path='mathgames' element={<MathGamesComponent />} />
+                                <Route path='olympian' element={<OlympianComponent />} />
+                                <Route path='basketball' element={<BasketballComponent />} />
+                                <Route path='battleship' element={<Battleship />} />
+                                <Route path='punchykicky' element={<PunchyKickyComponent />} />
+                                <Route path='mlc' element={<MLCComponent />} />
+                            </Route>
                             <Route path='/resume' element={<Resume />} />
                         </Route>
                     </Routes>
@@ -39,14 +47,6 @@ class MainContent extends React.Component {
         );
     }
 
-}
-
-const canvasStyle = {
-    opacity: '0.5',
-    position: 'absolute',
-    background: 'red',
-    width: '100%',
-    height: '100%',
 }
 
 export default MainContent;

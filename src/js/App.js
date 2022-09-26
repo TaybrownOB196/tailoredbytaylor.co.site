@@ -1,5 +1,6 @@
 import React from 'react';
 import Layout from './components/layouts/Layout';
+import ProfileLayout from './components/layouts/ProfileLayout';
 
 class App extends React.Component {
     constructor(props) {
@@ -8,7 +9,7 @@ class App extends React.Component {
 
     render() {
         return (
-            <Layout />
+            <ProfileLayout />
         );
     }
 }

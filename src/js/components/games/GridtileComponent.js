@@ -1,6 +1,6 @@
 import React from 'react';
 
-class Gridtile extends React.Component {
+class GridtileComponent extends React.Component {
     constructor(props) {
         super(props);
     }
@@ -15,4 +15,4 @@ class Gridtile extends React.Component {
    
 }
 
-export default Gridtile;
+export default GridtileComponent;
