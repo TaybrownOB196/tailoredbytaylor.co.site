@@ -5,7 +5,7 @@ import RouterLinkNavbarComponent from './nav/RouterLinkNavbarComponent';
 
 function HeaderNavComponent() {
     return (
-        <React.Fragment>
+        <>
             <RouterLinkNavbarComponent links={[
                 { ref: 'about', text: 'About', class: '' }, 
                 { ref: 'projects', text: 'Projects', class: '' }, 
@@ -14,7 +14,7 @@ function HeaderNavComponent() {
             <div id='content-container'>
                 <Outlet />
             </div>
-        </React.Fragment>
+        </>
     );
 }
 

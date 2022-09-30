@@ -13,11 +13,14 @@ module.exports = {
   },
   output: {
     filename: 'bundle.js',
-    path: path.resolve(__dirname, 'dist'),
+    path: path.join(__dirname, 'dist'),
   },
   plugins: [
     new MiniCssExtractPlugin(), 
-    new FaviconsWebpackPlugin('./src/svg/taylor_bust_bowtie.svg'),
+    new FaviconsWebpackPlugin({
+      logo:'./src/svg/taylor_bust_bowtie.svg',
+      cache: true
+    }),
     new HtmlWebPackPlugin({
       template: './src/index.html',
       filename: './index.html'
