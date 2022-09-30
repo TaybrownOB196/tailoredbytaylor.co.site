@@ -16,18 +16,10 @@ import  '../../../sass/profilelayout.scss'
 class ProfileLayout extends React.Component {
     constructor(props) {
         super(props);
-        
-        this.handleClick = this.handleClick.bind(this);
-        this.state = { isHorizontal: false };
     }
-
-    handleClick(e) {
-        this.setState({isHorizontal: !this.state.isHorizontal});
-    }
-
     render() {
         return (<>
-            <div id='profileLayout' className={this.state.isHorizontal ? 'horizontal' : ''}>
+            <div id='profileLayout'>
                 <header id='header-container'>
                     <h2>Taylor Brown</h2>
                     <h4>Software Developer</h4>
@@ -35,7 +27,7 @@ class ProfileLayout extends React.Component {
 
                 <div id='profileImage-container'>
                     <div id='profileImage-wrapper'>
-                        <img id='profileImage'  src={profile_img}></img>
+                        <img id='profileImage' src={profile_img}></img>
                     </div>
 
                     <div id='profileImageBubble'></div>
@@ -51,7 +43,7 @@ class ProfileLayout extends React.Component {
             
             </div>
 
-            <div id='nav-container' className={this.state.isHorizontal ? 'horizontal' : ''}>
+            <div id='nav-container'>
                 <Router id='router'>
                     <Routes id='routes'>
                         <Route id='home' path='/' element={<HeaderNavComponent />}>
@@ -63,7 +55,6 @@ class ProfileLayout extends React.Component {
                 </Router>
             </div>
             
-            <a id='toggleViewLink' className={this.state.isHorizontal ? 'horizontal' : ''} onClick={this.handleClick} href='#'>{this.state.isHorizontal ? 'vertical' : 'horizontal' }</a>
         </>)
     }
 }
