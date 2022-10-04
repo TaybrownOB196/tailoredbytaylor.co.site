@@ -17,6 +17,17 @@ class Utility {
         return list.filter(lambda);
     }
 
+    static GetIndexesOf(charArray, expression) {
+        return charArray
+            .map((element, index) => {
+                if (expression(element)) {
+                // if (element === 't' || element === 'r') {
+                    return index;
+                }
+            })
+            .filter(element => element >= 0);
+    }
+
     static GetDirectionModifiers(direction) {
         switch(direction) {
             case 'NORTH': return {c:-1, r:0};

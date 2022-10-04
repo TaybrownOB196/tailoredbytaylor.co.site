@@ -12,7 +12,7 @@ class GamegridComponent extends React.Component {
     }
 
     handleClick(e) {
-        this.props.handleClick(e, this.state.Grid);
+        this.props.handleClick(e, this.state.ID, this.state.Grid);
     }
 
     render() {

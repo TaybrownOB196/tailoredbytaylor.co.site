@@ -1,23 +1,23 @@
-.gridboard {
-    div div {
-        float: left;
-        border: 1px solid black;
-        width: 16px;
-        height: 16px;
-        text-align: center;
-        display: flex;
-        flex-direction: column;
-        place-content: center;
+// .gridboard {
+//     div {
+//         float: left;
+//         border: 1px solid black;
+//         width: 16px;
+//         height: 16px;
+//         text-align: center;
+//         display: flex;
+//         flex-direction: column;
+//         place-content: center;
 
-        cursor: pointer;
-        //crosshair not-allowed grab grabbing
+//         cursor: pointer;
+//         //crosshair not-allowed grab grabbing
 
-        &:hover {
-            background-color: red;
-        }
-    }
+//         &:hover {
+//             background-color: red;
+//         }
+//     }
 
-    div:first-child {
-        clear: left;
-    }
-}
+//     // div:first-child {
+//     //     clear: left;
+//     // }
+// }
