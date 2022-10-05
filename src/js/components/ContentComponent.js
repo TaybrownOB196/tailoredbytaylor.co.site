@@ -3,7 +3,7 @@ import { Outlet } from 'react-router-dom';
 
 import RouterLinkNavbarComponent from './nav/RouterLinkNavbarComponent';
 
-function HeaderNavComponent() {
+function ContentComponent() {
     return (
         <>
             <RouterLinkNavbarComponent links={[
@@ -18,4 +18,4 @@ function HeaderNavComponent() {
     );
 }
 
-export default HeaderNavComponent;
+export default ContentComponent;

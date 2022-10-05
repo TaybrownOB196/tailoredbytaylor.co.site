@@ -1,19 +1,10 @@
 import React from 'react';
-import Layout from './components/layouts/Layout';
-import ProfileLayout from './components/layouts/ProfileLayout';
+import SiteLayout from './components/layouts/SiteLayout';
 
-class App extends React.Component {
-    constructor(props) {
-        super(props);
-    }
-
-    render() {
-        return (
-            <ProfileLayout />
-        );
-    }
+function App() {
+    return (
+        <SiteLayout />
+    )
 }
-
-
 
 export default App;

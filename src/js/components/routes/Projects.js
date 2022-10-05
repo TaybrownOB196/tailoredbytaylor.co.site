@@ -1,8 +1,5 @@
 import React from 'react';
 import { Link, Outlet } from "react-router-dom";
-import RouterLinkNavbarComponent from '../nav/RouterLinkNavbarComponent';
-import TictactoeComponent from '../games/TicTacToe/TictactoeComponent';
-import HangmanComponent from '../games/Hangman/HangmanComponent';
 import Utility from '../../lib/Utility';
 
 class Projects extends React.Component {
