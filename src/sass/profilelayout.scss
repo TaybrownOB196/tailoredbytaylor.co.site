@@ -89,6 +89,51 @@ body {
         left: 33%;
         width: 67%;
         height: 45px;
+
+        #content-container {
+            #about {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+
+            #tictactoe {
+                display: flex;
+                flex-flow: column;
+                align-items: center;
+            }
+
+            #projects-container {
+                width: 100%;
+
+                nav {
+                    display: grid;
+                    grid-template-columns: 50% 50%;
+                    grid-template-rows: 50% 50%;
+                    text-align: center;
+                    text-align: -webkit-center;
+
+                    a {
+                        text-decoration: none;
+                        
+                        p {
+                            min-width: initial;
+                            border: 1px solid black;
+                            border-radius: 24px;
+                            padding: 8px 0px;
+                            margin: 16px 0px;
+                            color: $shade-0;
+                            background-color: $shade-3;
+                            
+                            &:hover {
+                                color: $shade-3;
+                                background-color: $shade-0;
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     #toggleViewLink {
@@ -235,7 +280,42 @@ body {
             height: 32px;
 
             #content-container {
-                
+                #tictactoe {
+                    display: flex;
+                    flex-flow: column;
+                    align-items: center;
+                }
+
+                #projects-container {
+                    width: 100%;
+    
+                    nav {
+                        display: grid;
+                        grid-template-columns: 50% 50%;
+                        grid-template-rows: 50% 50%;
+                        text-align: center;
+                        text-align: -webkit-center;
+    
+                        a {
+                            text-decoration: none;
+                            
+                            p {
+                                min-width: initial;
+                                border: 1px solid black;
+                                border-radius: 24px;
+                                padding: 8px 0px;
+                                margin: 16px 0px;
+                                color: $shade-0;
+                                background-color: $shade-3;
+                                
+                                &:hover {
+                                    color: $shade-3;
+                                    background-color: $shade-0;
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }

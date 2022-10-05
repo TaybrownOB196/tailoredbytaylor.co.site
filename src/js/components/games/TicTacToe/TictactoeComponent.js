@@ -6,6 +6,7 @@ import Utility from '../../../lib/Utility';
 import './../../../../sass/tictactoe.scss';
 
 const BOARD_SIZE = 3;
+
 class TictactoeComponent extends React.Component {
     constructor(props) {
         super(props);

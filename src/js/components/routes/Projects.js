@@ -25,11 +25,14 @@ class Projects extends React.Component {
 
     render() {
         return (<div id='projects-container'>
+            <nav> 
             {
                 this.links.map(function (link, idx) {
                     return <Link key={idx} to={link.ref}><p>{link.text}</p></Link>
                 })
             }
+            </nav>
+            
             <Outlet />
         </div>)
     }
