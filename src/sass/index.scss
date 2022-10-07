@@ -74,6 +74,50 @@ p {
     text-align: center;
 }
 
+.keypad {
+    display: grid;
+    row-gap: 2%;
+    place-items: center;
+    
+    div {     
+        border: 1px solid black;
+        /* padding: 8px; */
+        min-width: 1.75rem;
+        /* width: 2rem; */
+        /* text-align: center; */
+        height: 1.75rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: white;
+        cursor: pointer;
+        border-bottom: double;
+        border-right: double;
+        
+        &:hover {
+            color: black;
+            background-color: lightgrey;
+            border-bottom: 1px solid;
+            border-right: 1px solid;
+            border-top: double;
+            border-left: double;
+        }
+    }
+} 
+.numpad {
+    .keypad {
+        grid-template-columns: 33% 34% 33%;
+        width: 6.5rem;
+    }
+}
+
+.alphabetpad {
+    .keypad {
+        grid-template-columns: 12.5% 12.5% 12.5% 12.5% 12.5% 12.5% 12.5% 12.5%;
+        width: 20rem;
+    }
+}
+
 .detroit-skyline-bg {
     background-attachment: fixed;
     background-image: url('../svg/detroit_skyline_0.svg');

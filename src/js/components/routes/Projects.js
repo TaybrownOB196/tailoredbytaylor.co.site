@@ -7,17 +7,11 @@ class Projects extends React.Component {
         super(props);
 
         this.links = [
-            { ref: 'tictactoe', text: 'TicTacToe' },
-            { ref: 'hangman', text: 'Hangman' }
+            { ref: 'tictactoe', text: 'TicTacToe' }
+            ,{ ref: 'hangman', text: 'Hangman' }
+            ,{ ref: 'alphabetpad', text: 'Alphabetpad' }
+            ,{ ref: 'numpad', text: 'Numpad' }
         ];
-        this.getWord = this.getWord.bind(this);
-    }
-
-
-    getWord() {
-        let words = ['pizza', 'egg', 'mouth'];
-        let word = words[Utility.GetRandomInt(words.length)];
-        return word;
     }
 
     render() {

@@ -1,6 +1,7 @@
 import React from 'react';
 import GridrowComponent from '../GridrowComponent';
 import Utility from '../../../lib/Utility';
+import Alphabetpad from '../../../components/input/Alphabetpad';
 
 import '../../../../sass/hangman.scss';
 
@@ -11,6 +12,8 @@ class HangmanComponent extends React.Component {
         this.maxGuessCount = 6;
         this.state = { ID: Utility.GetRandomInt(1337), key: Utility.GetRandomInt(1337), isGameOver: false, word: this.props.getWord(), guesses: [], getWord: this.props.getWord };
         this.onKeyPress = this.onKeyPress.bind(this);
+        this.handleInput = this.handleInput.bind(this);
+        this.handleClick = this.handleClick.bind(this);
         this.reset = this.reset.bind(this);
     }
 
@@ -27,11 +30,21 @@ class HangmanComponent extends React.Component {
     }
 
     onKeyPress(e) {
+        this.handleInput(e.key.toUpperCase());
+    }
+
+    handleClick(e) {
+        this.handleInput(e.target.innerHTML);
+    }
+
+    handleInput(input) {
+        console.log(input);
         if (this.state.isGameOver) {
             console.log('GAME OVER');
             return;
         }
-        let input = e.key.toUpperCase();
+
+        console.log(this.state.word);
         if (this.state.word.indexOf(input) == -1 && this.state.guesses.indexOf(input) == -1) {
             this.state.guesses.push(input);
 
@@ -97,6 +110,7 @@ class HangmanComponent extends React.Component {
                         gridRow={this.state.word}
                         count={this.state.word.length} />
                 </div>
+                <Alphabetpad handleClick={this.handleClick} />
                 <button onClick={this.reset}>Reset</button>
             </div>
         )

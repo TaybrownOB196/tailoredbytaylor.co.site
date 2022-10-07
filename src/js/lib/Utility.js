@@ -3,6 +3,10 @@ class Utility {
         return Math.floor(Math.random() * max);
     }
     
+    static GetAlphabet() {
+        return ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
+    }
+
     static getRandomIntInclusive(min, max) {
         min = Math.ceil(min);
         max = Math.floor(max);

@@ -8,6 +8,8 @@ import About from './routes/About';
 import Utility from './../lib/Utility';
 import HangmanComponent from './games/Hangman/HangmanComponent';
 import TictactoeComponent from './games/Tictactoe/TictactoeComponent';
+import Alphabetpad from './input/Alphabetpad';
+import Numpad from './input/Numpad';
 import Projects from './routes/Projects';
 import ContentComponent from './ContentComponent';
 
@@ -20,7 +22,7 @@ class RoutesComponent extends React.Component {
     getWord() {
         let words = ['pizza', 'egg', 'mouth'];
         let word = words[Utility.GetRandomInt(words.length)];
-        return word;
+        return word.toUpperCase();
     }
 
     render() {
@@ -32,6 +34,8 @@ class RoutesComponent extends React.Component {
                         <Route path='projects' element={<Projects />} >
                             <Route path='tictactoe' element={<TictactoeComponent />} />
                             <Route path='hangman' element={<HangmanComponent getWord={this.getWord} />} />
+                            <Route path='alphabetpad' element={<Alphabetpad handleClick={(key) => {console.log(key.target.innerHTML)}} />} />
+                            <Route path='numpad' element={<Numpad handleClick={(key) => {console.log(key.target.innerHTML)}} />} />
                         </Route>
                         <Route path='resume' element={<Resume />} />
                     </Route>
