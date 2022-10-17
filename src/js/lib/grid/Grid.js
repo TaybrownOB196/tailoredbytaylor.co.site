@@ -1,7 +1,7 @@
 import Utility from './../Utility';
 import Gridcell from './Gridcell';
 
-//Store grid in 2D array, but implement traversal at a directional level
+//TODO: Store grid in 2D array, but implement traversal at a directional level
 
 class Grid {
     constructor(_default, colCount, rowCount) {
@@ -10,8 +10,8 @@ class Grid {
         throw 'columns/rows must be greater than 1';
         
         this.Default = _default;
-        this.RowCount = rowCount;
         this.ColCount = colCount;
+        this.RowCount = rowCount;
         this.Container = [];
         for(let col=0; col<this.ColCount; col++) {
             let row = [];

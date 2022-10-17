@@ -9,11 +9,21 @@ class GridrowComponent extends React.Component {
     render() {
         let row = this.props.gridRow;
         let handleClick = this.props.handleClick;
+        let handleMouseEnter = this.props.handleMouseEnter;
+        let handleMouseLeave = this.props.handleMouseLeave;
         let self = this;
         return (
             <> {
                 Array.apply(0, Array(this.props.count)).map(function (r, ri) {
-                    return <GridtileComponent ID={self.props.ID} handleClick={handleClick} colIndex={self.props.colIndex} rowIndex={ri} key={ri} value={row[ri]} />})
+                    return <GridtileComponent 
+                            ID={self.props.ID} 
+                            handleClick={handleClick} 
+                            handleMouseEnter={handleMouseEnter} 
+                            handleMouseLeave={handleMouseLeave} 
+                            colIndex={ri} 
+                            rowIndex={self.props.rowIndex} 
+                            key={ri} 
+                            value={row[ri]} />})
             }</>   
     );
     }

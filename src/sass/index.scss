@@ -124,6 +124,19 @@ p {
     background-position: bottom;
     background-repeat: no-repeat;
     background-size: contain;
+    z-index: -1000;
+}
+
+.opaque-bg-container {
+    position: relative;
+}
+.opaque-bg {
+    z-index: -1;
+    position: absolute;
+    width: 90%;
+    height: 100%;
+    border-radius: 2rem;
+    opacity: 75%;
 }
 
 .light-blue-1 { background-color: #0A091B; }

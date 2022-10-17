@@ -14,13 +14,9 @@ body {
     //   box-sizing: border-box;
 }
 
-// #bg {
-//     background-attachment: fixed;
-//     background-image: url('../svg/detroit_skyline_0.svg');
-//     background-position: bottom;
-//     background-repeat: no-repeat;
-//     background-size: contain;
-// }
+.opaque-bg {
+    background: $shade-2;
+}
 
 #root {
     position: absolute;
@@ -52,7 +48,7 @@ body {
         align-items: center;
         
         div img, p {
-            padding: 8px 0px;
+            padding: .5rem 0rem;
             width: 80%;
             min-width: 300px;
             text-align: center;
@@ -71,7 +67,7 @@ body {
             text-decoration: none;
             p {
                 text-align: justify;
-                padding: 4px 8px;
+                padding: .25rem .5rem;
                 border: 1px solid $shade-3;
                 border-radius: 24px;
                 
@@ -109,7 +105,6 @@ body {
                 nav {
                     display: grid;
                     grid-template-columns: 50% 50%;
-                    grid-template-rows: 50% 50%;
                     text-align: center;
                     text-align: -webkit-center;
 
@@ -120,8 +115,8 @@ body {
                             min-width: initial;
                             border: 1px solid black;
                             border-radius: 24px;
-                            padding: 8px 0px;
-                            margin: 16px 0px;
+                            padding: .5rem 0rem;
+                            margin: 1rem 0rem;
                             color: $shade-0;
                             background-color: $shade-3;
                             
@@ -150,7 +145,7 @@ body {
         border-bottom-left-radius: 64px;
         display: flex;
         flex-direction: column;
-        gap: 32px;
+        gap: 2rem;
         height: 99%;
         position: absolute;
         width: 33%;
@@ -158,7 +153,7 @@ body {
 
         #intro-container {
             background-color: $shade-0;
-            padding: 16px;
+            padding: 1rem;
             border-radius: 24px;
         }
 
@@ -185,7 +180,7 @@ body {
             background-color: $shade-0;
             border-radius: 24px;
             height: 48px;
-            padding: 8px 0px;
+            padding: .5rem 0rem;
             width: 100%;
     
             .socialMediaTray {
@@ -213,12 +208,12 @@ body {
             border-radius: 0;
             display: grid;
             flex-direction: row;
-            gap: 0px;
+            gap: 0rem;
             position: relative;
 
             .socialMediaTray {
                 justify-content: flex-start;
-                gap: 32px;
+                gap: 2rem;
             }
 
     
@@ -230,7 +225,7 @@ body {
                 grid-column: 1/2;
                 grid-row: 1;
                 align-self: baseline;
-                padding-bottom: 8px;
+                padding-bottom: .5rem;
                 h2, h4 {
                     padding-left: 200px;
                 }
@@ -261,14 +256,14 @@ body {
                 
                 .socialMediaTray {
                     justify-content: flex-start;
-                    gap: 32px;
+                    gap: 2rem;
                     padding-left: 200px;
                 }
             }
         }
 
         .navbar {
-            height: 32px;
+            height: 2rem;
 
             a:first-of-type {
                 padding-left: 100px;
@@ -283,7 +278,7 @@ body {
             position: initial;
             left: initial;
             width: 100%;
-            height: 32px;
+            height: 2rem;
 
             #content-container {
                 #tictactoe {
@@ -309,8 +304,8 @@ body {
                                 min-width: initial;
                                 border: 1px solid black;
                                 border-radius: 24px;
-                                padding: 8px 0px;
-                                margin: 16px 0px;
+                                padding: .5rem 0rem;
+                                margin: 1rem 0rem;
                                 color: $shade-0;
                                 background-color: $shade-3;
                                 

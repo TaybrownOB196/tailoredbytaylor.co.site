@@ -8,8 +8,10 @@ class GridtileComponent extends React.Component {
     render() {
         return (
             <div 
-                id={`${this.props.rowIndex}|${this.props.colIndex}|${this.props.ID}`} 
-                onClick={this.props.handleClick}>
+                id={`${this.props.colIndex}|${this.props.rowIndex}|${this.props.ID}`} 
+                onClick={this.props.handleClick}
+                onMouseEnter={this.props.handleMouseEnter}
+                onMouseLeave={this.props.handleMouseLeave}>
             </div>);
     }
    

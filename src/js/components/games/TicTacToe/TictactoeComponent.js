@@ -22,7 +22,8 @@ class TictactoeComponent extends React.Component {
 
     render() {
         return (
-            <div id='tictactoe'>
+            <div id='tictactoe' className='opaque-bg-container'>
+                <div className='opaque-bg'></div>
                 <GamegridComponent key={this.state.key} grid={new Grid('', BOARD_SIZE, BOARD_SIZE)} handleClick={this.handleClick} />
                 <div>
                     <p>{`P1 Wins: ${this.state.p1w}`}</p>

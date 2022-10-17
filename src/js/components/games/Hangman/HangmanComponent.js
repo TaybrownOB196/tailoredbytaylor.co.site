@@ -38,13 +38,11 @@ class HangmanComponent extends React.Component {
     }
 
     handleInput(input) {
-        console.log(input);
         if (this.state.isGameOver) {
             console.log('GAME OVER');
             return;
         }
 
-        console.log(this.state.word);
         if (this.state.word.indexOf(input) == -1 && this.state.guesses.indexOf(input) == -1) {
             this.state.guesses.push(input);
 
@@ -78,7 +76,8 @@ class HangmanComponent extends React.Component {
     render() {
         let self = this;
         return (
-            <div id='hangman' key={this.state.key} >
+            <div id='hangman' className='opaque-bg-container' key={this.state.key} >
+                <div className='opaque-bg'></div>
                 <div id='view'>
                     <div id='gallows'>
                         <div id='hook'></div>
@@ -106,7 +105,7 @@ class HangmanComponent extends React.Component {
                 <div id='word-container'>
                     <GridrowComponent
                         ID={this.state.ID}
-                        colIndex={0}
+                        rowIndex={0}
                         gridRow={this.state.word}
                         count={this.state.word.length} />
                 </div>

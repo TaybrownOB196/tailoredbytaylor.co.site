@@ -7,6 +7,7 @@ import Resume from './routes/Resume';
 import About from './routes/About';
 import Utility from './../lib/Utility';
 import HangmanComponent from './games/Hangman/HangmanComponent';
+import FourInARowComponent from './games/FourInARow/FourInARowComponent';
 import TictactoeComponent from './games/Tictactoe/TictactoeComponent';
 import Alphabetpad from './input/Alphabetpad';
 import Numpad from './input/Numpad';
@@ -34,8 +35,7 @@ class RoutesComponent extends React.Component {
                         <Route path='projects' element={<Projects />} >
                             <Route path='tictactoe' element={<TictactoeComponent />} />
                             <Route path='hangman' element={<HangmanComponent getWord={this.getWord} />} />
-                            <Route path='alphabetpad' element={<Alphabetpad handleClick={(key) => {console.log(key.target.innerHTML)}} />} />
-                            <Route path='numpad' element={<Numpad handleClick={(key) => {console.log(key.target.innerHTML)}} />} />
+                            <Route path='fourinarow' element={<FourInARowComponent />} />
                         </Route>
                         <Route path='resume' element={<Resume />} />
                     </Route>

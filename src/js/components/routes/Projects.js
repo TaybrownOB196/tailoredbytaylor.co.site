@@ -9,8 +9,8 @@ class Projects extends React.Component {
         this.links = [
             { ref: 'tictactoe', text: 'TicTacToe' }
             ,{ ref: 'hangman', text: 'Hangman' }
-            ,{ ref: 'alphabetpad', text: 'Alphabetpad' }
-            ,{ ref: 'numpad', text: 'Numpad' }
+            ,{ ref: 'fourinarow', text: 'FourInARow' }
+            
         ];
     }
 
