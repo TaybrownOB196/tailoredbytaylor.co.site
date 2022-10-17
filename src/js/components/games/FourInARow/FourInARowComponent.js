@@ -29,9 +29,10 @@ class FourInARowComponent extends React.Component {
 
     handleMouseEnter(e, ID, grid) {
         if (this.state.isGameOver) return;
+        let color = this.state.p1Turn ? 'lightpink' : 'lightblue';
         let [col, row, gameID] = e.target.id.split('|');
         for (let x=this.rowCount-1; x>=0; x--) {
-            document.getElementById(`${col}|${x}|${gameID}`).style.backgroundColor = 'lightgrey';
+            document.getElementById(`${col}|${x}|${gameID}`).style.backgroundColor = color;
         }
     }
 
