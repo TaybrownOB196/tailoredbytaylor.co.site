@@ -1,5 +1,5 @@
 import React from 'react';
-import ObjectComponent from '../objects/ObjectComponent';
+import ObjectComponent from './ObjectComponent';
 
 const transitionString = 'max-height .5s ease-out';
 const toggleStyle = {
@@ -8,13 +8,12 @@ const toggleStyle = {
     right: '8px',
 }
 
-class ListOfObjectComponent extends React.Component {
+class DropdownObjectComponent extends React.Component {
     constructor(props) {
         super(props);
 
         this.header = props.header;
-        this.objects = props.objects;
-        this.objectLambda = props.objectLambda;
+        this.object = props.object;
         this.isCollapsible = props.isCollapsible;
         this.state = {
             isCollapsed: !props.isCollapsible,
@@ -31,11 +30,11 @@ class ListOfObjectComponent extends React.Component {
         return (
             <div className='list-container'>
                 <div id='list-header' onClick={this.toggleCollapse}>
-                    {this.header}
+                    {this.object.title}
                     <div style={toggleStyle}>{this.state.isCollapsed ? '-' : '+'}</div>
                 </div>
                 <ul ref='listContent' style={this.state.listStyle}>
-                    { this.objects.map((obj, i) => { return <ObjectComponent key={i} index={i} object={ this.objectLambda ? this.objectLambda(obj) : obj } /> }) }
+                    <ObjectComponent object={this.object} />
                 </ul>
             </div>
         );
@@ -56,4 +55,4 @@ class ListOfObjectComponent extends React.Component {
     }
 }
 
-export default ListOfObjectComponent;
+export default DropdownObjectComponent;

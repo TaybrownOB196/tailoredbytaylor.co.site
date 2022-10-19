@@ -1,6 +1,6 @@
 import React from 'react';
 import BlurbsService from '../../services/BlurbsService';
-import ListOfObjectComponent from '../lists/ListOfObjectComponent';
+import DropdownObjectComponent from '../objects/DropdownObjectComponent';
 
 class Blurbs extends React.Component {
     constructor(props) {
@@ -21,11 +21,10 @@ class Blurbs extends React.Component {
     render() {
         if (this.state.data && this.state.data.length > 0) {
             return <div className='object-list bordered-list collapsible-list'>
-                    <ListOfObjectComponent
+                    <DropdownObjectComponent
                         header='Blurbs'
                         isCollapsible={true}
-                        objects={this.state.data}
-                        objectLambda={(item) => { return item } } 
+                        object={this.state.data[0]} 
                     />
                 </div>
         } else {
