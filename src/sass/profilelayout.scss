@@ -18,6 +18,18 @@ body {
     background: $shade-2;
 }
 
+.dropdown-object-container {
+    border: 1px solid black;
+    
+    .dropdown-object-header {
+        border-top: 1px solid black;
+        border-right: 1px solid black;
+        border-left: 1px solid black;
+        border-bottom: 2px solid black;
+        cursor: pointer;
+    }
+}
+
 .object-list {
 
     .object {
@@ -34,7 +46,7 @@ body {
             }
     
             .valueArray {
-                
+
             }
         }
 

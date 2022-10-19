@@ -12,8 +12,8 @@ class DropdownObjectComponent extends React.Component {
     constructor(props) {
         super(props);
 
-        this.header = props.header;
         this.object = props.object;
+        this.header = props.header;
         this.isCollapsible = props.isCollapsible;
         this.state = {
             isCollapsed: !props.isCollapsible,
@@ -28,14 +28,14 @@ class DropdownObjectComponent extends React.Component {
 
     render() {
         return (
-            <div className='list-container'>
-                <div id='list-header' onClick={this.toggleCollapse}>
-                    {this.object.title}
+            <div className='dropdown-object-container'>
+                <div className='dropdown-object-header' onClick={this.toggleCollapse}>
+                    {this.header}
                     <div style={toggleStyle}>{this.state.isCollapsed ? '-' : '+'}</div>
                 </div>
-                <ul ref='listContent' style={this.state.listStyle}>
+                <div ref='dropdownObjectContent' className='dropdown dropdown-object-content' style={this.state.listStyle}>
                     <ObjectComponent object={this.object} />
-                </ul>
+                </div>
             </div>
         );
     }
@@ -46,7 +46,7 @@ class DropdownObjectComponent extends React.Component {
                 isCollapsed: !state.isCollapsed, 
                 listStyle: 
                     { 
-                        maxHeight: state.isCollapsed ? '0px' : `${this.refs.listContent.scrollHeight}px`,
+                        maxHeight: state.isCollapsed ? '0px' : `${this.refs.dropdownObjectContent.scrollHeight}px`,
                         transition: transitionString,
                     }
                 }

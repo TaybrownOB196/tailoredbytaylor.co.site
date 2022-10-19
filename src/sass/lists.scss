@@ -34,7 +34,7 @@
         cursor: pointer;       
     }
 
-    ul:first-of-type {
+    ul:first-of-type, div:first-of-type .dropdown {
         overflow-y: hidden
     }
 }

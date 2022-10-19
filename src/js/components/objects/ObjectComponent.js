@@ -13,9 +13,7 @@ class ObjectComponent extends React.Component {
         return (
             <div className='object'>
                 {Object.keys(this.object).map((k, ki) =>
-                    <div key={ki}>
-                        <ObjectKeyValueComponent kkey={k} val={self.object[k]} />
-                    </div>
+                    <ObjectKeyValueComponent key={ki} kkey={k} val={self.object[k]} />
                 )}
             </div>
         );

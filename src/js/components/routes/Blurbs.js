@@ -20,13 +20,16 @@ class Blurbs extends React.Component {
 
     render() {
         if (this.state.data && this.state.data.length > 0) {
-            return <div className='object-list bordered-list collapsible-list'>
-                    <DropdownObjectComponent
-                        header='Blurbs'
-                        isCollapsible={true}
-                        object={this.state.data[0]} 
-                    />
-                </div>
+            return <>
+                {this.state.data.map((k, ki) =>
+                    <div key={ki} className='object-list collapsible-list'>
+                        <DropdownObjectComponent
+                            header={this.state.data[ki].title}
+                            isCollapsible={true}
+                            object={this.state.data[ki]} />
+                    </div>
+                )}
+            </>
         } else {
             return <p>loading...</p>
         }

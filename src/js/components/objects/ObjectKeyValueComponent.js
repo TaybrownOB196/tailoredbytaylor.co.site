@@ -15,7 +15,7 @@ export default class ObjectKeyValueComponent extends React.Component {
         if (Array.isArray(this.val)) {
             toReturn = <ObjectValueArrayComponent array={this.val} />;
         }
-        return (<div>
+        return (<div className='keyValue'>
             <ObjectKeyComponent value={this.kkey}  />
             { toReturn }
         </div>);
