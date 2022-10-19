@@ -10,6 +10,7 @@ function ContentComponent() {
                 { ref: 'about', text: 'About', class: '' }
                 ,{ ref: 'projects', text: 'Projects', class: '' }
                 ,{ ref: 'resume', text: 'Resume', class: '' }
+                ,{ ref: 'blurbs', text: 'Blurbs', class: '' }
             ]}/>
 
             <div id='content-container'>

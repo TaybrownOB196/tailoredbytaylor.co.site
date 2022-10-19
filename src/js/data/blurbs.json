@@ -1,0 +1,20 @@
+[
+    {
+        "title": "First",
+        "content": "This is the first blurb",
+        "date": "10/19/2022 3:29:29 AM",
+        "tags": ["intro", "favorite"]
+    },
+    {
+        "title": "Second",
+        "content": "This is the second blurb",
+        "date": "10/19/2022 3:29:29 AM",
+        "tags": []
+    },
+    {
+        "title": "Third",
+        "content": "This is the third blurb",
+        "date": "10/19/2022 3:29:29 AM",
+        "tags": ["sponsored", "favorite", "video games"]
+    }
+]

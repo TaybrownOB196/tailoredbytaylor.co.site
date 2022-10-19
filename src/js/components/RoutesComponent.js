@@ -4,13 +4,12 @@ import React from 'react';
 import { HashRouter as Router } from 'react-router-dom';
 import { Routes, Route } from 'react-router-dom';
 import Resume from './routes/Resume';
+import Blurbs from './routes/Blurbs';
 import About from './routes/About';
 import Utility from './../lib/Utility';
 import HangmanComponent from './games/Hangman/HangmanComponent';
 import FourInARowComponent from './games/FourInARow/FourInARowComponent';
 import TictactoeComponent from './games/Tictactoe/TictactoeComponent';
-import Alphabetpad from './input/Alphabetpad';
-import Numpad from './input/Numpad';
 import Projects from './routes/Projects';
 import ContentComponent from './ContentComponent';
 
@@ -37,6 +36,7 @@ class RoutesComponent extends React.Component {
                             <Route path='hangman' element={<HangmanComponent getWord={this.getWord} />} />
                             <Route path='fourinarow' element={<FourInARowComponent />} />
                         </Route>
+                        <Route path='blurbs' element={<Blurbs />} />
                         <Route path='resume' element={<Resume />} />
                     </Route>
                 </Routes>
