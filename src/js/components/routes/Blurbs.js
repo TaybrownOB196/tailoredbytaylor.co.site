@@ -11,15 +11,13 @@ class Blurbs extends React.Component {
         this.service = new BlurbsService();
         this.servicePromise = makeCancelable(
             this.service.getBlurbs()
-            //Should there be a promise resolution here to not setstate if the component has been unmounted?
-                .then((json) => {
-                    this.setState((state, props) => ({ data: json }));
-                })
+                .catch(err => console.log(err))
         );
     }
 
     componentDidMount() {
         this.servicePromise.promise
+            .then(json => this.setState((state, props) => ({ data: json })))
             .catch((reason) => console.log('isCanceled', reason.isCanceled))
     }
 
