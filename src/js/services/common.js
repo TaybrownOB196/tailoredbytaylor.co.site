@@ -14,6 +14,19 @@ class JSONService {
     }
 }
 
+class HttpService {
+    constructor(baseUrl) {
+        this.baseUrl = baseUrl;
+    }
+
+    get(resource) {
+        return fetch(`${this.baseUrl}/${resource}`, { method:'get', credentials: 'include' })
+            .then((body) => { return body.json() })
+            .catch(err => console.log(`¯\_(ツ)_/¯   ${err}`));
+    }
+}
+
 export {
-    JSONService
+    JSONService,
+    HttpService,
 }

@@ -11,11 +11,14 @@ class Blurbs extends React.Component {
     
     componentDidMount() {
         this.service.getBlurbs()
-            .then((res) => res.json())
             .then((json) => {
                 this.setState((state, props) => ({ data: json }));
             }
         );
+    }
+
+    componentDidUnmount() {
+        
     }
 
     render() {

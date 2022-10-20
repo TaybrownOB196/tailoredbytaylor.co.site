@@ -1,15 +1,12 @@
-import { JSONService } from './common';
-
-import json from '../data/blurbs.json'
+import { HttpService } from './common';
 
 class BlurbsService {
     constructor() {
-        this.service = new JSONService(json);
-        // this.data = JSON.stringify(json);
+        this.service = new HttpService('https://localhost:7022');
     }
 
     getBlurbs() {
-        return this.service.getData();
+        return this.service.get('api/blurb/get');
     }
 }
 

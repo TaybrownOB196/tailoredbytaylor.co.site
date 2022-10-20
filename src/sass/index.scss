@@ -15,10 +15,6 @@ p {
     font-size: .88em;
 }
 
-#about {
-    padding: 8px 0px;
-}
-
 #bust {
     width: 96px;
     height: 96px;
@@ -251,6 +247,7 @@ p {
     display: flex;
     flex-direction: column;
     align-items: center;
+    margin-top: 1rem;
 
     a {
         font-size: small;
@@ -258,7 +255,6 @@ p {
 
     img {
         height: auto;
-        padding: 8px 0px;
         width: 25%;
     }
 }
