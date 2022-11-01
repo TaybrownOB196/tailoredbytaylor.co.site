@@ -99,8 +99,6 @@ class Rect {
             _normal = new Vector2d(-normal.x, -normal.y);
         }
         
-        console.log(_normal);
-        console.log(_depth);
         return { depth: _depth, normal: normal };
     }
 }

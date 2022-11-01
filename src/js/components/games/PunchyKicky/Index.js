@@ -7,8 +7,8 @@ import Rect from '../../../lib/gaming/Rect';
 import './../../../../sass/punchykicky.scss';
 
 const MAXSPEED = 1000000;
-const JUMP = 300;
-const MOVE = 50;
+const JUMP = 800;
+const MOVE = 25;
 
 class Physics2d extends Gameobject {
     constructor(rect, mass=1, gravity=null) {
@@ -61,6 +61,9 @@ class Physics2d extends Gameobject {
 
         r1.position.x -= result.normal.x * result.depth;
         r1.position.y -= result.normal.y * result.depth;
+        if (result.normal.y != 0) {
+            this.isGrounded = true;
+        }
         return true;
     }
 
@@ -68,10 +71,11 @@ class Physics2d extends Gameobject {
         if (!colliders || colliders.length < 1) return;
         this.isGrounded = false;
         for (let collider of colliders) {
-
             if (this.checkCollision(this.rect, collider.rect)) {
+                if (this.rect.height + this.rect.position.y >= collider.rect.position.y) {
+                    this.isGrounded = true;
+                }
                 collider.colorHex = '#ffffff';
-                console.log(`${this.ID} colliding with ${collider.ID}`);
             } else {
                 collider.colorHex = '#000fff';
             }
@@ -79,12 +83,11 @@ class Physics2d extends Gameobject {
     }
 
     update(timeDelta) {
+        if (this.useGravity) {
+            this.velocity.y += this.gravity * this.mass;
+        }
         this.velocity.x *= timeDelta;
         this.velocity.y *= timeDelta;
-
-        if (this.useGravity && !this.isGrounded) {
-            this.velocity.y += this.gravity;
-        }
 
         this.setPosition(new Point2d(
             this.rect.position.x + this.velocity.x,
@@ -97,6 +100,7 @@ class Ting extends Physics2d {
         super(rect, mass, gravity);
         this.colorHex = colorHex;
         this.isRunning = false;
+        this.directionX = 0;
         this.maxJumpCount = 2;
         this.jumpCount = 0;
     }
@@ -107,6 +111,13 @@ class Ting extends Physics2d {
         // else
         //     this.jumpCount++;
         // if (this.jumpCount > this.maxJumpCount) return;
+
+        // if (!this.isGrounded) {
+        //     // console.log(this.rect.position.y, this.rect.position.y + this.rect.height)
+        //     // console.log('not on ground');
+        //     // return;
+        // }
+
         if (!this.isGrounded) return;
         this.isGrounded = false;
         this.updateVelocity(0, -JUMP, MAXSPEED);
@@ -114,7 +125,8 @@ class Ting extends Physics2d {
 
     run(value) {
         this.isRunning = true;
-        this.updateVelocity(MOVE * Math.sign(value), 0, MAXSPEED);
+        this.directionX = value;
+        // this.updateVelocity(MOVE * Math.sign(value), 0, MAXSPEED);
     }
     
     stop() {
@@ -127,10 +139,19 @@ class Ting extends Physics2d {
     }
 
     update(timeDelta) {
-        super.update(timeDelta);
-        if (!this.isRunning && this.velocity.x != 0) {
-            this.updateVelocity(Math.round(this.velocity.x * .06 * -Math.sign(this.velocity.x)), 0, MAXSPEED);
+        if (this.isRunning) {
+            this.updateVelocity(
+                this.velocity.x + MOVE * this.directionX, 
+                0, 
+                MAXSPEED);
+        } else {
+            this.updateVelocity(
+                Math.round(this.velocity.x * .06 * -Math.sign(this.velocity.x)), 
+                0, 
+                MAXSPEED);
         }
+
+        super.update(timeDelta);
     }
 }
 
@@ -140,7 +161,7 @@ class PunchyKicky extends EngineBase {
         this.player = new Ting(new Rect(
             new Point2d(66,16), 16, 16), 
             '#ff00ff',
-            10,
+            20,
             1);
         this.platform = new Ting(new Rect(
             new Point2d(50,100), 100, 18), 
