@@ -2,6 +2,7 @@ import EngineBase from '../../../lib/gaming/EngineBase';
 import { Gameobject, Text, Point2d } from '../../../lib/gaming/common';
 import { Keyboardhandler, Pointerhandler } from './../../../lib/gaming/input';
 import Vector2d from '../../../lib/gaming/Vector2d';
+import Hud from '../../../lib/gaming/ui/Hud';
 import Rect from '../../../lib/gaming/Rect';
 import './../../../../sass/punchykicky.scss';
 
@@ -10,6 +11,12 @@ import { Player, Platform } from './gameobjects';
 class PunchyKicky extends EngineBase {
     constructor() {
         super('PunchyKicky', 'PunchyKickyContainer');
+        this.hud = new Hud(new Point2d(
+            this.DEFAULT_CANVAS_WIDTH - 75, 
+            this.DEFAULT_CANVAS_HEIGHT - 24),
+            50,
+            50,
+            { fps: '', mse: '', kbi: ''});
         this.player = new Player(new Rect(
             new Point2d(66,16), 16, 16), 
             '#ff00ff',
@@ -28,22 +35,22 @@ class PunchyKicky extends EngineBase {
         this.pointerhandler = new Pointerhandler(this.canvas);
         this.pointerhandler.pubsub.subscribe('pointermove', (ev) => {
             let click = this.getClick(ev.offsetX, ev.y);
-            this.pointerText.value = `(${click.x},${click.y})`;
-
+            this.hud.update({mse: `(${click.x},${click.y})`});
             this.player.setPosition(click);
         });
         this.pointerhandler.pubsub.subscribe('pointerenter', (ev) => {
             let click = this.getClick(ev.offsetX, ev.y);
-            this.pointerText.value = `(${click.x},${click.y})`;
+            this.hud.update({mse: `(${click.x},${click.y})`});
             this.player.setPosition(click);
 
         });
         this.pointerhandler.pubsub.subscribe('pointerleave', (ev) => {
-            this.pointerText.value = '( , )';
+            this.hud.update({mse: '( , )'});
         });
 
         this.keyboardhandler = new Keyboardhandler(window);
         this.keyboardhandler.pubsub.subscribe('keydown', (ev) => {
+            this.hud.update({kbi: ev.key});
             switch (ev.key) {
                 case 'w':
                     this.player.jump();
@@ -111,17 +118,8 @@ class PunchyKicky extends EngineBase {
         this.player.update(fps/1000);
         this.handleCollisions(this.player, [this.platform, this.platform2]);
         this.player.draw(this.context);
-        
-        this.frameRateText.value = fps;
-        this.frameRateText.draw(this.context,
-            new Point2d(
-                this.DEFAULT_CANVAS_WIDTH - 75, 
-                this.DEFAULT_CANVAS_HEIGHT - 24));
-
-        this.pointerText.draw(this.context, 
-            new Point2d(
-                this.DEFAULT_CANVAS_WIDTH - 75, 
-                this.DEFAULT_CANVAS_HEIGHT - 10));
+        this.hud.update({fps: fps});
+        this.hud.draw(this.context);
     }
 }
 
