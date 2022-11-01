@@ -182,9 +182,14 @@ body {
                 align-items: center;
             }
 
-            #PunchyKickyContainer {
+            #PunchyKickyComponent {
                 display: flex;
                 justify-content: center;
+                
+                #PunchyKickyContainer {
+                    display: flex;
+                    justify-content: center;
+                }
             }
 
             #projects-container {

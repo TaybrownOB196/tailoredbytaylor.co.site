@@ -34,13 +34,13 @@ class PunchyKicky extends EngineBase {
 
         this.pointerhandler = new Pointerhandler(this.canvas);
         this.pointerhandler.pubsub.subscribe('pointermove', (ev) => {
-            let click = this.getClick(ev.offsetX, ev.y);
+            let click = this.getClick(ev.layerX, ev.layerY);
             this.hud.update({mse: `(${click.x},${click.y})`});
             this.player.setPosition(click);
         });
         this.pointerhandler.pubsub.subscribe('pointerenter', (ev) => {
-            let click = this.getClick(ev.offsetX, ev.y);
-            this.hud.update({mse: `(${click.x},${click.y})`});
+            let click = this.getClick(ev.x, ev.y);
+            this.hud.update({mse: `(${click.layerX},${click.layerY})`});
             this.player.setPosition(click);
 
         });
