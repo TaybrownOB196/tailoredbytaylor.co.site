@@ -428,4 +428,5 @@ export {
     FillPhysicsRect,
     Spritesheet,
     Point2d,
+    IDGenerator,
 }
