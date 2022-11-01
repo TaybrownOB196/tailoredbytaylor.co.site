@@ -68,6 +68,42 @@ body {
     height: 100%;
     flex-direction: column;
 
+    .carousel {
+        display: grid;
+        align-items: center;
+        grid-template-columns: 10% 80% 10%;
+        width: 80%;
+        height: 80%;
+        margin-top: .5rem;
+
+        .carousel-right,.carousel-left {
+            text-align: center;
+            background-color: $shade-3;
+            color: $shade-0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 25%;
+            cursor: pointer;
+            border: 1px solid $shade-2;
+
+            &:hover {
+                color: $shade-0;
+                background-color: $shade-2;
+            }
+        }
+
+        .carousel-left {
+            border-top-left-radius: 1rem;
+            border-bottom-left-radius: 1rem;
+        }
+
+        .carousel-right {
+            border-top-right-radius: 1rem;
+            border-bottom-right-radius: 1rem;
+        }
+    }
+
     header {
         width: 100%;
         background-color: $shade-0;
@@ -144,6 +180,11 @@ body {
                 display: flex;
                 flex-flow: column;
                 align-items: center;
+            }
+
+            #PunchyKickyContainer {
+                display: flex;
+                justify-content: center;
             }
 
             #projects-container {
@@ -303,7 +344,7 @@ body {
                 
                 .socialMediaTray {
                     justify-content: flex-start;
-                    gap: 2rem;
+                    gap: 1rem;
                     padding-left: 200px;
                 }
             }

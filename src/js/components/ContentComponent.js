@@ -8,9 +8,9 @@ function ContentComponent() {
         <>
             <RouterLinkNavbarComponent links={[
                 { ref: 'about', text: 'About', class: '' }
-                ,{ ref: 'projects', text: 'Projects', class: '' }
                 ,{ ref: 'resume', text: 'Resume', class: '' }
-                ,{ ref: 'blurbs', text: 'Blurbs', class: '' }
+                ,{ ref: 'games', text: 'Games', class: '' }
+                ,{ ref: 'misc', text: 'Misc.', class: '' }
             ]}/>
 
             <div id='content-container'>

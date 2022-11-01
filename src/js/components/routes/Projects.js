@@ -7,9 +7,7 @@ class Projects extends React.Component {
         super(props);
 
         this.links = [
-            { ref: 'tictactoe', text: 'TicTacToe' }
-            ,{ ref: 'hangman', text: 'Hangman' }
-            ,{ ref: 'fourinarow', text: 'FourInARow' }
+            { ref: 'fighter', text: 'Fighter' }
             
         ];
     }
