@@ -1,80 +1,195 @@
-import { Circle,Rect, Vector2d, Fill, FillPhysicsRect, FillPhysicsCircle } from '../../../lib/gaming/common';
-import { Keyboardhandler, Pointerhandler } from './../../../lib/gaming/input';
-import './../../../../sass/punchykicky.scss';
-import Utility from '../../../lib/Utility';
 import EngineBase from '../../../lib/gaming/EngineBase';
+import { Gameobject, Text, Point2d } from '../../../lib/gaming/common';
+import { Keyboardhandler, Pointerhandler } from './../../../lib/gaming/input';
+import Vector2d from '../../../lib/gaming/Vector2d';
+import Rect from '../../../lib/gaming/Rect';
 
-const SPEED = 10;
-const JUMP = SPEED * 1.5;
+import './../../../../sass/punchykicky.scss';
 
-class Fighter extends FillPhysicsRect {
-    constructor(rect, fill) {
-        super(rect, fill);
-        this.jumpCount = 0;
-        this.maxJumpCount = 2;
+const MAXSPEED = 1000000;
+const JUMP = 300;
+const MOVE = 50;
+
+class Physics2d extends Gameobject {
+    constructor(rect, mass=1, gravity=null) {
+        super();
+        this.rect = rect;
+        this.mass = mass;
+        this.velocity = new Vector2d(0,0);
+        this.useGravity = gravity ? true : false;
+        this.gravity = this.useGravity ? gravity : 0;
+        this.isGrounded = this.useGravity ? false : true;
     }
 
-    update(timeDelta, context, gameRect) {
-        super.update(timeDelta, context, gameRect);
+    setPosition(position) {
+        this.rect.position = position;
+    }
 
-        if (this.rect.bottomRight().y >= gameRect.bottomRight().y) {
-            this.land();
-        }      
+    setVelocity(velocity) {
+        this.velocity = velocity;
+    }
+
+    updateVelocity(x, y, maxSpeed) {
+        let _x = this.velocity.x + x >= maxSpeed ?
+            maxSpeed : this.velocity.x + x <= -maxSpeed ?
+            -maxSpeed : this.velocity.x + x;
+
+        let _y = this.velocity.y + y >= maxSpeed ?
+            maxSpeed : this.velocity.y + y <= -maxSpeed ?
+            -maxSpeed : this.velocity.y + y;
+        
+        if (_x > 0) {
+            _x = Math.floor(_x);
+        } else {
+            _x = Math.ceil(_x);
+        }
+
+        if (_y > 0) {
+            _y = Math.floor(_y);
+        } else {
+            _y = Math.ceil(_y);
+        }
+
+        this.velocity.x = _x;
+        this.velocity.y = _y;
+    }
+
+    checkCollision(r1, r2) {
+        let result = r1.checkCollision(r2);
+
+        if (!result) return false;
+
+        r1.position.x -= result.normal.x * result.depth;
+        r1.position.y -= result.normal.y * result.depth;
+        return true;
+    }
+
+    handleCollisions(colliders) {
+        if (!colliders || colliders.length < 1) return;
+        this.isGrounded = false;
+        for (let collider of colliders) {
+
+            if (this.checkCollision(this.rect, collider.rect)) {
+                collider.colorHex = '#ffffff';
+                console.log(`${this.ID} colliding with ${collider.ID}`);
+            } else {
+                collider.colorHex = '#000fff';
+            }
+        }
+    }
+
+    update(timeDelta) {
+        this.velocity.x *= timeDelta;
+        this.velocity.y *= timeDelta;
+
+        if (this.useGravity && !this.isGrounded) {
+            this.velocity.y += this.gravity;
+        }
+
+        this.setPosition(new Point2d(
+            this.rect.position.x + this.velocity.x,
+            this.rect.position.y + this.velocity.y));
+    }
+}
+
+class Ting extends Physics2d {
+    constructor(rect, colorHex, mass=1, gravity=null) {
+        super(rect, mass, gravity);
+        this.colorHex = colorHex;
+        this.isRunning = false;
+        this.maxJumpCount = 2;
+        this.jumpCount = 0;
     }
 
     jump() {
-        if (this.jumpCount < this.maxJumpCount) {
-            this.isGrounded = false;
-            this.velocity.y = -JUMP;
-        }
+        // if (this.isGrounded)
+        //     this.jumpCount = 1;
+        // else
+        //     this.jumpCount++;
+        // if (this.jumpCount > this.maxJumpCount) return;
+        if (!this.isGrounded) return;
+        this.isGrounded = false;
+        this.updateVelocity(0, -JUMP, MAXSPEED);
+    }
 
-        this.jumpCount++;
+    run(value) {
+        this.isRunning = true;
+        this.updateVelocity(MOVE * Math.sign(value), 0, MAXSPEED);
     }
     
-    land() {
-        this.isGrounded = true;
-        this.jumpCount = 0;
-        this.velocity.y = 0;
+    stop() {
+        this.isRunning = false;
     }
-    
-    crouch() {
-        this.rect.position.y += this.rect.height/2;
-        this.rect.height /= 2;
+
+    draw(context) {
+        context.fillStyle = this.colorHex;
+        context.fillRect(this.rect.position.x, this.rect.position.y, this.rect.width, this.rect.height);
+    }
+
+    update(timeDelta) {
+        super.update(timeDelta);
+        if (!this.isRunning && this.velocity.x != 0) {
+            this.updateVelocity(Math.round(this.velocity.x * .06 * -Math.sign(this.velocity.x)), 0, MAXSPEED);
+        }
     }
 }
 
 class PunchyKicky extends EngineBase {
     constructor() {
-        super('PunchyKicky', 'PunchyKickyContainer')
-        this.playerColliderIndexes = [];
-        this.previousDirKey = '';
-        this.gameObjects = [];
+        super('PunchyKicky', 'PunchyKickyContainer');
+        this.player = new Ting(new Rect(
+            new Point2d(66,16), 16, 16), 
+            '#ff00ff',
+            10,
+            1);
+        this.platform = new Ting(new Rect(
+            new Point2d(50,100), 100, 18), 
+            '#000fff',
+            1000000,
+            null);
+        this.platform2 = new Ting(new Rect(
+            new Point2d(200,75), 100, 18),
+            '#000fff', 
+            1000000,
+            null);
+        
+        this.pointerText = new Text('( , )');
+        this.frameRateText = new Text('');
+
         this.pointerhandler = new Pointerhandler(this.canvas);
+        this.pointerhandler.pubsub.subscribe('pointermove', (ev) => {
+            let click = this.getClick(ev.offsetX, ev.y);
+            this.pointerText.value = `(${click.x},${click.y})`;
+
+            this.player.setPosition(click);
+        });
+        this.pointerhandler.pubsub.subscribe('pointerenter', (ev) => {
+            let click = this.getClick(ev.offsetX, ev.y);
+            this.pointerText.value = `(${click.x},${click.y})`;
+            this.player.setPosition(click);
+
+        });
+        this.pointerhandler.pubsub.subscribe('pointerleave', (ev) => {
+            this.pointerText.value = '( , )';
+        });
+
         this.keyboardhandler = new Keyboardhandler(window);
         this.keyboardhandler.pubsub.subscribe('keydown', (ev) => {
             switch (ev.key) {
                 case 'w':
                     this.player.jump();
-                    this.previousDirKey = ev.key;
                 break;
 
                 case 'a':
-                    if (!this.player.isGrounded)
-                        return; 
-                    this.player.velocity.x = -SPEED;
-                    this.previousDirKey = ev.key;
+                    this.player.run(-1);
                 break;
-
+                
                 case 's':
-                    this.player.crouch();
-                    this.previousDirKey = ev.key;
+                    
                 break;
-
+                
                 case 'd':
-                    if (!this.player.isGrounded) 
-                        return; 
-                    this.player.velocity.x = SPEED;
-                    this.previousDirKey = ev.key;
+                    this.player.run(1);
                 break;
             }
         });
@@ -82,57 +197,44 @@ class PunchyKicky extends EngineBase {
         this.keyboardhandler.pubsub.subscribe('keyup', (ev) => { 
             switch (ev.key) {
                 case 'w':
-                    if (this.player.isAffectedByGravity)
-                        return;
-                    this.player.velocity.y = 0;
-                break;
-
-                case 's':
-                    this.player.rect.position.y += this.player.rect.height*2;
-                    this.player.rect.height *= 2;
-                    this.player.velocity.y = 0;
+                    
                 break;
 
                 case 'a':
-                    if (this.previousDirKey === 'd') {
-                        return;
-                    }
-                    this.player.velocity.x = 0;
+                    this.player.stop();
+                break;
+
+                case 's':
+                    
                 break;
 
                 case 'd':
-                    if (this.previousDirKey === 'a') {
-                        return;
-                    }
-                    this.player.velocity.x = 0;
+                    this.player.stop();
                 break;
             }
         });
-
-        //this.player = new Fighter(new Rect(new Vector2d(0,0), 32, 32), new Fill('#fff'));
-        this.box1 = new FillPhysicsRect(new Rect(new Vector2d(0,0), 16, 16), new Fill('#fff'));
-       this.box2 = new FillPhysicsRect(new Rect(new Vector2d(0,32), 16, 16), new Fill('#aaa'));
-
-       //console.log(this.box2);
-       // this.ball1 = new FillPhysicsCircle(new Circle(new Vector2d(16,8), 8), 1, 0.7, '#fff');
-       // this.ball2 = new FillPhysicsCircle(new Circle(new Vector2d(16,32), 16), 2, 0.7, '#fff');
     }
     
     run() {
-        super.run();     
-        // this.player.update(this.tickDelta/60, this.context, this.gameRect);
-        // for(let index=0; index<this.gameObjects.length; index++) {
-            //     this.gameObjects[index].update(this.tickDelta/60, this.context, this.gameRect);
-            // }
-            
-        this.box1.update(this.tickDelta/60, this.context, this.gameRect);
-        this.box2.update(this.tickDelta/60, this.context, this.gameRect);
+        super.run();
+        let fps = this.getFps();
+        this.platform.draw(this.context);
+        this.platform2.draw(this.context);
+        
+        this.player.update(fps/1000);
+        this.player.handleCollisions([this.platform, this.platform2]);
+        this.player.draw(this.context);
+        
+        this.frameRateText.value = fps;
+        this.frameRateText.draw(this.context,
+            new Point2d(
+                this.DEFAULT_CANVAS_WIDTH - 75, 
+                this.DEFAULT_CANVAS_HEIGHT - 24));
 
-        // this.ball1.update(this.tickDelta/60, this.context, this.gameRect);
-        // this.ball2.update(this.tickDelta/60, this.context, this.gameRect);
-       
-        this.box1.rect2dCollision(this.box2);
-        // this.ball2.circle2dCollision(this.ball1);
+        this.pointerText.draw(this.context, 
+            new Point2d(
+                this.DEFAULT_CANVAS_WIDTH - 75, 
+                this.DEFAULT_CANVAS_HEIGHT - 10));
     }
 }
 

@@ -1,19 +1,27 @@
-import { Rect, Vector2d } from '../../lib/gaming/common'; 
+import { Point2d } from '../../lib/gaming/common';
+import Rect from '../../lib/gaming/Rect';
 import EngineRunnerBase from './EngineRunnerBase';
 
 class EngineBase extends EngineRunnerBase {
-    constructor(name, containerID) {
+    constructor(name, containerID, canvasWidth=300, canvasHeight=150) {
         super(name, containerID);
-        this.DEFAULT_CANVAS_WIDTH = 300;
-        this.DEFAULT_CANVAS_HEIGHT = 150;
+        this.DEFAULT_CANVAS_WIDTH = canvasWidth;
+        this.DEFAULT_CANVAS_HEIGHT = canvasHeight;
         
         this.canvas = document.createElement('canvas');
         this.container.append(this.canvas);
         console.log(this.canvas.clientWidth, this.canvas.clientHeight);
         this.isHorizontal = this.canvas.clientWidth > this.canvas.clientHeight;
-        this.gameRect = new Rect(new Vector2d(0, 0), this.canvas.clientWidth, this.canvas.clientHeight);
+        this.gameRect = new Rect(new Point2d(0, 0), this.canvas.clientWidth, this.canvas.clientHeight);
         console.log(this.gameRect.width, this.gameRect.height);
         this.context = this.canvas.getContext('2d');
+    }
+
+    getClick(x, y) {
+        //May have to take styling into account
+        return new Point2d(
+            Math.round(x - this.container.offsetLeft),
+            Math.round(y - this.container.offsetTop));
     }
 
     run() {

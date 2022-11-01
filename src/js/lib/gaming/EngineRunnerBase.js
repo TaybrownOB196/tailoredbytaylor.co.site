@@ -15,6 +15,10 @@ class EngineRunnerBase {
         this.run = this.run.bind(this);
     }
 
+    getFps() {
+        return Math.round(1/(this.tickDelta/1000));
+    }
+
     run() {
         let newTick = new Date().getTime();
         this.tickDelta = newTick - this.ticks;

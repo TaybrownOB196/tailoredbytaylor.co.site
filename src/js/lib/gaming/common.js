@@ -1,3 +1,5 @@
+import Vector2d from "./Vector2d";
+
 const gravity = 9.8;
 const dragValue = 0.47;
 const fluidDensity = 1.29;
@@ -78,48 +80,24 @@ class LayeredCanvas {
     }
 }
 
-class Vector2d {
+class Point2d {
     constructor(x,y) {
         this.x = x;
         this.y = y;
     }
 
-    static getLinearBezierVector(vector0, vector1, fraction) {
-        return new Vector2d(
-            vector0.x + (fraction * (vector1.x - vector0.x)),
-            vector0.y + (fraction * (vector1.y - vector0.y)));
+    getQuadrant() {
+        if (this.x == 0 && this.y == 0) return 0;
+        let val = Math.sign(this.x) + Math.sign(this.y);
+        if(val == 2) return 1;
+        else if (val == -2) return 3;
+        else {
+            return Math.sign(this.x) == -1 ? 2 : 4;
+        }
     }
 
-    static getQuadraticBezierVector(vector0, vector1, vector2, fraction) {
-        let v0p = Math.pow(1 - fraction, 2);
-        let v0 = new Vector2d(v0p * vector0.x, v0p * vector0.y);
-
-        let v1p = 2 * (1 - fraction) * fraction;
-        let v1 = new Vector2d(v1p * vector1.x, v1p * vector1.y);
-
-        let v2p = Math.pow(fraction, 2);
-        let v2 = new Vector2d(v2p * vector2.x, v2p * vector2.y);
-
-        return new Vector2d(
-            v0.x + v1.x + v2.x,
-            v0.y + v1.y + v2.y
-        );
-    }
-
-    static getQuadraticBezierVectorEnd(vector0, vector1, vector2, fraction) {
-        let v0p = Math.pow(1 - fraction, 2);
-        let v0 = new Vector2d(v0p * vector0.x, v0p * vector0.y);
-
-        let v1p = 2 * (1 - fraction) * fraction;
-        let v1 = new Vector2d(v1p * vector1.x, v1p * vector1.y);
-
-        let v2p = Math.pow(fraction, 2);
-        let v2 = new Vector2d(v2p * vector2.x, v2p * vector2.y);
-        
-        return new Vector2d(
-            v0.x + v1.x + v2.x,
-            v0.y + v1.y + v2.y
-        );
+    subtract(other) {
+        return new Point2d(other.x - this.x, other.y - this.y);
     }
 }
 
@@ -131,34 +109,14 @@ class Circle {
         this.area = (Math.PI * Math.pow(radius,2)) / 10000;
     }
 
-    contains(vector2d) {
+    contains(point2d) {
         return false;
     }
 }
 
-class Rect {
-    constructor(position, width, height) {
-        this.position = position;
-        this.width = width;
-        this.height = height;
-        this.area = width * height;
-    }
-
-    contains(vector2d) {
-        return this.position.x <= vector2d.x && vector2d.x <= this.position.x + this.width &&
-               this.position.y <= vector2d.y && vector2d.y <= this.position.y + this.height;
-    }
-
-    bottomRight() {
-        return new Vector2d(this.position.x + this.width, this.position.y + this.height);
-    }
-}
-
 class Gameobject {
-    constructor(position) {
+    constructor() {
         this.ID = IDGenerator.GetID();
-        this.position = position;
-        this.velocity = new Vector2d(0,0);
     }
 }
 
@@ -261,10 +219,10 @@ class PhysicsCircle2d extends Gameobject {
 					var colPointY = ((this.position.y * circle2d.circle.radius) + (circle2d.position.y * this.circle.radius)) / (this.circle.radius + circle2d.circle.radius);
 					
                     //stoping overlap 
-                    this.setPosition(new Vector2d(
+                    this.setPosition(new Point2d(
                         colPointX + this.circle.radius * (this.position.x - circle2d.position.x) / d,
                         colPointY + this.circle.radius * (this.position.y - circle2d.position.y) / d));
-                    circle2d.setPosition(new Vector2d(
+                    circle2d.setPosition(new Point2d(
 					    colPointX + circle2d.circle.radius * (circle2d.position.x - this.position.x) / d,
 					    colPointY + circle2d.circle.radius * (circle2d.position.y - this.position.y) / d));
 
@@ -309,16 +267,16 @@ class PhysicsCircle2d extends Gameobject {
 
         if(newX > gameRect.width - this.circle.radius){
             this.velocity.x *= this.e;
-            this.setPosition(new Vector2d(gameRect.width - this.circle.radius, this.position.y));
+            this.setPosition(new Point2d(gameRect.width - this.circle.radius, this.position.y));
         } if(newY > gameRect.height - this.circle.radius){
             this.velocity.y *= this.e;
-            this.setPosition(new Vector2d(this.position.x, gameRect.height - this.circle.radius));
+            this.setPosition(new Point2d(this.position.x, gameRect.height - this.circle.radius));
         } if(newX < this.circle.radius){
             this.velocity.x *= this.e;
-            this.setPosition(new Vector2d(this.circle.radius, this.position.y));
+            this.setPosition(new Point2d(this.circle.radius, this.position.y));
         } if(newY < this.circle.radius){
             this.velocity.y *= this.e;
-            this.setPosition(new Vector2d(this.position.x, this.circle.radius));
+            this.setPosition(new Point2d(this.position.x, this.circle.radius));
         }
     }
 }
@@ -370,10 +328,10 @@ class PhysicsRect2d extends Gameobject {
             var colPointY = ((this.position.y * rect.rect.height) + (rect.position.y * this.rect.height)) / (this.rect.height + rect.rect.height);
             
             //stoping overlap 
-            this.setPosition(new Vector2d(
+            this.setPosition(new Point2d(
                 (colPointX + this.rect.width * (this.position.x - rect.position.x) / d),
                 (colPointY + this.rect.height * (this.position.y - rect.position.y) / d)));
-            rect.setPosition(new Vector2d(
+            rect.setPosition(new Point2d(
                 (colPointX + rect.rect.width * (rect.position.x - this.position.x) / d),
                 (colPointY + rect.rect.height * (rect.position.y - this.position.y) / d)));
 
@@ -405,22 +363,22 @@ class PhysicsRect2d extends Gameobject {
         this.velocity.x += ax * timeDelta;
         this.velocity.y += ay * timeDelta;
         
-        this.setPosition(new Vector2d(
+        this.setPosition(new Point2d(
             this.rect.position.x + this.velocity.x,
             this.rect.position.y + this.velocity.y));
         
         if(this.rect.position.x > gameRect.width - this.rect.width){
             this.velocity.x *= e;
-            this.setPosition(new Vector2d(gameRect.width - this.rect.width, this.rect.position.y));
+            this.setPosition(new Point2d(gameRect.width - this.rect.width, this.rect.position.y));
         } if(this.rect.position.y > gameRect.height - this.rect.height){
             this.velocity.y *= e;
-            this.setPosition(new Vector2d(this.rect.position.x, gameRect.height - this.rect.height));
+            this.setPosition(new Point2d(this.rect.position.x, gameRect.height - this.rect.height));
         } if(this.rect.position.x < this.rect.width){
             this.velocity.x *= e;
-            this.setPosition(new Vector2d(0, this.rect.position.y));
+            this.setPosition(new Point2d(0, this.rect.position.y));
         } if(this.rect.position.y < this.rect.height){
             this.velocity.y *= e;
-            this.setPosition(new Vector2d(this.rect.position.x, this.rect.height));
+            this.setPosition(new Point2d(this.rect.position.x, this.rect.height));
         }
     }
 }
@@ -462,7 +420,6 @@ export {
     Gameobject,
     PhysicsRect2d,
     PhysicsCircle2d,
-    Rect,
     Circle,
     Fillobject,
     Fill,
@@ -470,5 +427,5 @@ export {
     FillPhysicsCircle,
     FillPhysicsRect,
     Spritesheet,
-    Vector2d,
+    Point2d,
 }

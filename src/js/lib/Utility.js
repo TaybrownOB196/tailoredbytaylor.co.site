@@ -1,4 +1,24 @@
 class Utility {
+    static shuffle(list) {
+        let toReturn = [];
+        
+        function _shuffle(_list, toReturn) {
+            if (_list.length === 1) {
+                toReturn.push(_list[0]);
+                return toReturn;
+            }
+
+            let index = GetRandomInt(_list.length);
+            toReturn.push(_list[index]);
+            _list[index] = null;
+
+            let _ = _list.filter(item => {return item !== null;});
+            return _shuffle(_, toReturn);
+        }
+
+        return _shuffle(list, toReturn);
+    }
+
     static GetRandomInt(max) {
         return Math.floor(Math.random() * max);
     }
