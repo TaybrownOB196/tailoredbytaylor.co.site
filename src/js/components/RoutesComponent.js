@@ -13,7 +13,7 @@ import FourInARowComponent from './games/FourInARow/FourInARowComponent';
 import TictactoeComponent from './games/Tictactoe/TictactoeComponent';
 import Projects from './routes/Projects';
 import ContentComponent from './ContentComponent';
-import PunchyKickyComponent from './games/PunchyKicky/PunchyKickyComponent';
+import SandboxComponent from './games/Sandbox/SandboxComponent';
 
 class RoutesComponent extends React.Component {
     constructor(props) {
@@ -36,7 +36,7 @@ class RoutesComponent extends React.Component {
                         <Route path='resume' element={<Resume />} />
                         <Route path='games' element={<CarouselComponent components={[<TictactoeComponent />, <FourInARowComponent />, <HangmanComponent getWord={this.getWord} />]} />} />
                         <Route path='misc' element={<Projects />} >
-                            <Route path='fighter' element={<PunchyKickyComponent />} />
+                            <Route path='sandbox' element={<SandboxComponent />} />
 
                         </Route>
                     </Route>

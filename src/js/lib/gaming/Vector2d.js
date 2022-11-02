@@ -17,6 +17,16 @@ class Vector2d {
         this.y -= vector1.y;
     }
 
+    multiply(vector1) {
+        this.x *= vector1.x;
+        this.y *= vector1.y;
+    }
+    
+    divide(vector1) {
+        this.x /= vector1.x;
+        this.y /= vector1.y;
+    }
+
     getPerpendicular() {
         let length = this.getLength();
         return new Vector2d(this.y/length, this.x/length);
@@ -26,10 +36,7 @@ class Vector2d {
         return Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2));
     }
 
-    getMagnitude() {
-        return this.getLength();
-    }
-
+    //Change length of vector to 1
     getNormalize() {
         let length = this.getLength();
         return new Vector2d(this.x/length, this.y/length);
@@ -49,6 +56,19 @@ class Vector2d {
         }
     }
 
+    static getDistance(vector0, vector1) {
+        let dx = vector0.x - vector1.x;
+        let dy = vector0.y - vector1.y;
+        return Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
+    }
+    
+    static getCross(vector0, vector1) {
+        return vector0.x * vector1.y - vector0.y * vector1.x;
+    }
+
+    //If return > 0 then vectors are facing the same direction
+    //If return = 0 then vectors are perpendicular
+    //If return < 0 then vectors are facing the opposite direction
     static getDotProduct(vector0, vector1) {
         return (vector1.x * vector0.x + vector1.y * vector0.y);
     }
@@ -61,38 +81,6 @@ class Vector2d {
         return new Vector2d(
             vector0.x + (fraction * (vector1.x - vector0.x)),
             vector0.y + (fraction * (vector1.y - vector0.y)));
-    }
-
-    static getQuadraticBezierVector(vector0, vector1, vector2, fraction) {
-        let v0p = Math.pow(1 - fraction, 2);
-        let v0 = new Vector2d(v0p * vector0.x, v0p * vector0.y);
-
-        let v1p = 2 * (1 - fraction) * fraction;
-        let v1 = new Vector2d(v1p * vector1.x, v1p * vector1.y);
-
-        let v2p = Math.pow(fraction, 2);
-        let v2 = new Vector2d(v2p * vector2.x, v2p * vector2.y);
-
-        return new Vector2d(
-            v0.x + v1.x + v2.x,
-            v0.y + v1.y + v2.y
-        );
-    }
-
-    static getQuadraticBezierVectorEnd(vector0, vector1, vector2, fraction) {
-        let v0p = Math.pow(1 - fraction, 2);
-        let v0 = new Vector2d(v0p * vector0.x, v0p * vector0.y);
-
-        let v1p = 2 * (1 - fraction) * fraction;
-        let v1 = new Vector2d(v1p * vector1.x, v1p * vector1.y);
-
-        let v2p = Math.pow(fraction, 2);
-        let v2 = new Vector2d(v2p * vector2.x, v2p * vector2.y);
-        
-        return new Vector2d(
-            v0.x + v1.x + v2.x,
-            v0.y + v1.y + v2.y
-        );
     }
 }
 

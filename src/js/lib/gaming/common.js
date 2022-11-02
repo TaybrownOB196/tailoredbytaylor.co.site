@@ -99,6 +99,28 @@ class Point2d {
     subtract(other) {
         return new Point2d(other.x - this.x, other.y - this.y);
     }
+
+    static getQuadraticBezierVector(point0, point1, point2, fraction) {
+        let v0p = Math.pow(1 - fraction, 2);
+        let v0 = new Point2d(v0p * point0.x, v0p * point0.y);
+
+        let v1p = 2 * (1 - fraction) * fraction;
+        let v1 = new Point2d(v1p * point1.x, v1p * point1.y);
+
+        let v2p = Math.pow(fraction, 2);
+        let v2 = new Point2d(v2p * point2.x, v2p * point2.y);
+
+        return new Point2d(
+            v0.x + v1.x + v2.x,
+            v0.y + v1.y + v2.y
+        );
+    }
+
+    static getQuadraticBezierVectorEnd(point0, point1, fraction) {
+        return new Point2d(
+            (Math.pow(1-fraction, 2) * point0.x + 2 * fraction * (1-fraction) * fraction * point1.x)/Math.pow(-fraction, 2),
+            (Math.pow(1-fraction, 2) * point0.y + 2 * fraction * (1-fraction) * fraction * point1.y)/Math.pow(-fraction, 2));
+    }
 }
 
 class Circle {
@@ -428,5 +450,4 @@ export {
     FillPhysicsRect,
     Spritesheet,
     Point2d,
-    IDGenerator,
 }

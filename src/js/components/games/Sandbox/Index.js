@@ -4,13 +4,20 @@ import { Keyboardhandler, Pointerhandler } from './../../../lib/gaming/input';
 import Vector2d from '../../../lib/gaming/Vector2d';
 import Hud from '../../../lib/gaming/ui/Hud';
 import Rect from '../../../lib/gaming/Rect';
-import './../../../../sass/punchykicky.scss';
+import Utility from '../../../lib/Utility';
 
-import { Player, Platform } from './gameobjects';
+import './../../../../sass/sandbox.scss';
 
-class PunchyKicky extends EngineBase {
+import { Player, Platform, Cursor } from './gameobjects';
+
+//    cursor: none;
+//    cursor: wait;
+class Sandbox extends EngineBase {
     constructor() {
-        super('PunchyKicky', 'PunchyKickyContainer');
+        super('Sandbox', 'SandboxContainer');
+        
+        this.projectiles = [];
+        this.cursor = new Cursor(new Rect(new Point2d(0,0), 16, 16), '#00ff00');
         this.hud = new Hud(new Point2d(
             this.DEFAULT_CANVAS_WIDTH - 75, 
             this.DEFAULT_CANVAS_HEIGHT - 24),
@@ -20,8 +27,7 @@ class PunchyKicky extends EngineBase {
         this.player = new Player(new Rect(
             new Point2d(66,16), 16, 16), 
             '#ff00ff',
-            20,
-            1);
+            20);
         this.platform = new Platform(new Rect(
             new Point2d(50,100), 100, 18), 
             '#000fff');
@@ -33,19 +39,25 @@ class PunchyKicky extends EngineBase {
         this.frameRateText = new Text('');
 
         this.pointerhandler = new Pointerhandler(this.canvas);
+        this.pointerhandler.pubsub.subscribe('pointerdown', (ev) => {
+            let click = this.getMousePosition(ev.layerX, ev.layerY);
+            this.projectiles.push(this.player.attack(click));
+        });
         this.pointerhandler.pubsub.subscribe('pointermove', (ev) => {
-            let click = this.getClick(ev.layerX, ev.layerY);
-            this.hud.update({mse: `(${click.x},${click.y})`});
-            this.player.setPosition(click);
+            let msePos = this.getMousePosition(ev.layerX, ev.layerY);
+            this.hud.update({mse: `(${msePos.x},${msePos.y})`});
+            // this.player.setPosition(msePos);
+            this.cursor.setPosition(msePos);
         });
         this.pointerhandler.pubsub.subscribe('pointerenter', (ev) => {
-            let click = this.getClick(ev.x, ev.y);
-            this.hud.update({mse: `(${click.layerX},${click.layerY})`});
-            this.player.setPosition(click);
-
+            let msePos = this.getMousePosition(ev.x, ev.y);
+            this.hud.update({mse: `(${msePos.x},${msePos.y})`});
+            // this.player.setPosition(msePos);
+            this.cursor.setPosition(msePos);
         });
         this.pointerhandler.pubsub.subscribe('pointerleave', (ev) => {
             this.hud.update({mse: '( , )'});
+            this.cursor.setPosition(new Point2d(-10000, -10000));
         });
 
         this.keyboardhandler = new Keyboardhandler(window);
@@ -91,20 +103,14 @@ class PunchyKicky extends EngineBase {
         });
     }
     
-    handleCollisions(player, colliders) {
+    handleCollisions(player, colliders, resolution) {
+        
         if (!colliders || colliders.length < 1) return;
         player.isGrounded = false;
         for (let collider of colliders) {
             let result = player.rect.checkCollision(collider.rect);
-            if (result) {
-                player.rect.position.x -= result.normal.x * result.depth;
-                player.rect.position.y -= result.normal.y * result.depth;
-                if (player.rect.height + player.rect.position.y >= collider.rect.position.y) {
-                    player.isGrounded = true;
-                }
-                collider.colorHex = '#ffffff';
-            } else {
-                collider.colorHex = '#000fff';
+            if (resolution) {
+                resolution(result, player, collider);
             }
         }
     }
@@ -116,11 +122,46 @@ class PunchyKicky extends EngineBase {
         this.platform2.draw(this.context);
         
         this.player.update(fps/1000);
-        this.handleCollisions(this.player, [this.platform, this.platform2]);
+        this.handleCollisions(
+            this.player, 
+            [this.platform, this.platform2],
+            (result, player, collider) => {
+                if (result) {
+                    player.rect.position.x -= result.normal.x * result.depth;
+                    player.rect.position.y -= result.normal.y * result.depth;
+                    if (player.rect.height + player.rect.position.y >= collider.rect.position.y) {
+                        player.isGrounded = true;
+                    }
+                    collider.colorHex = '#ffffff';
+                } else {
+                    collider.colorHex = '#000fff';
+                }
+            });
         this.player.draw(this.context);
         this.hud.update({fps: fps});
         this.hud.draw(this.context);
+
+        this.cursor.draw(this.context);
+        this.handleCollisions(
+            this.cursor, 
+            this.projectiles,
+            (result, main, collider) => {
+                if (result) {
+                    collider.ticks = collider.speed;
+                    main.takeDamage(-20);
+                }
+            });
+
+        let newProjectiles = [];
+        for (let proj of this.projectiles) {
+            proj.update(this.tickDelta);            
+            proj.draw(this.context);
+            if (proj.isAlive()) {
+                newProjectiles.push(proj);
+            }
+        }
+        this.projectiles = newProjectiles;
     }
 }
 
-export default PunchyKicky;
+export default Sandbox;

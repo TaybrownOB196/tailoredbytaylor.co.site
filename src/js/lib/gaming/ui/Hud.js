@@ -12,7 +12,6 @@ class Hud {
         this.textDict = initialDisplay;
         this.fontHeight = (height / Object.keys(initialDisplay).length - 1) - PADDINGY;
         this.font = `${this.fontHeight}px Arial`;
-        console.log(initialDisplay, this.font)
         for (let key in initialDisplay) {
             this.textDict[key] = new Text(initialDisplay[key], this.font, this.colorHex);
         }

@@ -1,13 +1,12 @@
 import React from 'react';
 import { Link, Outlet } from "react-router-dom";
-import Utility from '../../lib/Utility';
 
 class Projects extends React.Component {
     constructor(props) {
         super(props);
 
         this.links = [
-            { ref: 'fighter', text: 'Fighter' }
+            { ref: 'sandbox', text: 'Sandbox' }
             
         ];
     }

@@ -17,7 +17,7 @@ class EngineBase extends EngineRunnerBase {
         this.context = this.canvas.getContext('2d');
     }
 
-    getClick(x, y) {
+    getMousePosition(x, y) {
         //May have to take styling into account
         return new Point2d(
             Math.round(x - this.container.offsetLeft),

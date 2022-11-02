@@ -1,8 +1,9 @@
 import Vector2d from './Vector2d';
-import { Point2d } from './common';
+import { Point2d, Gameobject } from './common';
 
-class PhysicsRect2d {
+class PhysicsRect2d extends Gameobject {
     constructor(rect, mass=1, gravity=null) {
+        super();
         this.rect = rect;
         this.mass = mass;
         this.velocity = new Vector2d(0,0);

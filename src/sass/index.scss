@@ -72,16 +72,16 @@ p {
 
 .keypad {
     display: grid;
-    row-gap: 2%;
+    row-gap: .5rem;
     place-items: center;
     
     div {     
         border: 1px solid black;
         /* padding: 8px; */
-        min-width: 1.75rem;
+        min-width: 1.5rem;
         /* width: 2rem; */
         /* text-align: center; */
-        height: 1.75rem;
+        height: 1.5rem;
         display: flex;
         justify-content: center;
         align-items: center;
@@ -110,7 +110,7 @@ p {
 .alphabetpad {
     .keypad {
         grid-template-columns: 12.5% 12.5% 12.5% 12.5% 12.5% 12.5% 12.5% 12.5%;
-        width: 20rem;
+        width: 17rem;
     }
 }
 
