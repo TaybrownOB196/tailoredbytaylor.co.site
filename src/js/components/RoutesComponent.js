@@ -16,6 +16,8 @@ import Projects from './routes/Projects';
 import ContentComponent from './ContentComponent';
 import SandboxComponent from './games/Sandbox/SandboxComponent';
 import DeckComponent from './games/DeckComponent';
+import UserInfoComponent from './forms/UserInfoComponent';
+import UserLoginComponent from './forms/UserLoginComponent';
 
 class RoutesComponent extends React.Component {
     constructor(props) {
@@ -38,6 +40,8 @@ class RoutesComponent extends React.Component {
                         <Route path='resume' element={<Resume />} />
                         <Route path='games' element={<CarouselComponent components={[<MatchingGameComponent colCount={6} rowCount={6} />, <TictactoeComponent />, <FourInARowComponent />, <HangmanComponent getWord={this.getWord} />]} />} />
                         <Route path='misc' element={<Projects />} >
+                            <Route path='userform' element={<UserInfoComponent id='userInfoForm' formID='userInfoForm' submitUrl='https://jsonplaceholder.typicode.com/posts' />} />
+                            <Route path='loginform' element={<UserLoginComponent id='loginForm' formID='loginForm' submitUrl='https://jsonplaceholder.typicode.com/posts' />} />
                             <Route path='sandbox' element={<SandboxComponent />} />
                             <Route path='deck' element={<DeckComponent />} />
 

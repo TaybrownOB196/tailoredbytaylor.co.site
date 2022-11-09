@@ -17,7 +17,7 @@ class SandboxComponent extends React.Component {
         return (
             <div id='SandboxComponent'>
                 <div id='SandboxContainer'></div>
-                <button id='SandboxContainer-Start' onClick={this.onClickStart}>Start</button>
+                <button id='SandboxContainer-Start' onClick={this.onClickStart}>Start Simulation</button>
             </div>
         )
     }

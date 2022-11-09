@@ -14,7 +14,11 @@ class UserLogin extends Baseform {
         };
     }
 
-    OnSucess(res) { console.log(res); }
+    OnSucess(res) {         
+        alert(
+`Welcome, ${this.fieldValueOrNull('userName')}!
+DISCLAIMER: No data has been captured, purely for simulation`); 
+    }
 }
 
 export default UserLogin;

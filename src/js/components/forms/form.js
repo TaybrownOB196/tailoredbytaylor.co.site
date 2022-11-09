@@ -33,7 +33,7 @@ class Baseform {
         console.log(payload);
         if (payload) {
             //Concrete logic goes here for basic submission
-            this.options.body = payload;
+            this.options.body = JSON.stringify(payload);
             console.log(this.options);
             fetch(this.submitUrl, this.options)
                 .then((res) => this.OnSucess(res))

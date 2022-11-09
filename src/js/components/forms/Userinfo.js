@@ -24,7 +24,11 @@ class UserInfo extends Baseform {
         };
     }
 
-    OnSucess(res) { console.log(res); }
+    OnSucess(res) {
+        alert(
+`${this.fieldValueOrNull('firstName')}, Thank You for your submission!
+DISCLAIMER: No data has been captured, purely for simulation`); 
+    }
 }
 
 export default UserInfo;
