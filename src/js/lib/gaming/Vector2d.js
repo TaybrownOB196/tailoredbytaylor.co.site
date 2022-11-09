@@ -21,10 +21,20 @@ class Vector2d {
         this.x *= vector1.x;
         this.y *= vector1.y;
     }
+
+    multiplyScalar(scalar) {
+        this.x *= scalar;
+        this.y *= scalar;
+    }
     
     divide(vector1) {
         this.x /= vector1.x;
         this.y /= vector1.y;
+    }
+
+    divideScalar(scalar) {
+        this.x /= scalar;
+        this.y /= scalar;
     }
 
     getPerpendicular() {

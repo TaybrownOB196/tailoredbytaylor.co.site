@@ -3,6 +3,65 @@ $shade-1: #B6B7C7;
 $shade-2: #63678B;
 $shade-3: #2D3155;
 
+#cardhand-container {
+    display: flex;
+    width: 500px;
+    overflow-x: scroll;
+}
+
+#deck-container {
+    display: flex;
+    align-content: center;
+    justify-content: center;
+
+    #deckback {
+        display: flex;
+        align-content: center;
+        justify-content: center;
+        align-items: center;
+        background-color: orange;
+    }
+}
+
+.card {
+    width: 80px;
+    height: 112px;
+    
+
+    &:hover {
+        border: 2px solid red;
+    }
+    span {
+        position: relative;
+
+        &:first-child {
+            top: 24px;
+            left: 6px;
+            // left: 10px;
+        }
+
+        &:last-child {
+            top: 71px;
+            left: 41px;
+            // left: 54px;
+        }
+    }
+
+    span.adjustment {
+        &:first-child {
+            left: 10px;
+        }
+        &:last-child {
+            left: 54px;
+        }
+    }
+}
+
+.clubs { background-image: url('../png/games/clubs_base.png'); }
+.hearts { background-image: url('../png/games/hearts_base.png'); }
+.diamonds { background-image: url('../png/games/diamonds_base.png'); }
+.spades { background-image: url('../png/games/spades_base.png'); }
+
 body {
     background-color: $shade-1;
 }

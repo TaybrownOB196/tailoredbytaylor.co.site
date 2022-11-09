@@ -1,4 +1,48 @@
 class Utility {
+    static GetRandomInt(max) {
+        return Math.floor(Math.random() * max);
+    }
+
+    static getRandomIntInclusive(min, max) {
+        min = Math.ceil(min);
+        max = Math.floor(max);
+        return Math.floor(Math.random() * (max - min + 1) + min);
+    }
+
+    static range(end, start=0, step=1) {
+        let toReturn = [];
+        for(let idx=start; idx<end; idx+=step) {
+            toReturn.push(idx);
+        }
+
+        return toReturn;
+    }
+
+    static getRandomColors(count=1) {
+        let chars = ['A', 'B', 'C', 'D', 'E', 'F'];
+        let nums = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+        function _getColorComponentValue() {
+            if (Utility.getRandomIntInclusive(0,1)) {
+                return chars[Utility.GetRandomInt(chars.length)];
+            } else {
+                return nums[Utility.GetRandomInt(nums.length)];
+            }
+        }
+
+        let toReturn = [];
+        
+        for(let idx=0; idx<count; idx++) {
+            let color = '#';
+            for(let cIdx=0; cIdx<6; cIdx++) {
+                color += _getColorComponentValue();
+            }
+            toReturn.push(color);
+        }
+
+
+        return toReturn;
+    }
+
     static shuffle(list) {
         let toReturn = [];
         
@@ -8,7 +52,7 @@ class Utility {
                 return toReturn;
             }
 
-            let index = GetRandomInt(_list.length);
+            let index = Utility.GetRandomInt(_list.length);
             toReturn.push(_list[index]);
             _list[index] = null;
 
@@ -19,18 +63,9 @@ class Utility {
         return _shuffle(list, toReturn);
     }
 
-    static GetRandomInt(max) {
-        return Math.floor(Math.random() * max);
-    }
     
     static GetAlphabet() {
         return ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
-    }
-
-    static getRandomIntInclusive(min, max) {
-        min = Math.ceil(min);
-        max = Math.floor(max);
-        return Math.floor(Math.random() * (max - min + 1) + min);
     }
 
     static RemoveAllInstances(list, target) {
