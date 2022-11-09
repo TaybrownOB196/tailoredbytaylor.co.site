@@ -76,7 +76,7 @@ class HangmanComponent extends React.Component {
     render() {
         let self = this;
         return (
-            <div id='hangman' className='opaque-bg-container' key={this.state.key} >
+            <div id='hangman' className='opaque-bg-container reactgame' key={this.state.key} >
                 <div className='opaque-bg'></div>
                 <div id='view'>
                     <div id='gallows'>

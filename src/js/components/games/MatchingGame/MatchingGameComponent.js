@@ -90,7 +90,7 @@ class MatchingGameComponent extends React.Component {
 
     render() {
         return (
-            <div id='matchinggame' className='opaque-bg-container' key={this.state.key} >
+            <div id='matchinggame' className='opaque-bg-container reactgame' key={this.state.key} >
                 <div className='opaque-bg'></div>
                 <GamegridComponent
                     key={this.state.key} 

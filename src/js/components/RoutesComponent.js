@@ -34,7 +34,7 @@ class RoutesComponent extends React.Component {
             <Router id='router'>
                 <Routes id='routes'>
                     <Route id='home' path='/' element={<ContentComponent />}>
-                        <Route path='about' element={<About />} />
+                        <Route index path='/' element={<About />} />
                         <Route path='resume' element={<Resume />} />
                         <Route path='games' element={<CarouselComponent components={[<MatchingGameComponent colCount={6} rowCount={6} />, <TictactoeComponent />, <FourInARowComponent />, <HangmanComponent getWord={this.getWord} />]} />} />
                         <Route path='misc' element={<Projects />} >

@@ -7,7 +7,7 @@ function ContentComponent() {
     return (
         <>
             <RouterLinkNavbarComponent links={[
-                { ref: 'about', text: 'About', class: '' }
+                { ref: '', text: 'About', class: '' }
                 ,{ ref: 'resume', text: 'Resume', class: '' }
                 ,{ ref: 'games', text: 'Games', class: '' }
                 ,{ ref: 'misc', text: 'Misc.', class: '' }

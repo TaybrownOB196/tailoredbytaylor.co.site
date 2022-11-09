@@ -9,6 +9,12 @@ $shade-3: #2D3155;
     overflow-x: scroll;
 }
 
+.reactgame {
+    height: 500px;
+    display: flex;
+    justify-content: center;
+}
+
 #deck-container {
     display: flex;
     align-content: center;
@@ -132,7 +138,6 @@ body {
         align-items: center;
         grid-template-columns: 10% 80% 10%;
         width: 80%;
-        height: 80%;
         margin-top: .5rem;
 
         .carousel-right,.carousel-left {
