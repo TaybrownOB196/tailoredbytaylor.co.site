@@ -10,6 +10,20 @@ class ParallaxBase {
 
     update(timeDelta) {}
 
+    // update(delta) {
+    //     let speedDelta = Math.round(delta * this.speed);
+    //     let _height = this.rects[0].height;
+    //     let otherIndex = this.index == 0 ? 1 : 0;
+    //     if (this.rects[this.index].position.y >= _height) {
+    //         this.rects[this.index].position.y = this.rects[otherIndex].position.y - _height;
+    //         this.index = otherIndex;
+    //         this.rects[otherIndex].position.y += speedDelta;
+    //     } else {
+    //         this.rects[this.index].position.y += speedDelta;
+    //         this.rects[otherIndex].position.y = this.rects[this.index].position.y - this.rects[otherIndex].height;
+    //     }
+    // }
+
     draw(context) {
         this.sheet.draw(context, this.rect, this.clipRect);
     }

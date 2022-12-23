@@ -1,0 +1,16 @@
+#SITComponent {
+    display: flex;
+    justify-content: center;
+    
+    #SITContainer {
+        display: flex;
+        justify-content: center;
+    }
+    
+    canvas {
+        background-color: black;
+        image-rendering: pixelated;
+        width: 150px;
+        height: 300px;
+    }
+}
