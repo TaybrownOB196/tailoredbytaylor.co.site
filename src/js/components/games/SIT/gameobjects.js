@@ -3,9 +3,17 @@ import PhysicsRect2d from '../../../lib/gaming/PhysicsRect2d';
 import Vector2d from '../../../lib/gaming/Vector2d';
 import Rect from '../../../lib/gaming/Rect';
 
-const VehicleDIM = {w: 32, h: 32};
-const RoadDIM = {w: 192, h: 192};
-const RoadPOS = {x: 60, y: 0};
+class Dashboard {
+    constructor(rect, color) {
+        this.rect = rect;
+        this.color = color;
+    }
+
+    draw(context, spriteSheet) {
+        context.fillStyle = this.color;
+        context.fillRect(this.rect.position.x, this.rect.position.y, this.rect.width, this.rect.height);
+    }
+}
 
 class Vehicle extends PhysicsRect2d {
     constructor(rect, clipRect, lane = 1, laneChangeCooldown = 1000) {
@@ -41,6 +49,24 @@ class Vehicle extends PhysicsRect2d {
     }
 }
 
+class NpcVehicle extends Vehicle {
+    constructor(rect, clipRect, lane, speed) {
+        super(rect, clipRect, lane);
+        this.speedIndex = speed;
+    }
+
+    update(tickDelta, road) {
+        super.update(tickDelta);
+        let yMod = road.speeds[this.speedIndex];
+        if (road.speedIndex < this.speedIndex)
+            yMod *= -1;
+        else if (road.speedIndex == this.speedIndex)
+            yMod = 0;
+
+        this.rect.position.y += yMod;
+    }
+}
+
 class Road extends Gameobject {
     constructor(rect, laneCount=3, stripeWidth=8, stripeLength=16, stripeGap=16, stripeColor='#FFFFFF') {
         super();
@@ -54,7 +80,7 @@ class Road extends Gameobject {
         this.rects = [];
         this.rects.push(rect);
         this.rects.push(new Rect(new Vector2d(rect.position.x, rect.position.y - rect.height), rect.width, rect.height));
-        this.speedIndex = 4;
+        this.speedIndex = 1;
         // this.speeds = [0, 1, 2, 3, 4];
         this.speeds = [0, .5, 1, 1.5, 2];
         this.stripeYOffset = 0;
@@ -63,7 +89,7 @@ class Road extends Gameobject {
     }
 
     update(delta) {
-        let _height = this.rects[0].height;
+        let _height = this.getHeight();
         let otherIndex = this.rectsIndex == 0 ? 1 : 0;
         if (this.rects[this.rectsIndex].position.y > _height) {
             this.rects[this.rectsIndex].position.y = this.rects[otherIndex].position.y - _height;
@@ -103,7 +129,7 @@ class Road extends Gameobject {
 
     getSpeed() { return this.speeds[this.speedIndex]; }
     getHeight() { return this.rects[0].height; }
-    getWidth() { return this.rects[0].width * .5; }
+    getWidth() { return this.rects[0].width; }
 
     increaseSpeed() { this.changeSpeed(this.speedIndex + 1); }
     decreaseSpeed() { this.changeSpeed(this.speedIndex - 1); }
@@ -113,29 +139,31 @@ class Road extends Gameobject {
         this.speedIndex = speed;
     }
 
-    getLaneWidth() { return (this.getWidth() * .5) / this.laneCount; }
-    getLane(pos) {
+    getLaneWidth() { return this.getWidth() / this.laneCount; }
+    getLane(posX) {
         let width = this.getWidth();
+        // console.log(width);
+        console.log(posX);
         let laneWidth = this.getLaneWidth();
         let idx = 1;
-        if (pos.x < 0) {
+        if (posX < 0) {
             return null;
         }
         while(laneWidth * (idx-1) < width && idx <= this.laneCount) {
-            console.log(`compare ${pos.x} [${laneWidth * (idx - 1)},${laneWidth * idx}]`);
-            if (pos.x >= laneWidth * (idx - 1) && pos.x <= laneWidth * idx) {
+            console.log(`compare ${posX} [${laneWidth * (idx - 1)},${laneWidth * idx}]`);
+            if (posX >= laneWidth * (idx - 1) && posX <= laneWidth * idx) {
                 break;
             } else {
                 idx++;
             }
         }
 
-        return idx == 0 ? null : idx;
+        return idx == 0 ? null : idx > this.laneCount ? this.laneCount : idx;
     }
 }
 
 export {
-    Vehicle,
+    Dashboard,
     Road, 
-    RoadDIM, RoadPOS, VehicleDIM
+    Vehicle, NpcVehicle
 }
