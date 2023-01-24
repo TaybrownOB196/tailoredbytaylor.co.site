@@ -1,11 +1,12 @@
 import EngineBase from '../../../lib/gaming/EngineBase';
-import { Text, Point2d, Spritesheet } from '../../../lib/gaming/common';
+import Utility from '../../../lib/Utility';
+import { Point2d, Spritesheet } from '../../../lib/gaming/common';
 import { Keyboardhandler, Pointerhandler } from './../../../lib/gaming/input';
 import Vector2d from '../../../lib/gaming/Vector2d';
-import Hud from '../../../lib/gaming/ui/Hud';
 import Rect from '../../../lib/gaming/Rect';
 
-import { Dashboard, Road, Vehicle, NpcVehicle } from './gameobjects';
+import Hud from '../../../lib/gaming/ui/Hud';
+import { Dashboard, Road, PlayerVehicle, NpcVehicle } from './gameobjects';
 
 import './../../../../sass/sit.scss';
 import spritesheet from './../../../../png/cars.png'
@@ -16,12 +17,13 @@ class SIT extends EngineBase {
         this.scaleW = this.DEFAULT_CANVAS_WIDTH/this.canvas.clientWidth;
         this.scaleH = this.DEFAULT_CANVAS_HEIGHT/this.canvas.clientHeight;
 
+        this.spawnVehicle = this.spawnVehicle.bind(this);
         let roadW = this.canvas.clientWidth * .7;
         let roadH = this.canvas.clientHeight * .8;
-        let stripeWidth = 8;
+        let stripeWidth = 4;
         let laneCount = 3;
-        this.xOffset = Math.ceil(this.canvas.clientWidth - roadW);
-
+        this.xOffset = Math.ceil((this.canvas.clientWidth - roadW * this.scaleW) / 2);
+        this.spawnTimerIntervalCallback = setInterval(this.spawnVehicle, 5000);
         this.isDriving = false;
         this.speedIndex = 0;
         this.spritesheet = new Spritesheet(spritesheet);
@@ -30,18 +32,17 @@ class SIT extends EngineBase {
                 new Vector2d(this.xOffset, 0), 
                 roadW * this.scaleW, 
                 roadH * this.scaleH), 
-            laneCount, 
-            stripeWidth);
+            laneCount,
+            stripeWidth * this.scaleW);
         
-        this.vehicleDim = Math.ceil(this.road.getLaneWidth()) - stripeWidth;
-        // let startX = ((this.canvas.clientWidth - roadW) * this.scaleW) - stripeWidth;
+        this.vehicleDim = Math.ceil(this.road.getLaneWidth()) - this.road.stripeWidth;
         let lane = 1;
-        let startX = this.xOffset * this.scaleW + 
-            this.road.getLaneWidth() * this.scaleW * (lane - 1) - 
-            (this.vehicleDim / 2) * this.scaleW - 
-            stripeWidth * this.scaleW;
+        let startX = this.xOffset + 
+            this.road.getLaneWidth() * this.scaleW * (lane) - 
+            this.vehicleDim * this.scaleW - 
+            this.road.stripeWidth;
         let startY = roadH * this.scaleH - this.vehicleDim * this.scaleH;
-        this.player = new Vehicle(
+        this.player = new PlayerVehicle(
             new Rect(
                 new Vector2d(startX, startY), 
                 this.vehicleDim * this.scaleW, 
@@ -56,14 +57,13 @@ class SIT extends EngineBase {
                 new Vector2d(this.xOffset, this.road.getHeight()),
                 roadW * this.scaleW, 
                 (this.canvas.clientHeight - roadH) * this.scaleH),
-                '#0F00F0');
+                '#8f563b');
 
         this.vehicles = [];
-        this.maxVehicles = 3;
+        this.maxVehicles = laneCount;
 
         this.hud = new Hud(new Point2d(
-            this.DEFAULT_CANVAS_WIDTH - 75, 
-            this.DEFAULT_CANVAS_HEIGHT - 24),
+            this.xOffset, this.road.getHeight()),
             50,
             50,
             { fps: '', mse: '', kbi: '', spd: this.road.speedIndex});
@@ -72,6 +72,7 @@ class SIT extends EngineBase {
         this.pointerhandler.pubsub.subscribe('pointerdown', (ev) => {
             let msePos = this.getMousePosition(ev.layerX, ev.layerY);
             this.isDriving = true;
+            this.handleMove(msePos);
         });
         this.pointerhandler.pubsub.subscribe('pointerup', (ev) => {
             let msePos = this.getMousePosition(ev.layerX, ev.layerY);
@@ -94,15 +95,8 @@ class SIT extends EngineBase {
         this.keyboardhandler = new Keyboardhandler(window);
         this.keyboardhandler.pubsub.subscribe('keydown', (ev) => {
             this.hud.update({kbi: ev.key});
-            if (!this.isDriving) return;
-            switch (ev.key) {
-                case 'e':
-                    this.spawnVehicle();
-                break;
-            }
         });
     }
-    
 
     getMousePosition(x, y) {
         let t = super.getMousePosition(x,y);
@@ -112,7 +106,7 @@ class SIT extends EngineBase {
     getSpeedSection(pos) {
         //TODO: Fix scaling here
         let speedSectionHeight = this.getSpeedSectionHeight();
-        let index = this.road.speeds.length;
+        let index = this.road.speeds.length-1;
         for (let idx=0; idx<this.road.speeds.length; idx++) {
             if (pos.y >= speedSectionHeight * idx && pos.y <= speedSectionHeight * (idx + 1)) {
                 return index;
@@ -124,7 +118,7 @@ class SIT extends EngineBase {
         return 0;
     }
     drawSpeedSections() {
-        this.context.strokeStyle = '#00FF00';
+        this.context.strokeStyle = '#00ff00';
         let speedSectionHeight = this.getSpeedSectionHeight();
         for (let idx=0; idx<this.road.speeds.length; idx++) {
             this.context.lineWidth = 1;
@@ -139,29 +133,24 @@ class SIT extends EngineBase {
             this.context.stroke();
         }
     }
-
     changeLane(mseX, vehicle, road) {
         let lane = road.getLane(mseX);
         if (!lane || lane == vehicle.lane) return;
         
         let side = lane > vehicle.lane ? 'right' : 'left';
         let laneWidth = road.getLaneWidth();
-        console.log(`${vehicle.lane} -> ${lane}`)
-        if (side == 'left' && vehicle.lane > 1) {
+        if (side == 'left') {
             laneWidth *= -1;
-            vehicle.changeLane(lane, laneWidth);
+            vehicle.changeLane(vehicle.lane - 1, laneWidth);
         } else if (side == 'right' && vehicle.lane < road.laneCount) {
-            vehicle.changeLane(lane, laneWidth);
+            vehicle.changeLane(vehicle.lane + 1, laneWidth);
         }
     }
-
     handleMove(msePos) {
         if (!this.isDriving) return;
 
         this.road.changeSpeed(this.getSpeedSection(msePos));
-        if (this.road.speedIndex == 0) {
-            this.isDriving = false;
-        } else {
+        if (this.road.speedIndex != 0) {
             this.isDriving = true;
         }
         this.hud.update({spd: this.road.speedIndex});
@@ -176,89 +165,103 @@ class SIT extends EngineBase {
             this.changeLane(mseX, this.player, this.road);
         }
     }
-
-    handleCollisions(player, colliders, resolution) {
-        if (!colliders || colliders.length < 1) return;
-        player.isGrounded = false;
-        for (let collider of colliders) {
-            let result = player.rect.checkCollision(collider.rect);
+    handleCollisions(player, vehicles, resolution) {
+        if (!vehicles || vehicles.length < 1) return;
+        for (let vehicle of vehicles) {
+            let result = player.rect.checkCollision(vehicle.rect);
             if (resolution) {
-                resolution(result, player, collider);
+                resolution(result, player, vehicle);
             }
         }
     }
-
     spawnVehicle() {
-        if (this.vehicles.length >= this.maxVehicles) return;
+        if (this.vehicles.length >= this.maxVehicles || !this.isDriving) return;
 
-        console.log('spawn vehicle');
-        let lane = 1;
-        let speed = 2;
-        let startX = this.xOffset * this.scaleW + 
-            this.road.getLaneWidth() * this.scaleW * (lane - 1) - 
-            (this.vehicleDim / 2) * this.scaleW - 
-            this.road.stripeWidth * this.scaleW;
+        let timeToLive = 2000;
+        let spawnAbove = Utility.getTrueOrFalse();
+        let lane = Utility.getRandomIntInclusive(1, this.road.laneCount);
+        let speed = 0;
+        let startX = this.xOffset + 
+            this.road.getLaneWidth() * this.scaleW * (lane) - 
+            this.vehicleDim * this.scaleW - 
+            this.road.stripeWidth;
+        let startY = 0;
+        if (spawnAbove) {
+            speed = Utility.getRandomIntInclusive(1, 1);
+            startY = this.road.position.y - this.vehicleDim * this.scaleH;
+        } else {
+            speed = Utility.getRandomIntInclusive(this.road.speeds.length/2, this.road.speeds.length-1);
+            startY = this.road.position.y + this.road.rects[0].height;
+        }
         this.vehicles.push(new NpcVehicle(
             new Rect(
-                new Vector2d(startX, 60), 
+                new Vector2d(startX, startY),
                 this.vehicleDim * this.scaleW, 
                 this.vehicleDim * this.scaleH),
             new Rect(
-                new Vector2d(0,256), 
+                new Vector2d(0,256),
                 64,
                 64),
-            lane, speed));
+            lane,
+            speed,
+            timeToLive,
+            spawnAbove));
     }
+    canDespawnOffscreen(vehicle) {
+        if (vehicle.isExpired() && 
+            (vehicle.rect.position.y + vehicle.rect.height < this.road.position.y || 
+            vehicle.rect.position.y >= this.road.position.y + this.road.rects[0].height)) {
+            console.log('despawn vehicle', this.vehicles);
+            return false;
+        }
 
-    run() {
-        super.run();
+        return true;
+    }
+    update() {
         let fps = this.getFps();
-        
-        // this.handleCollisions(
-        //     this.player, 
-        //     [this.platform, this.platform2],
-        //     (result, player, collider) => {
-        //         if (result) {
-        //             player.rect.position.x -= result.normal.x * result.depth;
-        //             player.rect.position.y -= result.normal.y * result.depth;
-        //             if (player.rect.height + player.rect.position.y >= collider.rect.position.y) {
-        //                 player.isGrounded = true;
-        //             }
-        //             collider.colorHex = '#ffffff';
-        //         } else {
-        //             collider.colorHex = '#000fff';
-        //         }
-        //     });
+        this.hud.update({fps: fps});
 
-        // this.handleCollisions(
-        //     this.cursor, 
-        //     this.projectiles,
-        //     (result, main, collider) => {
-        //         if (result) {
-        //             collider.ticks = collider.speed;
-        //             main.takeDamage(-20);
-        //         }
-        //     });
+        if (!this.isDriving) return;
+        this.road.update(this.tickDelta);
+        this.player.update(this.tickDelta);
+        for (let vehicle of this.vehicles) {
+            vehicle.update(this.tickDelta, this.road);
+        }
 
-        this.road.draw(this.context);
-        this.player.draw(this.context, this.spritesheet);
+        this.handleCollisions(
+            this.player, 
+            this.vehicles,
+            (result, player, vehicle) => {
+                if (result) {
+                    let vCenter = vehicle.rect.center();
+                    let pCenter = player.rect.center();
+                    console.log(`${ vCenter.x < pCenter.x > 0 ? 'left' : 'right'}`);
+                    console.log(`${ vCenter.y < pCenter.y > 0 ? 'down' : 'up'}`);
+                    player.rect.position.x -= result.normal.x * result.depth;
+
+                    vehicle.health = false;
+                }
+            }
+        );
+
+        this.vehicles = Utility.RemoveAll(this.vehicles, (vehicle) => { return !vehicle.isAlive() || this.canDespawnOffscreen(vehicle) });
+    }
+    draw() {
+        //this.hud.draw(this.context);
+
         for (let vehicle of this.vehicles) {
             vehicle.draw(this.context, this.spritesheet);
-        }
-
-        if (this.isDriving) {
-            this.road.update(this.tickDelta);
-            this.player.update(this.tickDelta);
-            for (let vehicle of this.vehicles) {
-                vehicle.update(this.tickDelta, this.road);
-            }
-        }
-
+        }        
+        this.road.draw(this.context);
+        this.player.draw(this.context, this.spritesheet);
         this.dashboard.draw(this.context);
 
         this.drawSpeedSections();
-        this.hud.update({fps: fps});
-        this.hud.draw(this.context);
+    }
+    run() {
+        super.run();
+        this.update();
+        this.draw();
     }
 }
 

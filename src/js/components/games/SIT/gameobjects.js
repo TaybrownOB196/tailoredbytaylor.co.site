@@ -2,6 +2,8 @@ import { Gameobject } from '../../../lib/gaming/common';
 import PhysicsRect2d from '../../../lib/gaming/PhysicsRect2d';
 import Vector2d from '../../../lib/gaming/Vector2d';
 import Rect from '../../../lib/gaming/Rect';
+import Meter from '../../../lib/gaming/ui/Meter';
+import { urlToHttpOptions } from 'url';
 
 class Dashboard {
     constructor(rect, color) {
@@ -32,7 +34,7 @@ class Vehicle extends PhysicsRect2d {
 
     draw(context, spriteSheet) {
         spriteSheet.draw(context, this.rect, this.clipRect);
-        context.strokeStyle = '#00FF00';
+        context.strokeStyle = '#00ff00';
         context.lineWidth = 1;
         context.setLineDash([1, 0]);
         context.strokeRect(this.rect.position.x, this.rect.position.y, this.rect.width, this.rect.height);
@@ -49,10 +51,29 @@ class Vehicle extends PhysicsRect2d {
     }
 }
 
+class PlayerVehicle extends Vehicle {
+    constructor(rect, clipRect) {
+        super(rect, clipRect, 1, 1000);
+        this.rageMeter = new Meter('#ff0000', 10, 10, 4, 10, '#000000');
+    }
+
+    draw(context, spritesheet) {
+        super.draw(context, spritesheet);
+        this.rageMeter.draw(context, 
+            new Vector2d(this.rect.position.x, this.rect.position.y + this.rageMeter.height/2));
+    }
+}
+
 class NpcVehicle extends Vehicle {
-    constructor(rect, clipRect, lane, speed) {
+    constructor(rect, clipRect, lane, speed, timeToLive, isSpawnAbove) {
         super(rect, clipRect, lane);
+        this.initPosition = new Vector2d(rect.position.x, rect.position.y);
         this.speedIndex = speed;
+        this.health = true;
+        this.canDespawn = false;
+        this.timeToLive = timeToLive;
+        this._ttlTicks = 0;
+        this.isSpawnAbove = isSpawnAbove;
     }
 
     update(tickDelta, road) {
@@ -64,13 +85,21 @@ class NpcVehicle extends Vehicle {
             yMod = 0;
 
         this.rect.position.y += yMod;
+        if (this._ttlTicks < this.timeToLive) {
+            this._ttlTicks += tickDelta;
+        } else {
+            this.canDespawn = true;
+        }
     }
+
+    isExpired() { return this.canDespawn; }
+    isAlive() { return this.health; }
 }
 
 class Road extends Gameobject {
-    constructor(rect, laneCount=3, stripeWidth=8, stripeLength=16, stripeGap=16, stripeColor='#FFFFFF') {
+    constructor(rect, laneCount=3, stripeWidth=8, stripeLength=16, stripeGap=16, stripeColor='#ffffff') {
         super();
-        this.position = rect.position;
+        this.position = new Vector2d(rect.position.x, rect.position.y);
         this.laneCount = laneCount;
         this.stripeWidth = stripeWidth;
         this.stripeLength = stripeLength;
@@ -109,17 +138,16 @@ class Road extends Gameobject {
 
         function drawLanes(context, rect) {
             let laneWidth = this.getWidth() / this.laneCount;
-            // let laneWidth = (this.getWidth()/2) / this.laneCount;
             for(let idx=0; idx<this.laneCount+1; idx++) {
                 context.strokeStyle = this.stripeColor;
                 context.lineWidth = this.stripeWidth;
                 context.setLineDash([this.stripeLength, this.stripeGap]);
                 context.beginPath();
                 context.moveTo(
-                    rect.position.x + (idx * laneWidth) - (this.stripeWidth/2), 
+                    rect.position.x + (idx * laneWidth) - (this.stripeWidth), 
                     rect.position.y);
                 context.lineTo(
-                    rect.position.x + (idx * laneWidth) - (this.stripeWidth/2), 
+                    rect.position.x + (idx * laneWidth) - (this.stripeWidth), 
                     rect.position.y + rect.height);
                 context.stroke();
             }
@@ -142,15 +170,13 @@ class Road extends Gameobject {
     getLaneWidth() { return this.getWidth() / this.laneCount; }
     getLane(posX) {
         let width = this.getWidth();
-        // console.log(width);
-        console.log(posX);
         let laneWidth = this.getLaneWidth();
         let idx = 1;
         if (posX < 0) {
             return null;
         }
         while(laneWidth * (idx-1) < width && idx <= this.laneCount) {
-            console.log(`compare ${posX} [${laneWidth * (idx - 1)},${laneWidth * idx}]`);
+            // console.log(`compare ${posX} [${laneWidth * (idx - 1)},${laneWidth * idx}]`);
             if (posX >= laneWidth * (idx - 1) && posX <= laneWidth * idx) {
                 break;
             } else {
@@ -165,5 +191,5 @@ class Road extends Gameobject {
 export {
     Dashboard,
     Road, 
-    Vehicle, NpcVehicle
+    Vehicle, NpcVehicle, PlayerVehicle
 }

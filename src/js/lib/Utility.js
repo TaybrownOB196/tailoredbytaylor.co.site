@@ -3,6 +3,14 @@ class Utility {
         return Math.floor(Math.random() * max);
     }
 
+    static getZeroOrOne() {
+        return Utility.getRandomIntInclusive(0,1);
+    }
+
+    static getTrueOrFalse() {
+        return Utility.getRandomIntInclusive(0,1) == 1 ? true : false;
+    }
+
     static getRandomIntInclusive(min, max) {
         min = Math.ceil(min);
         max = Math.floor(max);
@@ -22,7 +30,7 @@ class Utility {
         let chars = ['A', 'B', 'C', 'D', 'E', 'F'];
         let nums = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
         function _getColorComponentValue() {
-            if (Utility.getRandomIntInclusive(0,1)) {
+            if (Utility.getZeroOrOne()) {
                 return chars[Utility.GetRandomInt(chars.length)];
             } else {
                 return nums[Utility.GetRandomInt(nums.length)];
