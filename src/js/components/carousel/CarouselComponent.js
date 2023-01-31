@@ -8,10 +8,14 @@ class CarouselComponent extends React.Component {
     }
 
     render() {
+        console.log(this.state.components[this.state.componentIndex])
         return (
             <div className='carousel'>
                 <div className='carousel-left' onClick={() => this.toggleContent('left')}>{'<'}</div>
-                <div className='carousel-content'>{this.state.components[this.state.componentIndex]}</div>
+                <div className='carousel-content'>
+                    <h5 style={headerStyle}>{(this.state.components[this.state.componentIndex].type.name).replace('Component', '')}</h5>
+                    {this.state.components[this.state.componentIndex]}
+                </div>
                 <div className='carousel-right' onClick={() => this.toggleContent('right')}>{'>'}</div>
             </div>
         );
@@ -30,6 +34,10 @@ class CarouselComponent extends React.Component {
                 this.setState({ components: this.state.components, componentIndex: this.state.componentIndex + 1});
         }
     }
+}
+
+const headerStyle = {
+    textAlign: 'center',
 }
 
 export default CarouselComponent;

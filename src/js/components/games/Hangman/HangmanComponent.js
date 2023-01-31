@@ -7,7 +7,6 @@ import { update } from '../../../redux/reducers/hangmanSlice';
 
 import '../../../../sass/hangman.scss';
 
-
 function HangmanComponent(props) {
     const dispatch = useDispatch();
     const ID = Utility.GetRandomInt(1337);

@@ -38,7 +38,13 @@ class RoutesComponent extends React.Component {
                     <Route id='home' path='/' element={<ContentComponent />}>
                         <Route index path='/' element={<About />} />
                         <Route path='resume' element={<Resume />} />
-                        <Route path='games' element={<CarouselComponent components={[<MatchingGameComponent colCount={6} rowCount={6} />, <TictactoeComponent />, <FourInARowComponent />, <HangmanComponent getWord={this.getWord} />]} />} />
+                        <Route path='games' element={
+                            <CarouselComponent components={[
+                                <MatchingGameComponent colCount={6} rowCount={6} />, 
+                                <TictactoeComponent />, 
+                                <FourInARowComponent />, 
+                                <HangmanComponent getWord={this.getWord} />
+                            ]} />} />
                         <Route path='misc' element={<Projects />} >
                             <Route path='userform' element={<UserInfoComponent id='userInfoForm' formID='userInfoForm' submitUrl='https://jsonplaceholder.typicode.com/posts' />} />
                             <Route path='loginform' element={<UserLoginComponent id='loginForm' formID='loginForm' submitUrl='https://jsonplaceholder.typicode.com/posts' />} />
