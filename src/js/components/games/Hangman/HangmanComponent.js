@@ -1,119 +1,137 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import GridrowComponent from '../GridrowComponent';
 import Utility from '../../../lib/Utility';
 import Alphabetpad from '../../../components/input/Alphabetpad';
+import { useDispatch } from 'react-redux'
+import { update } from '../../../redux/reducers/hangmanSlice';
 
 import '../../../../sass/hangman.scss';
 
-class HangmanComponent extends React.Component {
-    constructor(props) {
-        super(props);
-        //TODO: make this number variable based on number of elements under #body
-        this.maxGuessCount = 6;
-        this.state = { ID: Utility.GetRandomInt(1337), key: Utility.GetRandomInt(1337), isGameOver: false, word: this.props.getWord(), guesses: [], getWord: this.props.getWord };
-        this.onKeyPress = this.onKeyPress.bind(this);
-        this.handleInput = this.handleInput.bind(this);
-        this.handleClick = this.handleClick.bind(this);
-        this.reset = this.reset.bind(this);
+
+function HangmanComponent(props) {
+    const dispatch = useDispatch();
+    const ID = Utility.GetRandomInt(1337);
+    const [guesses, setGuesses] = useState([]);
+    const [isGameOver, setGameOver] = useState(false);
+    const [key, setKey] = useState();
+    const [word, setWord] = useState(props.getWord());
+
+    useEffect(() => {
+        window.addEventListener('keypress', onKeyPress);
+
+        return function unmount() {
+            if (!isGameOver) return;
+            window.removeEventListener('keypress', onKeyPress);
+        }
+    });
+
+    const reset = () => {
+        let newKey = Utility.GetRandomInt(1337);
+        let newWord = props.getWord();
+
+        setWord(newWord);
+        setGameOver(false);
+        setGuesses([]);
+        setKey(newKey);
     }
 
-    componentDidMount() {
-        window.addEventListener('keypress', this.onKeyPress);
+    function onKeyPress(e) {
+        handleInput(e.key.toUpperCase());
     }
 
-    componentWillUnmount() {
-        window.removeEventListener('keypress', this.onKeyPress)
+    function handleClick(e) {
+        handleInput(e.target.innerHTML);
     }
 
-    reset() {
-        this.setState({ ID: this.state.ID, key: Utility.GetRandomInt(1337), isGameOver: false, word: this.state.getWord(), guesses: [], getWord: this.state.getWord });
-    }
-
-    onKeyPress(e) {
-        this.handleInput(e.key.toUpperCase());
-    }
-
-    handleClick(e) {
-        this.handleInput(e.target.innerHTML);
-    }
-
-    handleInput(input) {
-        if (this.state.isGameOver) {
+    const handleInput = (input) => {
+        if (isGameOver) {
             console.log('GAME OVER');
             return;
         }
 
-        if (this.state.word.indexOf(input) == -1 && this.state.guesses.indexOf(input) == -1) {
-            this.state.guesses.push(input);
+        if (word.indexOf(input) == -1 && guesses.indexOf(input) == -1) {
+            let _guesses = [input].concat(guesses);
+            setGuesses(_guesses);
 
-            this.setState({ ID: this.state.ID, key: this.state.key, isGameOver: this.state.guesses.length > this.maxGuessCount, word: this.state.word, guesses: this.state.guesses, getWord: this.state.getWord });
-
-            let ID = '';
-            if (this.state.guesses.length == 1) {
-                ID = `head|${this.state.ID}`;
-            } else if (this.state.guesses.length == 2) {
-                ID = `torso|${this.state.ID}`;
-            } else if (this.state.guesses.length == 3) {
-                ID = `left_arm|${this.state.ID}`;
-            } else if (this.state.guesses.length == 4) {
-                ID = `right_arm|${this.state.ID}`;
-            } else if (this.state.guesses.length == 5) {
-                ID = `left_leg|${this.state.ID}`;
-            } else if (this.state.guesses.length == 6) {
-                ID = `right_leg|${this.state.ID}`;
+            let _id = '';
+            if (_guesses.length == 1) {
+                _id = `head|${ID}`;
+            } else if (_guesses.length == 2) {
+                _id = `torso|${ID}`;
+            } else if (_guesses.length == 3) {
+                _id = `left_arm|${ID}`;
+            } else if (_guesses.length == 4) {
+                _id = `right_arm|${ID}`;
+            } else if (_guesses.length == 5) {
+                _id = `left_leg|${ID}`;
+            } else if (_guesses.length == 6) {
+                _id = `right_leg|${ID}`;
+            } else if (_guesses.length > 6) {
+                dispatch(update({ 
+                    winCount: 0, 
+                    totalGames: 1
+                }));
+                setGameOver(true);
+                return;
             }
 
-            document.getElementById(ID).style.display = 'block';
+            document.getElementById(_id).style.display = 'block';
         } else {
-            // this.state.word
-            let indexes = Utility.GetIndexesOf(this.state.word.split(''), (value) => { return value == input});
+            let indexes = Utility.GetIndexesOf(word.split(''), (value) => { return value == input});
             for(let idx of indexes) {
-                document.getElementById(`${idx}|0|${this.state.ID}`).innerHTML = input;
+                document.getElementById(`${idx}|0|${ID}`).innerHTML = input;
+            }
+            
+            if (Array.from(document.getElementById('word-container').children).every(p => p.innerHTML)) {
+                console.log('YOU WIN');
+                dispatch(update({ 
+                    winCount: 1, 
+                    totalGames: 1
+                }));
+                setGameOver(true);
             }
         }
     }
 
-    render() {
-        let self = this;
-        return (
-            <div id='hangman' className='opaque-bg-container reactgame' key={this.state.key} >
-                <div className='opaque-bg'></div>
-                <div id='view'>
-                    <div id='gallows'>
-                        <div id='hook'></div>
-                        <div id='top'></div>
-                        <div id='post'></div>
-                        <div id='bottom'></div>
-                    </div>
-
-                    <div id='body'>
-                        <div id={`head|${this.state.ID}`}></div>
-                        <div id={`torso|${this.state.ID}`}></div>
-                        <div id={`left_arm|${this.state.ID}`}></div>
-                        <div id={`right_arm|${this.state.ID}`}></div>
-                        <div id={`left_leg|${this.state.ID}`}></div>
-                        <div id={`right_leg|${this.state.ID}`}></div>
-                    </div>
+    return (
+        <div id='hangman' className='opaque-bg-container reactgame' key={key} >
+            <div className='opaque-bg'></div>
+            <div id='view'>
+                <div id='gallows'>
+                    <div id='hook'></div>
+                    <div id='top'></div>
+                    <div id='post'></div>
+                    <div id='bottom'></div>
                 </div>
 
-                <div id='guess-container'>
-                    { Array.apply(0, this.state.guesses).map(function (r, ri) {
-                        return <div key={ri}>{self.state.guesses[ri]}</div>}) 
-                    }
+                <div id='body'>
+                    <div id={`head|${ID}`}></div>
+                    <div id={`torso|${ID}`}></div>
+                    <div id={`left_arm|${ID}`}></div>
+                    <div id={`right_arm|${ID}`}></div>
+                    <div id={`left_leg|${ID}`}></div>
+                    <div id={`right_leg|${ID}`}></div>
                 </div>
-
-                <div id='word-container'>
-                    <GridrowComponent
-                        ID={this.state.ID}
-                        rowIndex={0}
-                        gridRow={this.state.word}
-                        count={this.state.word.length} />
-                </div>
-                <Alphabetpad handleClick={this.handleClick} />
-                <button onClick={this.reset}>Reset</button>
             </div>
-        )
-    }
+
+            <div id='guess-container'>
+                { Array.apply(0, guesses).map(function (r, ri) {
+                    return <div key={ri}>{guesses[ri]}</div>}) 
+                }
+            </div>
+
+            <div id='word-container'>
+                <GridrowComponent
+                    ID={ID}
+                    rowIndex={0}
+                    gridRow={word}
+                    count={word.length} />
+            </div>
+            <Alphabetpad handleClick={handleClick} />
+            <button onClick={reset}>Reset</button>
+        </div>
+    )
+    
 }
 
 export default HangmanComponent;
