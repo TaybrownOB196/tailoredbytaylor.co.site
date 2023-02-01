@@ -1,0 +1,17 @@
+#RoninComponent {
+    display: flex;
+    justify-content: center;
+    
+    #RoninContainer {
+        display: flex;
+        justify-content: center;
+    }
+    
+    canvas {
+        background-color: ghostwhite;
+        background-color: ivory;
+        background-color: azure;
+        width: 854px;
+        height: 480px;
+    }
+}

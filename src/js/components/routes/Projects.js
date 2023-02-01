@@ -7,6 +7,7 @@ class Projects extends React.Component {
 
         this.links = [
             { ref: 'sandbox', text: 'Sandbox' }
+            ,{ ref: 'ronin', text: 'Ronin' }
             ,{ ref: 'deck', text: 'Deck(WIP)' }
             ,{ ref: 'userform', text: 'UserForm' }
             ,{ ref: 'loginform', text: 'LoginForm' }

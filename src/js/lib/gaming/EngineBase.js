@@ -5,15 +5,14 @@ import EngineRunnerBase from './EngineRunnerBase';
 class EngineBase extends EngineRunnerBase {
     constructor(name, containerID, canvasWidth=300, canvasHeight=150) {
         super(name, containerID);
-        this.DEFAULT_CANVAS_WIDTH = canvasWidth;
-        this.DEFAULT_CANVAS_HEIGHT = canvasHeight;
+        this.DEFAULT_CANVAS_WIDTH = 300;
+        this.DEFAULT_CANVAS_HEIGHT = 150;
         
         this.canvas = document.createElement('canvas');
         this.container.append(this.canvas);
         console.log(this.canvas.clientWidth, this.canvas.clientHeight);
         this.isHorizontal = this.canvas.clientWidth > this.canvas.clientHeight;
         this.gameRect = new Rect(new Point2d(0, 0), this.canvas.clientWidth, this.canvas.clientHeight);
-        console.log(this.gameRect.width, this.gameRect.height);
         this.context = this.canvas.getContext('2d');
     }
 
@@ -26,7 +25,7 @@ class EngineBase extends EngineRunnerBase {
 
     run() {
         super.run();
-        this.context.clearRect(0,0, this.canvas.width, this.canvas.height);
+        this.context.clearRect(0,0, this.gameRect.width, this.gameRect.height);
     }
 }
 
