@@ -107,6 +107,39 @@ p {
     }
 }
 
+.slider {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    position: relative;
+
+    * {
+        position: absolute;
+    }
+
+    #dot {
+        width: 16px;
+        height: 16px;
+        background-color: red;
+        border-radius: 16px;
+        z-index: 3;
+    }
+
+    #line {
+        border-top: 2px solid black;
+        border-bottom: 2px solid black;
+        width: 100%;
+        z-index: 1;
+    }
+
+    #highline {
+        border-top: 2px solid red;
+        border-bottom: 2px solid red;
+        z-index: 2;
+    }
+}
+
 .alphabetpad {
     .keypad {
         grid-template-columns: 12.5% 12.5% 12.5% 12.5% 12.5% 12.5% 12.5% 12.5%;
