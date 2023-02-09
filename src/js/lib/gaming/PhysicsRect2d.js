@@ -29,17 +29,17 @@ class PhysicsRect2d extends Gameobject {
             maxSpeed : this.velocity.y + y <= -maxSpeed ?
             -maxSpeed : this.velocity.y + y;
         
-        if (_x > 0) {
-            _x = Math.floor(_x);
-        } else {
-            _x = Math.ceil(_x);
-        }
+        // if (_x > 0) {
+        //     _x = Math.floor(_x);
+        // } else {
+        //     _x = Math.ceil(_x);
+        // }
 
-        if (_y > 0) {
-            _y = Math.floor(_y);
-        } else {
-            _y = Math.ceil(_y);
-        }
+        // if (_y > 0) {
+        //     _y = Math.floor(_y);
+        // } else {
+        //     _y = Math.ceil(_y);
+        // }
 
         this.velocity.x = _x;
         this.velocity.y = _y;

@@ -18,6 +18,12 @@ class Keyboardhandler {
             this.pubsub.publish('keydown', ev);
         });
 
+        target.addEventListener('keypress', (ev) => {
+            if (!this.keyStateMap[ev.key]) {
+                this.keyStateMap[ev.key] = true;
+            }
+        });
+
         target.addEventListener('keyup', (ev) => {
             this.keyStateMap[ev.key] = false;
             this.pubsub.publish('keyup', ev);

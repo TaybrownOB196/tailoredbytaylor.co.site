@@ -1,7 +1,7 @@
 import { Point2d } from './common';
 import Vector2d from './Vector2d';
 
-//TODO: Move SAT logic to own class
+//TODO: Move SAT logic up to physics rect 2d
 class Rect {
     constructor(position, width, height) {
         this.position = position;

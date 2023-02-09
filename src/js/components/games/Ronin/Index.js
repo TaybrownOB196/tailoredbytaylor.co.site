@@ -20,7 +20,7 @@ class Ronin extends EngineBase {
                 new Point2d(16, 16), 
                 32, 
                 32), 
-            20);
+            100);
         console.log(this.player);
         this.hud = new Hud(new Point2d(
             this.gameRect.width - 128, 
@@ -51,15 +51,33 @@ class Ronin extends EngineBase {
             this.hud.update({kbi: ev.key});
             switch (ev.key) {
                 case 'w':
+                case 'ArrowUp':
+                    this.player.jump();
                 break;
-
+                    
                 case 'a':
+                case 'ArrowLeft':
+                    if (!this.keyboardhandler.keyStateMap['d'] 
+                        && !this.keyboardhandler.keyStateMap['ArrowRight']) {
+                        this.player.sprint(-1);
+                    }
                 break;
                 
                 case 's':
+                case 'ArrowDown':
                 break;
                 
                 case 'd':
+                case 'ArrowRight':
+                    if (!this.keyboardhandler.keyStateMap['a'] 
+                    && !this.keyboardhandler.keyStateMap['ArrowLeft']) {
+                    this.player.sprint(1);
+                }
+                break;
+
+                case '$':
+                    console.log(this.player)
+                    console.log(this.keyboardhandler.keyStateMap)
                 break;
             }
         });
@@ -67,15 +85,21 @@ class Ronin extends EngineBase {
         this.keyboardhandler.pubsub.subscribe('keyup', (ev) => { 
             switch (ev.key) {
                 case 'w':
+                case 'ArrowUp':
                 break;
-
+                    
                 case 'a':
+                case 'ArrowLeft':
+                    this.player.halt();
                 break;
-
+                
                 case 's':
+                case 'ArrowDown':
                 break;
-
+                
                 case 'd':
+                case 'ArrowRight':
+                    this.player.halt();
                 break;
             }
         });
@@ -87,7 +111,8 @@ class Ronin extends EngineBase {
         super.run();
         let fps = this.getFps();
 
-        // this.player.update(fps/1000);
+        this.player.update();
+        this.player.handleCollisions([], this.gameRect);
         this.player.draw(this.context);
 
         this.hud.update({fps: fps});
