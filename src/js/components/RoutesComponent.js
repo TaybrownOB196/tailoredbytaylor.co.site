@@ -26,7 +26,7 @@ class RoutesComponent extends React.Component {
     }
 
     getWord() {
-        let words = ['pizza', 'egg', 'mouth'];
+        let words = ['body', 'should', 'could', 'walk', 'right'];
         let word = words[Utility.GetRandomInt(words.length)];
         return word.toUpperCase();
     }
