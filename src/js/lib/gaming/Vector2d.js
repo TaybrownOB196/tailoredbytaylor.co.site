@@ -66,6 +66,10 @@ class Vector2d {
         }
     }
 
+    rotateAroundPoint(point, angle) {
+
+    }
+
     static getDistance(vector0, vector1) {
         let dx = vector0.x - vector1.x;
         let dy = vector0.y - vector1.y;

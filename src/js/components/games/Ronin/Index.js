@@ -1,5 +1,5 @@
 import EngineBase from '../../../lib/gaming/EngineBase';
-import { Gameobject, Text, Point2d } from '../../../lib/gaming/common';
+import { Gameobject, Text, Point2d, Spritesheet } from '../../../lib/gaming/common';
 import { Keyboardhandler, Pointerhandler } from './../../../lib/gaming/input';
 import Vector2d from '../../../lib/gaming/Vector2d';
 import Hud from '../../../lib/gaming/ui/Hud';
@@ -7,20 +7,25 @@ import Rect from '../../../lib/gaming/Rect';
 import Utility from '../../../lib/Utility';
 
 import './../../../../sass/ronin.scss';
+import _spritesheet from './../../../../png/ronin_ss_.png';
 
 import { Player, Platform, Npc } from './gameobjects';
+
+const RIGHT = 1;
+const LEFT = -1;
 
 class Ronin extends EngineBase {
     constructor() {
         super('Ronin', 'RoninContainer', 854, 480);
         this.scaleX = this.gameRect.width / this.DEFAULT_CANVAS_WIDTH;
         this.scaleY = this.gameRect.height / this.DEFAULT_CANVAS_HEIGHT;
+        this.spritesheet = new Spritesheet(_spritesheet);
         this.player = new Player(
             new Rect(
                 new Point2d(16, 16), 
-                32, 
-                32), 
-            100);
+                80, 
+                128), 
+            100, this.spritesheet, true);
         console.log(this.player);
         this.hud = new Hud(new Point2d(
             this.gameRect.width - 128, 
@@ -54,30 +59,33 @@ class Ronin extends EngineBase {
                 case 'ArrowUp':
                     this.player.jump();
                 break;
-                    
-                case 'a':
-                case 'ArrowLeft':
-                    if (!this.keyboardhandler.keyStateMap['d'] 
-                        && !this.keyboardhandler.keyStateMap['ArrowRight']) {
-                        this.player.sprint(-1);
-                    }
-                break;
                 
                 case 's':
                 case 'ArrowDown':
                 break;
                 
+                case 'a':
+                case 'ArrowLeft':
+                    if (!this.keyboardhandler.keyStateMap['d'] 
+                        && !this.keyboardhandler.keyStateMap['ArrowRight']) {
+                        this.player.sprint(LEFT);
+                    }
+                break;
+                
+                case 'e':
+                    this.player.attack();
+                break;
+
                 case 'd':
                 case 'ArrowRight':
                     if (!this.keyboardhandler.keyStateMap['a'] 
                     && !this.keyboardhandler.keyStateMap['ArrowLeft']) {
-                    this.player.sprint(1);
+                    this.player.sprint(RIGHT);
                 }
                 break;
 
                 case '$':
-                    console.log(this.player)
-                    console.log(this.keyboardhandler.keyStateMap)
+                    console.log(this.player);
                 break;
             }
         });
@@ -87,14 +95,14 @@ class Ronin extends EngineBase {
                 case 'w':
                 case 'ArrowUp':
                 break;
-                    
-                case 'a':
-                case 'ArrowLeft':
-                    this.player.halt();
-                break;
                 
                 case 's':
                 case 'ArrowDown':
+                break;
+
+                case 'a':
+                case 'ArrowLeft':
+                    this.player.halt();
                 break;
                 
                 case 'd':

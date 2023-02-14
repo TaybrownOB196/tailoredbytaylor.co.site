@@ -1,4 +1,22 @@
 #RoninComponent {
+    .color-primary-0 { color: #402828 }	/* Main Primary color */
+    .color-primary-1 { color: #9A0000 }
+    .color-primary-2 { color: #6D2323 }
+    .color-primary-3 { color: #272424 }
+    .color-primary-4 { color: #3F3F3F }
+
+    .color-secondary-1-0 { color: #402B28 }	/* Main Secondary color (1) */
+    .color-secondary-1-1 { color: #9A1500 }
+    .color-secondary-1-2 { color: #6D2D23 }
+    .color-secondary-1-3 { color: #272424 }
+    .color-secondary-1-4 { color: #3F3F3F }
+
+    .color-secondary-2-0 { color: #3D2629 }	/* Main Secondary color (2) */
+    .color-secondary-2-1 { color: #920014 }
+    .color-secondary-2-2 { color: #67212B }
+    .color-secondary-2-3 { color: #252223 }
+    .color-secondary-2-4 { color: #3C3C3C }
+
     display: flex;
     justify-content: center;
     
@@ -8,10 +26,13 @@
     }
     
     canvas {
+        background-image: linear-gradient(#252223,#a9a9a9);
         background-color: ghostwhite;
         background-color: ivory;
         background-color: azure;
-        width: 854px;
+        shape-rendering: crispedges;
+        image-rendering: pixelated;
         height: 480px;
+        width: 854px;
     }
 }

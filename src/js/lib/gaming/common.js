@@ -123,6 +123,46 @@ class Point2d {
     }
 }
 
+class Line2d {
+    constructor(point1, point2) {
+        this.pointA = point1;
+        this.pointB = point2;
+    }
+
+    intersectsLine(otherLine) {
+        let uA = ((otherLine.pointB.x-otherLine.pointA.x) * (this.pointA.y-otherLine.pointA.y) - (otherLine.pointB.y-otherLine.pointA.y) * (this.pointA.x-otherLine.pointA.x)) /
+            ((otherLine.pointB.y-otherLine.pointA.y) * (this.pointB.x-this.pointA.x) - (otherLine.pointB.x-otherLine.pointA.x) * (this.pointB.y-this.pointA.y));
+        let uB = ((this.pointB.x-this.pointA.x) * (this.pointA.y-otherLine.pointA.y) - (this.pointB.y-this.pointA.y) * (this.pointA.x-otherLine.pointA.y)) /
+            ((otherLine.pointB.y-otherLine.pointA.y) * (this.pointB.x-this.pointA.x) - (otherLine.pointB.x-otherLine.pointA.x) * (this.pointB.y-this.pointA.y));
+
+        // if uA and uB are between 0-1, lines are colliding
+        if (uA >= 0 && uA <= 1 && uB >= 0 && uB <= 1) {
+
+            // optionally, draw a circle where the lines meet
+            let intersectionX = this.pointA.x + (uA * (this.pointB.x-this.pointA.x));
+            let intersectionY = this.pointA.y + (uA * (this.pointB.y-this.pointA.y));
+            return true;
+        }
+        return false;
+    }
+
+    intersectsLineAt(otherLine) {
+        let uA = ((otherLine.pointB.x-otherLine.pointA.x) * (this.pointA.y-otherLine.pointA.y) - (otherLine.pointB.y-otherLine.pointA.y) * (this.pointA.x-otherLine.pointA.x)) /
+            ((otherLine.pointB.y-otherLine.pointA.y) * (this.pointB.x-this.pointA.x) - (otherLine.pointB.x-otherLine.pointA.x) * (this.pointB.y-this.pointA.y));
+        let uB = ((this.pointB.x-this.pointA.x) * (this.pointA.y-otherLine.pointA.y) - (this.pointB.y-this.pointA.y) * (this.pointA.x-otherLine.pointA.y)) /
+            ((otherLine.pointB.y-otherLine.pointA.y) * (this.pointB.x-this.pointA.x) - (otherLine.pointB.x-otherLine.pointA.x) * (this.pointB.y-this.pointA.y));
+
+        // if uA and uB are between 0-1, lines are colliding
+        if (uA >= 0 && uA <= 1 && uB >= 0 && uB <= 1) {
+            return new Point2d(
+                this.pointA.x + (uA * (this.pointB.x-this.pointA.x)),
+                this.pointA.y + (uA * (this.pointB.y-this.pointA.y)));
+        }
+
+        return null;
+    }
+}
+
 class Circle {
     constructor(position, radius) {
         this.position = position;
@@ -450,4 +490,5 @@ export {
     FillPhysicsRect,
     Spritesheet,
     Point2d,
+    Line2d
 }

@@ -5,13 +5,13 @@ import Vector2d from '../../../lib/gaming/Vector2d';
 import { Point2d } from '../../../lib/gaming/common';
 
 const MAXSPEED = 100;
-const JUMP = 100;
+const JUMP = 32;
 const MOVE = 8;
-const GRAVITY = .2;
+const GRAVITY = .02;
 const DRAG = .07;
-
-const RIGHT = 1;
-const LEFT = -1;
+const CHARACTER_DIMS = {x: 128, y: 128}
+const HEALTH = 1;
+const DAMAGE = 10;
 
 class Platform extends PhysicsRect2d {
     constructor(rect, colorHex) {
@@ -25,15 +25,43 @@ class Platform extends PhysicsRect2d {
     }
 }
 
+class Weapon {
+    constructor(name, range, weight) {
+        this.name = name;
+        this.range = range;
+        this.weight = weight;
+    }
+
+    getDamage() {
+        return DAMAGE;
+    }
+}
+
+class WeaponFactory {
+    static getSword() {
+        return new Weapon('sword', 10, 50);
+    }
+    static getClub() {
+        return new Weapon('club', 10, 50);
+    }
+    static getAxe() {
+        return new Weapon('axe', 10, 50);
+    }
+    static getPolearm() {
+        return new Weapon('staff', 10, 50);
+    }
+}
+
 class Character extends PhysicsRect2d {
-    constructor(rect, mass) {
+    constructor(rect, mass, showDebug) {
         super(rect, mass, GRAVITY);
-        // super(rect, mass, null);
         this._isAlive = true;
         this.isHalting = false;
         this.isChangeDirection = false;
         this.colorHex = '#000';
         this.direction = 0;
+        this.showDebug = showDebug;
+        this.weapon = WeaponFactory.getSword();
     }
 
     isAlive() { return this._isAlive; }
@@ -60,6 +88,11 @@ class Character extends PhysicsRect2d {
         }
     }
 
+    attack() {
+        console.log(this.weapon);
+        console.log(this.weapon.getDamage())
+    }
+
     jump() {
         if (!this.isGrounded) return;
 
@@ -68,7 +101,7 @@ class Character extends PhysicsRect2d {
     }
 
     sprint(direction) {
-        console.log(this.velocity.x, this.velocity.y)
+        if (!this.isGrounded) return;
         this.isChangeDirection = this.direction != direction;
         this.direction = direction;
         if (this.isChangeDirection) {
@@ -76,7 +109,6 @@ class Character extends PhysicsRect2d {
         }
 
         this.setVelocity(new Vector2d(MOVE * this.direction, this.velocity.y));
-        // this.updateVelocity(MOVE * this.direction + this.velocity.x, 0, MAXSPEED);
 
         this.isHalting = false;
         console.log(this.velocity.x, this.velocity.y)
@@ -94,6 +126,11 @@ class Character extends PhysicsRect2d {
         if (!this.isAlive()) return;
         context.fillStyle = this.isHalting ? '#0000ff' : this.colorHex;
         context.fillRect(this.rect.position.x, this.rect.position.y, this.rect.width, this.rect.height);
+
+        if (this.showDebug) {
+            context.strokeStyle = '#00ff00';
+            context.strokeRect(this.rect.position.x, this.rect.position.y, this.rect.width, this.rect.height);
+        }
     }
 
     update() {
@@ -104,7 +141,6 @@ class Character extends PhysicsRect2d {
         }
 
         if (this.isHalting) {
-            // let dir = this.isChangeDirection ? this.direction * -1 : this.direction;
             let ceil = Math.ceil(this.velocity.x);
             this.velocity.x = (ceil == 1 || ceil == 0) ? 0 : this.velocity.x - (this.velocity.x * DRAG);
             if (this.velocity.x == 0) {
@@ -119,19 +155,48 @@ class Character extends PhysicsRect2d {
 }
 
 class Npc extends Character {
-    constructor(rect, mass) {
-        super(rect, mass);
+    constructor(rect, mass, showDebug=false) {
+        super(rect, mass, showDebug);
         this.colorHex = '#0f0f11';
+    }
+
+    draw(context) {
+        if (!this.isAlive()) return;
+        if (this.direction == 1) {
+            this.spritesheet.draw(context, this.rect, new Rect(new Vector2d(0,0), CHARACTER_DIMS.x, CHARACTER_DIMS.y));
+
+        } else {
+            this.spritesheet.draw(context, this.rect, new Rect(new Vector2d(CHARACTER_DIMS.x,0), CHARACTER_DIMS.x, CHARACTER_DIMS.y));
+        }
+
+        if (this.showDebug) {
+            context.strokeStyle = '#00ff00';
+            context.strokeRect(this.rect.position.x, this.rect.position.y, this.rect.width, this.rect.height);
+        }
     }
 }
 
 class Player extends Character {
-    constructor(rect, mass) {
-        super(rect, mass);
-        this.isRunning = false;
-        this.directionX = 0;
+    constructor(rect, mass, spritesheet, showDebug=false) {
+        super(rect, mass, showDebug);
         this.maxJumpCount = 2;
         this.jumpCount = 0;
+        this.spritesheet = spritesheet;
+    }
+
+    draw(context) {
+        if (!this.isAlive()) return;
+        if (this.direction == 1) {
+            this.spritesheet.draw(context, this.rect, new Rect(new Vector2d(CHARACTER_DIMS.x * 2,0), CHARACTER_DIMS.x, CHARACTER_DIMS.y));
+
+        } else {
+            this.spritesheet.draw(context, this.rect, new Rect(new Vector2d(CHARACTER_DIMS.x * 3,0), CHARACTER_DIMS.x, CHARACTER_DIMS.y));
+        }
+
+        if (this.showDebug) {
+            context.strokeStyle = '#00ff00';
+            context.strokeRect(this.rect.position.x, this.rect.position.y, this.rect.width, this.rect.height);
+        }
     }
 }
 
