@@ -30,6 +30,8 @@ class Matrix2d {
         return this.grid.GetR(col, row);
     }
 
+    //TODO: Implement memoization here for the row/column retreivals
+    //TODO: Refactor for performance
     multiply(otherMatrix) {
         if (this.ColCount !== otherMatrix.RowCount) 
             throw new Exception(`unable to multiply due to dimensions ${this.ColCount} ${otherMatrix.RowCount}`);
@@ -39,10 +41,7 @@ class Matrix2d {
                 let row = this.getRow(idx1);
                 let column = otherMatrix.getColumn(idx2);
                 let value = 0;
-                let str = '';
                 for (let idx3=0; idx3<row.length; idx3++) {
-                    if (idx3 != 0) str += '+'
-                    str += `${row[idx3]} * ${column[idx3]} `;
                     value += row[idx3] * column[idx3];
                 }
 
