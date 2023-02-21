@@ -5,7 +5,11 @@ import Vector2d from '../../../lib/gaming/Vector2d';
 import Hud from '../../../lib/gaming/ui/Hud';
 import Rect from '../../../lib/gaming/Rect';
 import Utility from '../../../lib/Utility';
-
+import { UIContainerSettings,
+    UIContainerFactory } from '../../../lib/gaming/ui/UIContainerFactory';
+import { TextboxComponentSettings,
+    ButtonComponentSettings } from '../../../lib/gaming/ui/UIComponentFactory';
+    
 import './../../../../sass/ronin.scss';
 import _spritesheet from './../../../../png/ronin_ss_.png';
 
@@ -26,18 +30,69 @@ class Ronin extends EngineBase {
                 80, 
                 128), 
             100, this.spritesheet, true);
-        console.log(this.player);
         this.hud = new Hud(new Point2d(
-            this.gameRect.width - 128, 
+            this.gameRect.width - 128,
             this.gameRect.height - 75),
             100,
             100,
             { fps: '', mse: '', kbi: ''});
 
+        let modalWidth = this.gameRect.width * .33;
+        let modalHeight = this.gameRect.height * .75;
+        this.modal = UIContainerFactory.createContainer(new UIContainerSettings(
+            'modal',
+            modalWidth,
+            modalHeight,
+            '#000fff', 
+            '#fff000', 
+            '2',
+            'vertical', 10, 10, 10));
+        this.modal.addComponent('menuHeaderTxt', new TextboxComponentSettings(
+            '#f0f0f0', 
+            '#000', 
+            1, 
+            'PAUSED', 
+            '20px Arial',
+            '#fff'));
+        this.modal.addComponent('resumeBtn', new ButtonComponentSettings(
+            '#0f0f0f', 
+            '#fff', 
+            1, 
+            'RESUME', 
+            '16px Arial',
+            '#fff', () => {
+                this.modal.toggle(false);
+            }
+        ));
+        this.modal.addComponent('settingsBtn', new ButtonComponentSettings(
+            '#0f0f0f', 
+            '#fff', 
+            1, 
+            'SETTINGS', 
+            '16px Arial',
+            '#fff', () => {
+            }
+        ));
+        this.modal.addComponent('quitBtn', new ButtonComponentSettings(
+            '#0f0f0f', 
+            '#fff', 
+            1, 
+            'QUIT', 
+            '16px Arial',
+            '#fff', () => {
+            }
+        ));
+        this.modal.build();
+        this.modal.toggle(false);
 
         this.pointerhandler = new Pointerhandler(this.canvas);
         this.pointerhandler.pubsub.subscribe('pointerdown', (ev) => {
-            // let click = this.getMousePosition(ev.layerX, ev.layerY);
+            let msePos = this.getMousePosition(ev.layerX, ev.layerY);
+            let resumeBtn = this.modal.getComponent('resumeBtn');
+            if (resumeBtn.contains(msePos)) {
+                console.log('inside')
+                resumeBtn.handleClick();
+            }
         });
         this.pointerhandler.pubsub.subscribe('pointermove', (ev) => {
             let msePos = this.getMousePosition(ev.layerX, ev.layerY);
@@ -87,6 +142,10 @@ class Ronin extends EngineBase {
                 case '$':
                     console.log(this.player);
                 break;
+
+                case 'Escape':
+                    this.modal.toggle(true);
+                break;
             }
         });
 
@@ -122,9 +181,13 @@ class Ronin extends EngineBase {
         this.player.update();
         this.player.handleCollisions([], this.gameRect);
         this.player.draw(this.context);
-
         this.hud.update({fps: fps});
         this.hud.draw(this.context);
+
+        let modalPos = new Vector2d(
+            (this.gameRect.width - this.modal.settings.width)/2, 
+            (this.gameRect.height - this.modal.settings.height)/2);
+        this.modal.draw(this.context, modalPos);
     }
 }
 
