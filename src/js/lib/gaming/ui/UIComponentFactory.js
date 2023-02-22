@@ -11,12 +11,14 @@ class TextboxComponentSettings extends UIComponentSettings {
 }
 
 class ButtonComponentSettings extends UIComponentSettings {
-    constructor(bgHex, brdrHex, lineWidth, text, font, fontHex, onClick) {
+    constructor(bgHex, brdrHex, lineWidth, text, font, fontHex, onClick, altBgHex, altBrdrHex) {
         super('button', bgHex, brdrHex, lineWidth, text, font);
         this.text = text;
         this.font = font;
         this.fontHex = fontHex;
         this.onClick = onClick;
+        this.altBgHex = altBgHex;
+        this.altBrdrHex = altBrdrHex;
     }
 }
 
@@ -50,6 +52,7 @@ class Button extends Textbox {
         this.position = null;
         this.width = 0;
         this.height = 0;
+        this.isHover = false;
     }
 
     draw(context, position, width, height) {
@@ -57,14 +60,37 @@ class Button extends Textbox {
         this.width = width;
         this.height = height;
         if (!this.isShowing) return;
-        super.draw(context, position, width, height);
+
+        context.beginPath();
+        context.lineWidth = this.settings.lineWidth;
+        context.strokeStyle = !this.isHover ? this.settings.border : this.settings.altBrdrHex;
+        context.rect(
+            position.x, 
+            position.y, 
+            width, 
+            height);
+        context.stroke();
+
+        context.fillStyle = !this.isHover ? this.settings.background : this.settings.altBgHex;
+        context.fillRect(
+            position.x, 
+            position.y, 
+            width, 
+            height);
+
+        context.font = this.settings.font;
+        context.fillStyle = this.settings.fontHex;
+        let dims = this.getTextDimensions(context);
+        context.fillText(this.settings.text, 
+            position.x + ((width - dims.w) / 2), 
+            position.y + ((height - dims.h) / 2));
     }
 
     contains(position) {
-        return new Rect(this.position, this.width, this.height)
+        return this.isShowing && new Rect(this.position, this.width, this.height)
             .contains(position);
     }
-    
+
     handleClick() {
         if (this.settings.onClick) {
             this.settings.onClick();

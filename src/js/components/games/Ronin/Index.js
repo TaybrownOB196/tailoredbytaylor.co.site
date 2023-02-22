@@ -60,9 +60,12 @@ class Ronin extends EngineBase {
             1, 
             'RESUME', 
             '16px Arial',
-            '#fff', () => {
+            '#fff', 
+            () => {
                 this.modal.toggle(false);
-            }
+            },
+            '#000',
+            '#000'
         ));
         this.modal.addComponent('settingsBtn', new ButtonComponentSettings(
             '#0f0f0f', 
@@ -70,8 +73,11 @@ class Ronin extends EngineBase {
             1, 
             'SETTINGS', 
             '16px Arial',
-            '#fff', () => {
-            }
+            '#fff', 
+            () => {
+            },
+            '#000',
+            '#000'
         ));
         this.modal.addComponent('quitBtn', new ButtonComponentSettings(
             '#0f0f0f', 
@@ -79,8 +85,11 @@ class Ronin extends EngineBase {
             1, 
             'QUIT', 
             '16px Arial',
-            '#fff', () => {
-            }
+            '#fff', 
+            () => {
+            },
+            '#000',
+            '#000'
         ));
         this.modal.build();
         this.modal.toggle(false);
@@ -90,13 +99,19 @@ class Ronin extends EngineBase {
             let msePos = this.getMousePosition(ev.layerX, ev.layerY);
             let resumeBtn = this.modal.getComponent('resumeBtn');
             if (resumeBtn.contains(msePos)) {
-                console.log('inside')
                 resumeBtn.handleClick();
             }
         });
         this.pointerhandler.pubsub.subscribe('pointermove', (ev) => {
             let msePos = this.getMousePosition(ev.layerX, ev.layerY);
             this.hud.update({mse: `(${msePos.x},${msePos.y})`});
+            let resumeBtn = this.modal.getComponent('resumeBtn');
+            if (resumeBtn.contains(msePos)) {
+                resumeBtn.isHover = true;
+            } else {
+                
+                resumeBtn.isHover = false;
+            }
         });
         this.pointerhandler.pubsub.subscribe('pointerenter', (ev) => {
             let msePos = this.getMousePosition(ev.x, ev.y);
