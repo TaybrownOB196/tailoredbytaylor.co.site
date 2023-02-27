@@ -1,59 +1,66 @@
-class Animationcontroller {
-    constructor() {
-        this.STATE = 'idle';
-        this.state = 'idle';
-        this.stateMap = {};
+class Animation {
+    constructor(order=0) {
+        this._frameTicker = 0;
+
+        this.order = order;
+        this.frames = [];
+        this.frameIndex = 0;
+        this.isBuilt = false;
+
+        this.isStarted = false;
     }
 
-    setState(stateKey) {
-        if (this.stateMap.hasOwnProperty(stateKey)) {
-            this.state = stateKey;
-        } else {
-            this.state = this.STATE;
+    build() {
+        this.isBuilt = true;
+    }
+
+    addFrame(animationFrame) {
+        if (this.isBuilt) throw new Error('animation already built, no frames can be added');
+        this.frames.push(animationFrame);
+    }
+
+    getNext() {
+        this.isStarted = true;
+        let toReturn = this.frames[this.frameIndex];
+        if (this._frameTicker > toReturn.count) {
+            this.frameIndex++;
+            this._frameTicker = 0;
         }
+        
+        if (this.frameIndex >= this.frames.length) {
+            this.reset();
+        }
+        
+        this._frameTicker++;
+        return toReturn;
     }
 
-    getState() {
-        return this.stateMap[this.state];
+    getCurrent() { this.frames[this.frameIndex]; }
+
+    reset() {
+        this._frameTicker = 0;
+        this.frameIndex = 0;
+        this.isStarted = false;
     }
 
-    addState(stateKey, animationClip) {
-        this.stateMap[stateKey] = animationClip;
+    isAnimating() {
+        return this.isStarted;
     }
 }
 
-
-class Animationclip {
-    constructor(spritesheet, clipRects, shouldLoop = false, frameDuration = 1) {
-        this.isComplete = false;
-        this.shouldLoop = shouldLoop;
-        this._index = 0;
-        this._frameCount = 0;
-        this.frameDuration = frameDuration;
-        this.spritesheet = spritesheet;
-        this.clipRects = clipRects;
-    }
-
-    draw(context, rect) {
-        if (this.isComplete)
-            return;
-
-        this.spritesheet.draw(context, rect, this.clipRects[this._index]);
+class AnimationFrame {
+    constructor(hitboxOffsetRect, hurtboxOffsetRect=null, spritesheetRect=null, isInterruptable=false, count=1) {
+        //The values of this rect will be used as offsets to the current hitbox position of the object
+        this.hitboxOffsetRect = hitboxOffsetRect;
+        this.spritesheetRect = spritesheetRect;
+        this.hurtboxOffsetRect = hurtboxOffsetRect;
         
-        this._frameCount++;
-        if (this._frameCount % this.frameDuration == 0) {
-            this._index++;
-        }
-        
-        if (this._index > this.clipRects.length - 1) {
-            this._index = 0;
-            this._frameCount = 0;
-            if (!this.shouldLoop)
-            this.isComplete = true;
-        }
+        this.isInterruptable = isInterruptable;
+        this.count = count;
     }
 }
 
 export {
-    Animationclip,
+    Animation,
+    AnimationFrame
 }

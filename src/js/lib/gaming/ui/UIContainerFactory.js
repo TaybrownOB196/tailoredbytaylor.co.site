@@ -39,6 +39,7 @@ class UIContainer extends UIComponent {
     }
 
     addComponent(key, componentSettings) {
+        if (this.isBuilt) throw new Error('uicontainer already built');
         this.componentSettingsMap[key] = componentSettings;
     }
 

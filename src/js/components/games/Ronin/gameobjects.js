@@ -1,7 +1,7 @@
 import PhysicsRect2d from '../../../lib/gaming/PhysicsRect2d';
-import Meter from '../../../lib/gaming/ui/Meter';
 import Rect from '../../../lib/gaming/Rect';
 import Vector2d from '../../../lib/gaming/Vector2d';
+import { Animation, AnimationFrame } from '../../../lib/gaming/animation';
 import { Point2d } from '../../../lib/gaming/common';
 
 const MAXSPEED = 100;
@@ -10,8 +10,53 @@ const MOVE = 8;
 const GRAVITY = .02;
 const DRAG = .07;
 const CHARACTER_DIMS = {x: 128, y: 128}
-const HEALTH = 1;
 const DAMAGE = 10;
+
+const ACTION_STATES = {
+    STARTUP: 'STARTUP',
+    ACTIVE: 'ACTIVE',
+    RECOVERY: 'RECOVERY'
+};
+
+// class AnimationOrchestrator {
+//     constructor(idleAnimation) {
+//         this.idleAnimation = idleAnimation;
+//         this.queue = new AnimationQueue();
+//     }
+
+//     next() {
+//         if (this.queue.isEmpty()) {
+//             this.queue.push(this.idleAnimation);
+//         }
+
+//         let animation = this.queue.getCurrent();
+//         if (!animation) throw new Error('no animation to draw');
+//     }
+// }
+
+class AnimationQueue {
+    constructor() {
+        this.animationQueue = [];
+    }
+
+    isEmpty() { return this.animationQueue.length <= 0; }
+
+    clearQueue() {
+        this.animationQueue = [];
+    }
+
+    getCurrent() {
+        return this.animationQueue[0];
+    } 
+
+    push(animation, clearLesserOrder = false) {
+        if (clearLesserOrder) {
+            this.animationQueue = this.animationQueue.filter((anim) => { return anim.order >= animation.order });
+        }
+
+        this.animationQueue.push(animation);
+    }
+}
 
 class Platform extends PhysicsRect2d {
     constructor(rect, colorHex) {
@@ -62,6 +107,7 @@ class Character extends PhysicsRect2d {
         this.direction = 0;
         this.showDebug = showDebug;
         this.weapon = WeaponFactory.getSword();
+        this.animationQueue = new AnimationQueue();
     }
 
     isAlive() { return this._isAlive; }
@@ -124,9 +170,19 @@ class Character extends PhysicsRect2d {
 
     draw(context) {
         if (!this.isAlive()) return;
-        context.fillStyle = this.isHalting ? '#0000ff' : this.colorHex;
-        context.fillRect(this.rect.position.x, this.rect.position.y, this.rect.width, this.rect.height);
 
+        if (this.spritesheet) {
+            if (this.direction == 1) {
+                this.spritesheet.draw(context, this.rect, new Rect(new Vector2d(0,0), CHARACTER_DIMS.x, CHARACTER_DIMS.y));
+    
+            } else {
+                this.spritesheet.draw(context, this.rect, new Rect(new Vector2d(CHARACTER_DIMS.x,0), CHARACTER_DIMS.x, CHARACTER_DIMS.y));
+            }
+        } else {
+            context.fillStyle = this.isHalting ? '#0000ff' : this.colorHex;
+            context.fillRect(this.rect.position.x, this.rect.position.y, this.rect.width, this.rect.height);
+        }
+        
         if (this.showDebug) {
             context.strokeStyle = '#00ff00';
             context.strokeRect(this.rect.position.x, this.rect.position.y, this.rect.width, this.rect.height);
@@ -159,21 +215,6 @@ class Npc extends Character {
         super(rect, mass, showDebug);
         this.colorHex = '#0f0f11';
     }
-
-    draw(context) {
-        if (!this.isAlive()) return;
-        if (this.direction == 1) {
-            this.spritesheet.draw(context, this.rect, new Rect(new Vector2d(0,0), CHARACTER_DIMS.x, CHARACTER_DIMS.y));
-
-        } else {
-            this.spritesheet.draw(context, this.rect, new Rect(new Vector2d(CHARACTER_DIMS.x,0), CHARACTER_DIMS.x, CHARACTER_DIMS.y));
-        }
-
-        if (this.showDebug) {
-            context.strokeStyle = '#00ff00';
-            context.strokeRect(this.rect.position.x, this.rect.position.y, this.rect.width, this.rect.height);
-        }
-    }
 }
 
 class Player extends Character {
@@ -182,21 +223,6 @@ class Player extends Character {
         this.maxJumpCount = 2;
         this.jumpCount = 0;
         this.spritesheet = spritesheet;
-    }
-
-    draw(context) {
-        if (!this.isAlive()) return;
-        if (this.direction == 1) {
-            this.spritesheet.draw(context, this.rect, new Rect(new Vector2d(CHARACTER_DIMS.x * 2,0), CHARACTER_DIMS.x, CHARACTER_DIMS.y));
-
-        } else {
-            this.spritesheet.draw(context, this.rect, new Rect(new Vector2d(CHARACTER_DIMS.x * 3,0), CHARACTER_DIMS.x, CHARACTER_DIMS.y));
-        }
-
-        if (this.showDebug) {
-            context.strokeStyle = '#00ff00';
-            context.strokeRect(this.rect.position.x, this.rect.position.y, this.rect.width, this.rect.height);
-        }
     }
 }
 
