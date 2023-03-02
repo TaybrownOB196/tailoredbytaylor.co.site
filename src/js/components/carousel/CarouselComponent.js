@@ -8,7 +8,6 @@ class CarouselComponent extends React.Component {
     }
 
     render() {
-        console.log(this.state.components[this.state.componentIndex])
         return (
             <div className='carousel'>
                 <div className='carousel-left' onClick={() => this.toggleContent('left')}>{'<'}</div>

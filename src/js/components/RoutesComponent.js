@@ -10,6 +10,7 @@ import About from './routes/About';
 import Utility from './../lib/Utility';
 import HangmanComponent from './games/Hangman/HangmanComponent';
 import MatchingGameComponent from './games/MatchingGame/MatchingGameComponent';
+import CheckersComponent from './games/Checkers/CheckersComponent';
 import FourInARowComponent from './games/FourInARow/FourInARowComponent';
 import TictactoeComponent from './games/Tictactoe/TictactoeComponent';
 import Projects from './routes/Projects';
@@ -40,6 +41,7 @@ class RoutesComponent extends React.Component {
                         <Route path='resume' element={<Resume />} />
                         <Route path='games' element={
                             <CarouselComponent components={[
+                                <CheckersComponent />, 
                                 <MatchingGameComponent colCount={6} rowCount={6} />, 
                                 <TictactoeComponent />, 
                                 <FourInARowComponent />, 

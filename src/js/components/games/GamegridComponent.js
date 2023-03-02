@@ -10,7 +10,7 @@ class GamegridComponent extends React.Component {
         this.handleClick = this.handleClick.bind(this);
         this.handleMouseEnter = this.handleMouseEnter.bind(this);
         this.handleMouseLeave = this.handleMouseLeave.bind(this);
-        this.state = { ID: Utility.GetRandomInt(1337), Grid: this.props.grid };
+        this.state = { ID: props.ID || Utility.GetRandomInt(1337), Grid: this.props.grid };
     }
 
     handleMouseEnter(e) {
