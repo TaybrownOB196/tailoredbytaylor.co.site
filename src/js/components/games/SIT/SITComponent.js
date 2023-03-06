@@ -1,5 +1,6 @@
 import React from 'react';
 import SIT from './Index';
+import spritesheet from '../../../../png/cars_ss.png';
 
 class SITComponent extends React.Component {
     constructor(props) {
@@ -16,7 +17,9 @@ class SITComponent extends React.Component {
     render() {
         return (
             <div id='SITComponent'>
-                <div id='SITContainer'></div>
+                <div id='SITContainer'>
+                    <img className='tbt-spritesheet' src={spritesheet} />
+                </div>
                 <button id='SITContainer-Start' onClick={this.onClickStart}>Start</button>
             </div>
         )

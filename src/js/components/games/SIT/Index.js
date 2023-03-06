@@ -11,6 +11,72 @@ import { Dashboard, Road, PlayerVehicle, NpcVehicle } from './gameobjects';
 import './../../../../sass/sit.scss';
 import spritesheet from './../../../../png/cars.png'
 
+class Animation {
+    constructor(order=0) {
+        this._frameTicker = 0;
+
+        this.order = order;
+        this.frames = [];
+        this.frameIndex = 0;
+        this.isBuilt = false;
+
+        this.isStarted = false;
+    }
+
+    build() {
+        this.isBuilt = true;
+    }
+
+    addFrame(animationFrame) {
+        if (this.isBuilt) throw new Error('animation already built, no frames can be added');
+        this.frames.push(animationFrame);
+    }
+
+    getNext() {
+        this.isStarted = true;
+        let toReturn = this.frames[this.frameIndex];
+        if (this._frameTicker > toReturn.count) {
+            this.frameIndex++;
+            this._frameTicker = 0;
+        }
+        
+        if (this.frameIndex >= this.frames.length) {
+            this.reset();
+        }
+        
+        this._frameTicker++;
+        return toReturn;
+    }
+
+    getCurrent() { this.frames[this.frameIndex]; }
+
+    reset() {
+        this._frameTicker = 0;
+        this.frameIndex = 0;
+        this.isStarted = false;
+    }
+
+    isAnimating() {
+        return this.isStarted;
+    }
+}
+
+class AnimationFrame {
+    constructor(spritesheetRect, isInterruptable=false, count=1) {
+        //The values of this rect will be used as offsets to the current hitbox position of the object
+        this.spritesheetRect = spritesheetRect;
+        this.isInterruptable = isInterruptable;
+        this.count = count;
+    }
+}
+
+class HitboxFrame extends AnimationFrame {
+    constructor(hitboxOffsetRect, spritesheetRect, isInterruptable=false, count) {
+        super(spritesheetRect, isInterruptable, count);
+        this.hitboxOffsetRect = hitboxOffsetRect;
+    }
+}
+
 class SIT extends EngineBase {
     constructor() {
         super('SIT', 'SITContainer');
@@ -34,7 +100,40 @@ class SIT extends EngineBase {
                 roadH * this.scaleH), 
             laneCount,
             stripeWidth * this.scaleW);
-        
+
+        this.driftAnimation = new Animation(10);
+        this.driftAnimation.addFrame(
+            new HitboxFrame(
+                new Rect(new Vector2d(0,0), 0,0), 
+                new Rect(new Vector2d(0,0), 64,64),
+                true, 
+                1));
+        this.driftAnimation.addFrame(
+            new HitboxFrame(
+                new Rect(new Vector2d(0,0), 0,0), 
+                new Rect(new Vector2d(64,0), 64,64),
+                true, 
+                1));
+        this.driftAnimation.addFrame(
+            new HitboxFrame(
+                new Rect(new Vector2d(0,0), 0,0), 
+                new Rect(new Vector2d(128,0), 64,64),
+                true, 
+                1));
+        this.driftAnimation.addFrame(
+            new HitboxFrame(
+                new Rect(new Vector2d(0,0), 0,0), 
+                new Rect(new Vector2d(64*3,0), 64,64),
+                true, 
+                1));
+        this.driftAnimation.addFrame(
+            new HitboxFrame(
+                new Rect(new Vector2d(0,0), 0,0), 
+                new Rect(new Vector2d(0,0), 64,64),
+                true, 
+                1));
+        this.driftAnimation.build();
+
         this.vehicleDim = Math.ceil(this.road.getLaneWidth()) - this.road.stripeWidth;
         let lane = 1;
         let startX = this.xOffset + 
@@ -95,6 +194,11 @@ class SIT extends EngineBase {
         this.keyboardhandler = new Keyboardhandler(window);
         this.keyboardhandler.pubsub.subscribe('keydown', (ev) => {
             this.hud.update({kbi: ev.key});
+
+            switch (ev.key) {
+                case 'd':
+                break;
+            }
         });
     }
 
