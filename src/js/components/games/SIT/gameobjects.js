@@ -3,7 +3,9 @@ import PhysicsRect2d from '../../../lib/gaming/PhysicsRect2d';
 import Vector2d from '../../../lib/gaming/Vector2d';
 import Rect from '../../../lib/gaming/Rect';
 import Meter from '../../../lib/gaming/ui/Meter';
-import { urlToHttpOptions } from 'url';
+import { Animation, AnimationQueue, HitboxFrame, FrameTrigger } from '../../../lib/gaming/animation';
+
+// this.driftAnimation.draw(this.context, this.player.rect, this.spritesheetAnimSS);
 
 class Dashboard {
     constructor(rect, color) {
@@ -40,7 +42,7 @@ class Vehicle extends PhysicsRect2d {
         context.strokeRect(this.rect.position.x, this.rect.position.y, this.rect.width, this.rect.height);
     }
 
-    changeLane(lane, laneWidth) {
+    changeLane(lane, laneWidth, side) {
         this.lane = lane == null ? this.lane : lane;
         this.rect.position.x += laneWidth;
         this.laneChangeTicks = 0;
@@ -52,13 +54,86 @@ class Vehicle extends PhysicsRect2d {
 }
 
 class PlayerVehicle extends Vehicle {
-    constructor(rect, clipRect) {
-        super(rect, clipRect, 1, 1000);
+    constructor(rect, clipRect, lane, spriteSheet) {
+        super(rect, clipRect, lane, 1000);
         this.rageMeter = new Meter('#ff0000', 10, 10, 4, 10, '#000000');
+        this.animQueue = new AnimationQueue();
+        this.setAnimations(spriteSheet);
     }
 
-    draw(context, spritesheet) {
-        super.draw(context, spritesheet);
+    remAnim() {
+        console.log('this.animQueue')
+    }
+
+    changeLane(lane, laneWidth, side) {
+        this.animQueue.setState(side, true);
+        super.changeLane(lane, laneWidth, side);
+    }
+
+    setAnimations(spriteSheet) {
+        let idleAnim = new Animation(spriteSheet, 1, true);
+        let turnLeftAnim = new Animation(spriteSheet, 10, false);
+        let turnRightAnim = new Animation(spriteSheet, 10, false);
+        
+        idleAnim.addFrame(
+            new HitboxFrame(
+                new Rect(new Vector2d(0,0), 0,0), 
+                new Rect(new Vector2d(0,0), 64,64),
+                true, 
+                10));
+        idleAnim.addFrame(
+            new HitboxFrame(
+                new Rect(new Vector2d(0,0), 0,0), 
+                new Rect(new Vector2d(64,0), 64,64),
+                true, 
+                10));
+
+        turnLeftAnim.addFrame(
+            new HitboxFrame(
+                new Rect(new Vector2d(0,0), 0,0), 
+                new Rect(new Vector2d(128,0), 64,64),
+                true, 
+                10));
+        turnLeftAnim.addFrame(
+            new HitboxFrame(
+                new Rect(new Vector2d(0,0), 0,0), 
+                new Rect(new Vector2d(192,0), 64,64),
+                true, 
+                10));
+        turnLeftAnim.addFrame(
+            new HitboxFrame(
+                new Rect(new Vector2d(0,0), 0,0), 
+                new Rect(new Vector2d(256,0), 64,64),
+                true, 
+                10));
+
+        turnRightAnim.addFrame(
+            new HitboxFrame(
+                new Rect(new Vector2d(0,0), 0,0), 
+                new Rect(new Vector2d(320,0), 64,64),
+                true, 
+                10));
+        turnRightAnim.addFrame(
+            new HitboxFrame(
+                new Rect(new Vector2d(0,0), 0,0), 
+                new Rect(new Vector2d(384,0), 64,64),
+                true, 
+                10));
+        turnRightAnim.addFrame(
+            new HitboxFrame(
+                new Rect(new Vector2d(0,0), 0,0), 
+                new Rect(new Vector2d(448,0), 64,64),
+                true, 
+                10));
+        
+        this.animQueue.addState('idle', idleAnim);
+        this.animQueue.addState('left', turnLeftAnim);
+        this.animQueue.addState('right', turnRightAnim);
+        this.animQueue.build();
+    }
+
+    draw(context) {
+        this.animQueue.animate(context, this.rect);
         this.rageMeter.draw(context, 
             new Vector2d(this.rect.position.x, this.rect.position.y + this.rageMeter.height/2));
     }
