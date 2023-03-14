@@ -26,6 +26,10 @@ class EngineRunnerBase {
 
         window.requestAnimationFrame(this.run);
     }
+
+    stop() {
+        cancelAnimationFrame(this.run);
+    }
 }
 
 export default EngineRunnerBase;

@@ -1,0 +1,5 @@
+class ProjectileMotion {
+    static meth() {
+        
+    }
+}

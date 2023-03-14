@@ -19,6 +19,14 @@ import spritesheet from './../../../../png/cars.png';
 import spritesheetAnimSS from './../../../../png/cars_ss.png';
 import mainCarSS from './../../../../png/main_car_ss.png';
 
+const MAXSPEED = 5;
+const MINSPEED = 1;
+//TODO: Implement different car types that have varying performance based on:
+    //Acceleration: How quickly vehicle can catch up to the cursor
+    //Control: How quickly a vehicle can switch lanes
+    //Size: How large vehicle is (hitbox)
+//Vehicle specs
+
 class SIT extends EngineBase {
     constructor() {
         super('SIT', 'SITContainer');
@@ -32,7 +40,6 @@ class SIT extends EngineBase {
         this.xOffset = Math.ceil((this.canvas.clientWidth - roadW * this.scaleW) / 2);
         this.spawnTimerIntervalCallback = setInterval(this.spawnVehicle, 5000);
         this.isDriving = false;
-        this.speedIndex = 0;
         this.spritesheet = new Spritesheet(spritesheet);
         this.spritesheetAnimSS = new Spritesheet(spritesheetAnimSS);
         this.mainCarSS = new Spritesheet(mainCarSS);
@@ -46,6 +53,7 @@ class SIT extends EngineBase {
 
         this.vehicleDim = Math.ceil(this.road.getLaneWidth()) - this.road.stripeWidth;
         let lane = 1;
+        let speed = 0;//TODO: initial speed will be calculated based upon start height
         let startX = this.xOffset + 
             this.road.getLaneWidth() * this.scaleW * (lane) - 
             this.vehicleDim * this.scaleW - 
@@ -59,7 +67,8 @@ class SIT extends EngineBase {
             new Rect(
                 new Vector2d(0,192), 
                 64,
-                64), 
+                64),
+                speed,
                 lane,
                 this.mainCarSS);
         
@@ -86,7 +95,7 @@ class SIT extends EngineBase {
             this.handleMove(msePos);
         });
         this.pointerhandler.pubsub.subscribe('pointerup', (ev) => {
-            let msePos = this.getMousePosition(ev.layerX, ev.layerY);
+            // let msePos = this.getMousePosition(ev.layerX, ev.layerY);
             this.isDriving = false;
         });
         this.pointerhandler.pubsub.subscribe('pointermove', (ev) => {
@@ -119,37 +128,7 @@ class SIT extends EngineBase {
         let t = super.getMousePosition(x,y);
         return new Point2d(t.x * this.scaleW, t.y * this.scaleH);
     }
-    getSpeedSectionHeight() { return this.road.getHeight() / this.road.speeds.length; }
-    getSpeedSection(pos) {
-        //TODO: Fix scaling here
-        let speedSectionHeight = this.getSpeedSectionHeight();
-        let index = this.road.speeds.length-1;
-        for (let idx=0; idx<this.road.speeds.length; idx++) {
-            if (pos.y >= speedSectionHeight * idx && pos.y <= speedSectionHeight * (idx + 1)) {
-                return index;
-            }
-
-            index--;
-        }
-
-        return 0;
-    }
-    drawSpeedSections() {
-        this.context.strokeStyle = '#00ff00';
-        let speedSectionHeight = this.getSpeedSectionHeight();
-        for (let idx=0; idx<this.road.speeds.length; idx++) {
-            this.context.lineWidth = 1;
-            this.context.setLineDash([1,0]);
-            this.context.beginPath();
-            this.context.moveTo(
-                this.road.position.x, 
-                speedSectionHeight * idx);
-            this.context.lineTo(
-                this.road.position.x + this.road.getWidth(), 
-                speedSectionHeight * idx);
-            this.context.stroke();
-        }
-    }
+    
     changeLane(mseX, vehicle, road) {
         let lane = road.getLane(mseX);
         if (!lane || lane == vehicle.lane) return;
@@ -166,11 +145,12 @@ class SIT extends EngineBase {
     handleMove(msePos) {
         if (!this.isDriving) return;
 
-        this.road.changeSpeed(this.getSpeedSection(msePos));
-        if (this.road.speedIndex != 0) {
+        let roadHeight = this.road.getHeight();
+        this.road.setSpeed((roadHeight - msePos.y)/roadHeight * MAXSPEED);
+        if (this.road.speedValue > 0) {
             this.isDriving = true;
         }
-        this.hud.update({spd: this.road.speedIndex});
+        this.hud.update({spd: this.road.speedValue});
 
         let mseY = msePos.y - this.player.rect.height * this.scaleH;
         if (mseY >= 0 && mseY <= this.road.getHeight() - this.player.rect.height) {
@@ -204,10 +184,10 @@ class SIT extends EngineBase {
             this.road.stripeWidth;
         let startY = 0;
         if (spawnAbove) {
-            speed = Utility.getRandomIntInclusive(1, 1);
+            speed = Utility.getRandomIntInclusive(MINSPEED, MAXSPEED/2);
             startY = this.road.position.y - this.vehicleDim * this.scaleH;
         } else {
-            speed = Utility.getRandomIntInclusive(this.road.speeds.length/2, this.road.speeds.length-1);
+            speed = Utility.getRandomIntInclusive(MAXSPEED/2, MAXSPEED-2);
             startY = this.road.position.y + this.road.rects[0].height;
         }
         this.vehicles.push(new NpcVehicle(
@@ -219,8 +199,8 @@ class SIT extends EngineBase {
                 new Vector2d(0,256),
                 64,
                 64),
-            lane,
             speed,
+            lane,
             timeToLive,
             spawnAbove));
     }
@@ -272,8 +252,6 @@ class SIT extends EngineBase {
         this.road.draw(this.context);
         this.player.draw(this.context, this.spritesheet);
         this.dashboard.draw(this.context);
-
-        this.drawSpeedSections();
     }
     run() {
         super.run();

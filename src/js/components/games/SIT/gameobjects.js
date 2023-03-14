@@ -3,9 +3,11 @@ import PhysicsRect2d from '../../../lib/gaming/PhysicsRect2d';
 import Vector2d from '../../../lib/gaming/Vector2d';
 import Rect from '../../../lib/gaming/Rect';
 import Meter from '../../../lib/gaming/ui/Meter';
-import { Animation, AnimationQueue, HitboxFrame, FrameTrigger } from '../../../lib/gaming/animation';
+import { Animation, AnimationQueue, HitboxFrame } from '../../../lib/gaming/animation';
 
 // this.driftAnimation.draw(this.context, this.player.rect, this.spritesheetAnimSS);
+
+const turnFrameTickerCount = 5;
 
 class Dashboard {
     constructor(rect, color) {
@@ -20,10 +22,11 @@ class Dashboard {
 }
 
 class Vehicle extends PhysicsRect2d {
-    constructor(rect, clipRect, lane = 1, laneChangeCooldown = 1000) {
+    constructor(rect, clipRect, speed, lane = 1, laneChangeCooldown = 1000) {
         super(rect, 10, null);
         this.clipRect = clipRect;
         this.lane = lane;
+        this.speedValue = speed;
         this.laneChangeCooldown = laneChangeCooldown;
         this.laneChangeTicks = laneChangeCooldown;
     }
@@ -54,15 +57,11 @@ class Vehicle extends PhysicsRect2d {
 }
 
 class PlayerVehicle extends Vehicle {
-    constructor(rect, clipRect, lane, spriteSheet) {
-        super(rect, clipRect, lane, 1000);
+    constructor(rect, clipRect, speed, lane, spriteSheet) {
+        super(rect, clipRect, speed, lane, 1000);
         this.rageMeter = new Meter('#ff0000', 10, 10, 4, 10, '#000000');
         this.animQueue = new AnimationQueue();
         this.setAnimations(spriteSheet);
-    }
-
-    remAnim() {
-        console.log('this.animQueue')
     }
 
     changeLane(lane, laneWidth, side) {
@@ -93,38 +92,38 @@ class PlayerVehicle extends Vehicle {
                 new Rect(new Vector2d(0,0), 0,0), 
                 new Rect(new Vector2d(128,0), 64,64),
                 true, 
-                10));
+                turnFrameTickerCount));
         turnLeftAnim.addFrame(
             new HitboxFrame(
                 new Rect(new Vector2d(0,0), 0,0), 
                 new Rect(new Vector2d(192,0), 64,64),
                 true, 
-                10));
+                turnFrameTickerCount));
         turnLeftAnim.addFrame(
             new HitboxFrame(
                 new Rect(new Vector2d(0,0), 0,0), 
                 new Rect(new Vector2d(256,0), 64,64),
                 true, 
-                10));
+                turnFrameTickerCount));
 
         turnRightAnim.addFrame(
             new HitboxFrame(
                 new Rect(new Vector2d(0,0), 0,0), 
                 new Rect(new Vector2d(320,0), 64,64),
                 true, 
-                10));
+                turnFrameTickerCount));
         turnRightAnim.addFrame(
             new HitboxFrame(
                 new Rect(new Vector2d(0,0), 0,0), 
                 new Rect(new Vector2d(384,0), 64,64),
                 true, 
-                10));
+                turnFrameTickerCount));
         turnRightAnim.addFrame(
             new HitboxFrame(
                 new Rect(new Vector2d(0,0), 0,0), 
                 new Rect(new Vector2d(448,0), 64,64),
                 true, 
-                10));
+                turnFrameTickerCount));
         
         this.animQueue.addState('idle', idleAnim);
         this.animQueue.addState('left', turnLeftAnim);
@@ -140,10 +139,9 @@ class PlayerVehicle extends Vehicle {
 }
 
 class NpcVehicle extends Vehicle {
-    constructor(rect, clipRect, lane, speed, timeToLive, isSpawnAbove) {
-        super(rect, clipRect, lane);
+    constructor(rect, clipRect, speed, lane, timeToLive, isSpawnAbove) {
+        super(rect, clipRect, speed, lane);
         this.initPosition = new Vector2d(rect.position.x, rect.position.y);
-        this.speedIndex = speed;
         this.health = true;
         this.canDespawn = false;
         this.timeToLive = timeToLive;
@@ -153,13 +151,14 @@ class NpcVehicle extends Vehicle {
 
     update(tickDelta, road) {
         super.update(tickDelta);
-        let yMod = road.speeds[this.speedIndex];
-        if (road.speedIndex < this.speedIndex)
-            yMod *= -1;
-        else if (road.speedIndex == this.speedIndex)
+        let yMod = 1;
+        if (road.speedIndex == this.speedValue)
             yMod = 0;
-
-        this.rect.position.y += yMod;
+        if (road.speedValue < this.speedValue) {
+            yMod *= -1;
+        }
+        // this.speedValue = Math.abs(road.speedValue - this.speedValue);
+        this.rect.position.y += this.speedValue * yMod;
         if (this._ttlTicks < this.timeToLive) {
             this._ttlTicks += tickDelta;
         } else {
@@ -185,11 +184,14 @@ class Road extends Gameobject {
         this.rects.push(rect);
         this.rects.push(new Rect(new Vector2d(rect.position.x, rect.position.y - rect.height), rect.width, rect.height));
         this.speedIndex = 1;
-        // this.speeds = [0, 1, 2, 3, 4];
-        this.speeds = [0, .5, 1, 1.5, 2];
+        // // this.speeds = [0, 1, 2, 3, 4];
+        // this.speeds = [0, .5, 1, 1.5, 2];
+        this.speedSectionCount = 5;
         this.stripeYOffset = 0;
         this._offsetTick = 0;
         this.rectsIndex = 0;
+
+        this.speedValue = 0;
     }
 
     update(delta) {
@@ -198,18 +200,24 @@ class Road extends Gameobject {
         if (this.rects[this.rectsIndex].position.y > _height) {
             this.rects[this.rectsIndex].position.y = this.rects[otherIndex].position.y - _height;
             this.rectsIndex = otherIndex;
-            this.rects[otherIndex].position.y += this.getSpeed();
+            // this.rects[otherIndex].position.y += this.getSpeed();
+            this.rects[otherIndex].position.y += this.speedValue;
         } else {
-            this.rects[this.rectsIndex].position.y += this.getSpeed();
+            // this.rects[this.rectsIndex].position.y += this.getSpeed();
+            this.rects[this.rectsIndex].position.y += this.speedValue;
             this.rects[otherIndex].position.y = this.rects[this.rectsIndex].position.y - this.rects[otherIndex].height;
         }
     }
 
     draw(context) {
         drawLanes = drawLanes.bind(this);
+        drawSpeedSections = drawSpeedSections.bind(this);
+        getSpeedSectionHeight = getSpeedSectionHeight.bind(this);
 
         drawLanes(context, this.rects[0]);
         drawLanes(context, this.rects[1]);
+
+        drawSpeedSections(context);
 
         function drawLanes(context, rect) {
             let laneWidth = this.getWidth() / this.laneCount;
@@ -227,20 +235,32 @@ class Road extends Gameobject {
                 context.stroke();
             }
         }
-    }
-    
 
-    getSpeed() { return this.speeds[this.speedIndex]; }
+        function drawSpeedSections(context) {
+            context.strokeStyle = '#00ff00';
+            let speedSectionHeight = getSpeedSectionHeight(self);
+            for (let idx=0; idx<this.speedSectionCount; idx++) {
+                context.lineWidth = 1;
+                context.setLineDash([1,0]);
+                context.beginPath();
+                context.moveTo(
+                    this.position.x, 
+                    speedSectionHeight * idx);
+                context.lineTo(
+                    this.position.x + this.getWidth(), 
+                    speedSectionHeight * idx);
+                context.stroke();
+            }
+        }
+
+        function getSpeedSectionHeight() { return this.getHeight() / this.speedSectionCount; }  
+    }
+
+
+    setSpeed(speed) { return this.speedValue = speed; }
+    getSpeed() { return this.speedValue; }
     getHeight() { return this.rects[0].height; }
     getWidth() { return this.rects[0].width; }
-
-    increaseSpeed() { this.changeSpeed(this.speedIndex + 1); }
-    decreaseSpeed() { this.changeSpeed(this.speedIndex - 1); }
-    changeSpeed(speed) {
-        if (speed == this.speedIndex || speed >= this.speeds.length || speed < 0)
-            return;
-        this.speedIndex = speed;
-    }
 
     getLaneWidth() { return this.getWidth() / this.laneCount; }
     getLane(posX) {
