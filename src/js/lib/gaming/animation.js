@@ -91,6 +91,9 @@ class Animation {
     }
 
     draw(context, positionRect) {
+        getNext = getNext.bind(this);
+        reset = reset.bind(this);
+
         if (!this.isAnimating() || this._frameTicker + 1 >= this.frames[this.frameIndex].count) {
             let frameTriggers = this.frameTriggers.filter(x => x.frameIndex == this.frameIndex);
             for (let frameTrigger in frameTriggers) {
@@ -98,33 +101,33 @@ class Animation {
             }
         }
 
-        let frame = getNext(this);
+        let frame = getNext();
         this.spritesheet.draw(context,
             frame.offsetRect(positionRect),
             frame.spritesheetRect);
         
-            function getNext(self) {
-                let toReturn = self.frames[self.frameIndex];
-                self.isRunning = true;
-                if (self._frameTicker >= self.frames[self.frameIndex].count) {
-                    if (self.frameIndex < self.frames.length-1) {
-                        self.frameIndex++;
+            function getNext() {
+                let toReturn = this.frames[this.frameIndex];
+                this.isRunning = true;
+                if (this._frameTicker >= this.frames[this.frameIndex].count) {
+                    if (this.frameIndex < this.frames.length-1) {
+                        this.frameIndex++;
                     } else {
                         console.log('complete')
-                        self._isCompleted = !self.isLooping;
-                        reset(self);
+                        this._isCompleted = !this.isLooping;
+                        reset();
                     }
-                    self._frameTicker = 0;
+                    this._frameTicker = 0;
                 }
 
-                self._frameTicker++;
+                this._frameTicker++;
                 return toReturn;
             }
         
-            function reset(self) {
-                self._frameTicker = 0;
-                self.frameIndex = 0;
-                self.isRunning = false;
+            function reset() {
+                this._frameTicker = 0;
+                this.frameIndex = 0;
+                this.isRunning = false;
             }
     }
 
