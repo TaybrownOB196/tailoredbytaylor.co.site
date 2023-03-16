@@ -128,20 +128,6 @@ class SIT extends EngineBase {
         let t = super.getMousePosition(x,y);
         return new Point2d(t.x * this.scaleW, t.y * this.scaleH);
     }
-    
-    changeLane(mseX, vehicle, road) {
-        let lane = road.getLane(mseX);
-        if (!lane || lane == vehicle.lane) return;
-        
-        let side = lane > vehicle.lane ? 'right' : 'left';
-        let laneWidth = road.getLaneWidth();
-        if (side == 'left') {
-            laneWidth *= -1;
-            vehicle.changeLane(vehicle.lane - 1, laneWidth, side);
-        } else if (side == 'right' && vehicle.lane < road.laneCount) {
-            vehicle.changeLane(vehicle.lane + 1, laneWidth, side);
-        }
-    }
     handleMove(msePos) {
         if (!this.isDriving) return;
 
@@ -159,7 +145,7 @@ class SIT extends EngineBase {
 
         if (this.player.canChangeLane()) {
             let mseX = msePos.x - this.xOffset;
-            this.changeLane(mseX, this.player, this.road);
+            this.player.changeLane(this.road.getLane(mseX), this.road.getLaneWidth(), this.road.laneCount);
         }
     }
     handleCollisions(player, vehicles, resolution) {
@@ -244,8 +230,6 @@ class SIT extends EngineBase {
         this.vehicles = Utility.RemoveAll(this.vehicles, (vehicle) => { return !vehicle.isAlive() || this.canDespawnOffscreen(vehicle) });
     }
     draw() {
-        //this.hud.draw(this.context);
-
         for (let vehicle of this.vehicles) {
             vehicle.draw(this.context, this.spritesheet);
         }        

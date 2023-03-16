@@ -12,12 +12,10 @@ class AnimationQueue {
 
     animate(context, positionRect) {
         if (this.queue.length > 0 && this.queue.at(0).isCompleted()) {
-            let anim = this.queue.shift();
-            anim.reset();
+            this.queue.shift().reset();
         }
 
         if (this.queue.length == 0 && this.stateMap.has('idle')) {
-            console.log('return to idle')
             this.queue.push(this.stateMap.get('idle'))
         }
 
@@ -33,9 +31,8 @@ class AnimationQueue {
         }
         
         let anim = this.stateMap.get(stateKey);
-        if (isClear) {
+        if (isClear && this.queue.length > 0) {
             this.queue = this.queue.filter(x => x.order >= anim.order);
-            console.log(this.queue)
         }
         this.queue.push(anim);
     }
@@ -106,29 +103,28 @@ class Animation {
             frame.offsetRect(positionRect),
             frame.spritesheetRect);
         
-            function getNext() {
-                let toReturn = this.frames[this.frameIndex];
-                this.isRunning = true;
-                if (this._frameTicker >= this.frames[this.frameIndex].count) {
-                    if (this.frameIndex < this.frames.length-1) {
-                        this.frameIndex++;
-                    } else {
-                        console.log('complete')
-                        this._isCompleted = !this.isLooping;
-                        reset();
-                    }
-                    this._frameTicker = 0;
+        function getNext() {
+            let toReturn = this.frames[this.frameIndex];
+            this.isRunning = true;
+            if (this._frameTicker >= this.frames[this.frameIndex].count) {
+                if (this.frameIndex < this.frames.length-1) {
+                    this.frameIndex++;
+                } else {
+                    this._isCompleted = !this.isLooping;
+                    reset();
                 }
-
-                this._frameTicker++;
-                return toReturn;
-            }
-        
-            function reset() {
                 this._frameTicker = 0;
-                this.frameIndex = 0;
-                this.isRunning = false;
             }
+
+            this._frameTicker++;
+            return toReturn;
+        }
+    
+        function reset() {
+            this._frameTicker = 0;
+            this.frameIndex = 0;
+            this.isRunning = false;
+        }
     }
 
     reset() {

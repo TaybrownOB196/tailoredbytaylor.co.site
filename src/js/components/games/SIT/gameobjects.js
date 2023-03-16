@@ -22,7 +22,7 @@ class Dashboard {
 }
 
 class Vehicle extends PhysicsRect2d {
-    constructor(rect, clipRect, speed, lane = 1, laneChangeCooldown = 1000) {
+    constructor(rect, clipRect, speed, lane = 1, laneChangeCooldown = 3000) {
         super(rect, 10, null);
         this.clipRect = clipRect;
         this.lane = lane;
@@ -32,9 +32,9 @@ class Vehicle extends PhysicsRect2d {
     }
 
     update(tickDelta) {
-        super.update(tickDelta);
+        // super.update(tickDelta);
         if (this.laneChangeTicks >= this.laneChangeCooldown) return;
-        this.laneChangeTicks += tickDelta;
+        this.laneChangeTicks += tickDelta * 1000;
     }
 
     draw(context, spriteSheet) {
@@ -43,12 +43,6 @@ class Vehicle extends PhysicsRect2d {
         context.lineWidth = 1;
         context.setLineDash([1, 0]);
         context.strokeRect(this.rect.position.x, this.rect.position.y, this.rect.width, this.rect.height);
-    }
-
-    changeLane(lane, laneWidth, side) {
-        this.lane = lane == null ? this.lane : lane;
-        this.rect.position.x += laneWidth;
-        this.laneChangeTicks = 0;
     }
 
     canChangeLane() {
@@ -63,10 +57,19 @@ class PlayerVehicle extends Vehicle {
         this.animQueue = new AnimationQueue();
         this.setAnimations(spriteSheet);
     }
-
-    changeLane(lane, laneWidth, side) {
+    
+    changeLane(lane, laneWidth, laneCount) {
+        let side = lane > this.lane ? 'right' : 'left';        
+        if ((!side && !lane) || lane == this.lane) return;
+        if (side == 'left') {
+            laneWidth *= -1;
+            this.rect.position.x += laneWidth;
+        } else if (side == 'right' && this.lane < laneCount) {
+            this.rect.position.x += laneWidth;
+        }
         this.animQueue.setState(side, true);
-        super.changeLane(lane, laneWidth, side);
+        this.lane = lane;
+        this.laneChangeTicks = 0;
     }
 
     setAnimations(spriteSheet) {
@@ -152,12 +155,13 @@ class NpcVehicle extends Vehicle {
     update(tickDelta, road) {
         super.update(tickDelta);
         let yMod = 1;
-        if (road.speedIndex == this.speedValue)
+        // if (road.speedValue == this.speedValue)
+        if (Math.round(road.speedValue) == Math.round(this.speedValue))
             yMod = 0;
-        if (road.speedValue < this.speedValue) {
+        else if (road.speedValue < this.speedValue) {
             yMod *= -1;
         }
-        // this.speedValue = Math.abs(road.speedValue - this.speedValue);
+
         this.rect.position.y += this.speedValue * yMod;
         if (this._ttlTicks < this.timeToLive) {
             this._ttlTicks += tickDelta;
@@ -183,15 +187,13 @@ class Road extends Gameobject {
         this.rects = [];
         this.rects.push(rect);
         this.rects.push(new Rect(new Vector2d(rect.position.x, rect.position.y - rect.height), rect.width, rect.height));
-        this.speedIndex = 1;
-        // // this.speeds = [0, 1, 2, 3, 4];
-        // this.speeds = [0, .5, 1, 1.5, 2];
+
         this.speedSectionCount = 5;
+        this.speedValue = 0;
+
         this.stripeYOffset = 0;
         this._offsetTick = 0;
         this.rectsIndex = 0;
-
-        this.speedValue = 0;
     }
 
     update(delta) {
@@ -238,7 +240,7 @@ class Road extends Gameobject {
 
         function drawSpeedSections(context) {
             context.strokeStyle = '#00ff00';
-            let speedSectionHeight = getSpeedSectionHeight(self);
+            let speedSectionHeight = getSpeedSectionHeight();
             for (let idx=0; idx<this.speedSectionCount; idx++) {
                 context.lineWidth = 1;
                 context.setLineDash([1,0]);
