@@ -7,7 +7,11 @@ import { Animation, AnimationQueue, HitboxFrame } from '../../../lib/gaming/anim
 
 // this.driftAnimation.draw(this.context, this.player.rect, this.spritesheetAnimSS);
 
-const turnFrameTickerCount = 5;
+const LANE_CHANGE_FRAME_TICKER_COUNT = 5;
+const LANE_CHANGE_SECONDS = 1000;
+const LANE_CHANGE_COOLDOWN_SECONDS = 3000;
+
+const DEBUG_GREEN = '#00ff00';
 
 class Dashboard {
     constructor(rect, color) {
@@ -22,54 +26,82 @@ class Dashboard {
 }
 
 class Vehicle extends PhysicsRect2d {
-    constructor(rect, clipRect, speed, lane = 1, laneChangeCooldown = 3000) {
+    constructor(rect, clipRect, speed, lane = 1, laneChangeCooldown = LANE_CHANGE_COOLDOWN_SECONDS) {
         super(rect, 10, null);
         this.clipRect = clipRect;
         this.lane = lane;
         this.speedValue = speed;
+
         this.laneChangeCooldown = laneChangeCooldown;
-        this.laneChangeTicks = laneChangeCooldown;
+        this.canChangeLaneTicks = laneChangeCooldown;
+        this.targetLaneX = null;
+        this.targetLaneTicks = 0;
+        this.laneChangeDirection = null;
     }
 
-    update(tickDelta) {
-        // super.update(tickDelta);
-        if (this.laneChangeTicks >= this.laneChangeCooldown) return;
-        this.laneChangeTicks += tickDelta * 1000;
+    update(tickDelta, frameMultiplier) {
+        let xMod = 1;
+        if (this.laneChangeDirection === 'left') {
+            xMod *= -1;
+        }
+        if (this.canChangeLaneTicks < this.laneChangeCooldown) {
+            this.canChangeLaneTicks += tickDelta;
+        }
+
+        if (!this.targetLaneX) return;
+
+        this.targetLaneTicks += tickDelta;
+
+        if (this.targetLaneTicks >= LANE_CHANGE_SECONDS) {
+            this.rect.position.x = this.targetLaneX;
+            this.targetLaneX = null;
+            this.laneChangeDirection = null;
+            this.targetLaneTicks = 0;
+        } else {
+            this.rect.position.x = this.rect.position.x + (
+                (this.targetLaneTicks / LANE_CHANGE_SECONDS) * Math.abs(this.rect.position.x - this.targetLaneX))
+                * xMod;
+        }
+    }
+
+    canChangeLane() {
+        return this.canChangeLaneTicks >= this.laneChangeCooldown && !this.targetLaneX;
+    }
+
+    changeLane(lane, laneWidth) {
+        if (isNaN(lane) || lane == this.lane) return;
+        
+        this.laneChangeDirection = lane > this.lane ? 'right' : 'left';
+        if (this.laneChangeDirection == 'left') {
+            laneWidth *= -1;
+        }
+        
+        this.targetLaneX = this.rect.position.x + laneWidth;
+        this.lane = lane;
+        this.canChangeLaneTicks = 0;
     }
 
     draw(context, spriteSheet) {
         spriteSheet.draw(context, this.rect, this.clipRect);
-        context.strokeStyle = '#00ff00';
+        context.strokeStyle = DEBUG_GREEN;
         context.lineWidth = 1;
         context.setLineDash([1, 0]);
         context.strokeRect(this.rect.position.x, this.rect.position.y, this.rect.width, this.rect.height);
-    }
-
-    canChangeLane() {
-        return this.laneChangeTicks >= this.laneChangeCooldown;
     }
 }
 
 class PlayerVehicle extends Vehicle {
     constructor(rect, clipRect, speed, lane, spriteSheet) {
-        super(rect, clipRect, speed, lane, 1000);
+        super(rect, clipRect, speed, lane, LANE_CHANGE_COOLDOWN_SECONDS);
         this.rageMeter = new Meter('#ff0000', 10, 10, 4, 10, '#000000');
         this.animQueue = new AnimationQueue();
         this.setAnimations(spriteSheet);
     }
-    
+
     changeLane(lane, laneWidth, laneCount) {
-        let side = lane > this.lane ? 'right' : 'left';        
-        if ((!side && !lane) || lane == this.lane) return;
-        if (side == 'left') {
-            laneWidth *= -1;
-            this.rect.position.x += laneWidth;
-        } else if (side == 'right' && this.lane < laneCount) {
-            this.rect.position.x += laneWidth;
-        }
-        this.animQueue.setState(side, true);
-        this.lane = lane;
-        this.laneChangeTicks = 0;
+        if (isNaN(lane) || lane == this.lane) return;
+        super.changeLane(lane, laneWidth, laneCount);
+        this.animQueue.setState(this.laneChangeDirection, true);
     }
 
     setAnimations(spriteSheet) {
@@ -95,38 +127,38 @@ class PlayerVehicle extends Vehicle {
                 new Rect(new Vector2d(0,0), 0,0), 
                 new Rect(new Vector2d(128,0), 64,64),
                 true, 
-                turnFrameTickerCount));
+                LANE_CHANGE_FRAME_TICKER_COUNT));
         turnLeftAnim.addFrame(
             new HitboxFrame(
                 new Rect(new Vector2d(0,0), 0,0), 
                 new Rect(new Vector2d(192,0), 64,64),
                 true, 
-                turnFrameTickerCount));
+                LANE_CHANGE_FRAME_TICKER_COUNT));
         turnLeftAnim.addFrame(
             new HitboxFrame(
                 new Rect(new Vector2d(0,0), 0,0), 
                 new Rect(new Vector2d(256,0), 64,64),
                 true, 
-                turnFrameTickerCount));
+                LANE_CHANGE_FRAME_TICKER_COUNT));
 
         turnRightAnim.addFrame(
             new HitboxFrame(
                 new Rect(new Vector2d(0,0), 0,0), 
                 new Rect(new Vector2d(320,0), 64,64),
                 true, 
-                turnFrameTickerCount));
+                LANE_CHANGE_FRAME_TICKER_COUNT));
         turnRightAnim.addFrame(
             new HitboxFrame(
                 new Rect(new Vector2d(0,0), 0,0), 
                 new Rect(new Vector2d(384,0), 64,64),
                 true, 
-                turnFrameTickerCount));
+                LANE_CHANGE_FRAME_TICKER_COUNT));
         turnRightAnim.addFrame(
             new HitboxFrame(
                 new Rect(new Vector2d(0,0), 0,0), 
                 new Rect(new Vector2d(448,0), 64,64),
                 true, 
-                turnFrameTickerCount));
+                LANE_CHANGE_FRAME_TICKER_COUNT));
         
         this.animQueue.addState('idle', idleAnim);
         this.animQueue.addState('left', turnLeftAnim);
@@ -152,11 +184,11 @@ class NpcVehicle extends Vehicle {
         this.isSpawnAbove = isSpawnAbove;
     }
 
-    update(tickDelta, road) {
+    update(tickDelta, frameMultiplier, road) {
         super.update(tickDelta);
         let yMod = 1;
         // if (road.speedValue == this.speedValue)
-        if (Math.round(road.speedValue) == Math.round(this.speedValue))
+        if (road.speedValue == this.speedValue)
             yMod = 0;
         else if (road.speedValue < this.speedValue) {
             yMod *= -1;
@@ -197,8 +229,8 @@ class Road extends Gameobject {
     }
 
     update(delta) {
-        let _height = this.getHeight();
-        let otherIndex = this.rectsIndex == 0 ? 1 : 0;
+        const _height = this.getHeight();
+        const otherIndex = this.rectsIndex == 0 ? 1 : 0;
         if (this.rects[this.rectsIndex].position.y > _height) {
             this.rects[this.rectsIndex].position.y = this.rects[otherIndex].position.y - _height;
             this.rectsIndex = otherIndex;
@@ -239,7 +271,7 @@ class Road extends Gameobject {
         }
 
         function drawSpeedSections(context) {
-            context.strokeStyle = '#00ff00';
+            context.strokeStyle = DEBUG_GREEN;
             let speedSectionHeight = getSpeedSectionHeight();
             for (let idx=0; idx<this.speedSectionCount; idx++) {
                 context.lineWidth = 1;

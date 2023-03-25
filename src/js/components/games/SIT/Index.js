@@ -145,7 +145,7 @@ class SIT extends EngineBase {
 
         if (this.player.canChangeLane()) {
             let mseX = msePos.x - this.xOffset;
-            this.player.changeLane(this.road.getLane(mseX), this.road.getLaneWidth(), this.road.laneCount);
+            this.player.changeLane(this.road.getLane(mseX), this.road.getLaneWidth());
         }
     }
     handleCollisions(player, vehicles, resolution) {
@@ -206,9 +206,9 @@ class SIT extends EngineBase {
 
         if (!this.isDriving) return;
         this.road.update(this.tickDelta);
-        this.player.update(this.tickDelta);
+        this.player.update(this.tickDelta, this.frameMultiplier);
         for (let vehicle of this.vehicles) {
-            vehicle.update(this.tickDelta, this.road);
+            vehicle.update(this.tickDelta, this.frameMultiplier, this.road);
         }
 
         this.handleCollisions(
