@@ -2,10 +2,9 @@ import { Gameobject } from '../../../lib/gaming/common';
 import PhysicsRect2d from '../../../lib/gaming/PhysicsRect2d';
 import Vector2d from '../../../lib/gaming/Vector2d';
 import Rect from '../../../lib/gaming/Rect';
-import Meter from '../../../lib/gaming/ui/Meter';
+import BarMeter from '../../../lib/gaming/ui/BarMeter';
 import { Animation, AnimationQueue, HitboxFrame } from '../../../lib/gaming/animation';
-import Transformation2d from '../../../lib/gaming/Transformation2d';
-
+import NeedleMeter from '../../../lib/gaming/ui/NeedleMeter';
 // this.driftAnimation.draw(this.context, this.player.rect, this.spritesheetAnimSS);
 
 const LANE_CHANGE_FRAME_TICKER_COUNT = 5;
@@ -13,105 +12,32 @@ const LANE_CHANGE_SECONDS = 1000;
 const LANE_CHANGE_COOLDOWN_SECONDS = 3000;
 
 const DEBUG_GREEN = '#00ff00';
-const BLACK = '#000';
-
-class SpeedOMeter {
-    constructor(position, radius, minValue=0,maxValue=100,initValue=0) {
-        this.position = position;
-        this.radius = radius;
-        this.minValue = minValue;
-        this.maxValue = maxValue;
-        this.initValue = initValue;
-    }
-
-    update(value) {
-        this.value = value;
-    }
-
-    draw(context) {
-        let v0 = Vector2d.pointsToVector({x:x, y:y}, {x:x - this.radius, y:y});
-        
-        context.strokeStyle = BLACK;
-        context.beginPath();
-        context.ellipse(
-            this.position.x,
-            this.position.y, 
-            this.radius, 
-            this.radius, 
-            0, 0, Math.PI, true);
-        context.stroke();
-
-        context.strokeStyle = '#ff0000';
-        context.beginPath();
-        context.moveTo(x,y);
-        let res = Transformation2d.rotateVector2dAroundPoint(v0, this.value, {x:x,y:y});
-        context.lineTo(
-            res.x,
-            res.y);
-        context.stroke();
-
-        context.fillStyle = BLACK;
-        context.beginPath();
-        context.ellipse(x,y, 4, 2, 0, 0, 2 * Math.PI, true);
-        context.fill()
-        context.stroke();
-    }
-}
 
 class Dashboard {
     constructor(rect, color) {
         this.rect = rect;
         this.color = color;
 
-        this.speed = 30;
+        let radius = 25;
         this.collisions = 0;
+
+        let x = this.rect.position.x + (this.rect.width - radius/2)/2;
+        let y = this.rect.position.y + (radius) + 2;
+        this.speedOMeter = new NeedleMeter(new Vector2d(x,y), 25, 5, 0);
     }
 
     update(speed) {
-        this.speed = speed;
+        this.speedOMeter.update(speed);
     }
 
     draw(context) {
         drawText = drawText.bind(this);
-        drawSpeedOMeter = drawSpeedOMeter.bind(this);
         context.fillStyle = this.color;
         context.fillRect(this.rect.position.x, this.rect.position.y, this.rect.width, this.rect.height);
 
         // drawText();
-        drawSpeedOMeter();
-
-        function drawSpeedOMeter() {
-            let degree = this.speed;
-            let yOffset = 5;
-            let radiusX = 25;
-            let radiusY = 15;
-            let x = this.rect.position.x + (this.rect.width - radiusX/2)/2;
-            let y = this.rect.position.y + (this.rect.height - radiusY) + context.lineWidth + yOffset;
-            let v0 = Vector2d.pointsToVector({x:x, y:y}, {x:x - radiusX, y:y});
-            
-            context.strokeStyle = BLACK;
-            context.beginPath();
-            context.ellipse(x,y, radiusX, radiusY, 0, 0, Math.PI, true);
-            context.stroke();
-
-            context.strokeStyle = '#ff0000';
-            context.beginPath();
-            context.moveTo(x,y);
-            // context.lineTo(x - radiusX, y);
-            let res = Transformation2d.rotateVector2dAroundPoint(v0, degree, {x:x,y:y});
-            context.lineTo(
-                res.x,
-                res.y);
-                // Math.sin(degree) * v0.x + Math.cos(degree) * v0.y);
-            context.stroke();
-
-            context.fillStyle = BLACK;
-            context.beginPath();
-            context.ellipse(x,y, 4, 2, 0, 0, 2 * Math.PI, true);
-            context.fill()
-            context.stroke();
-        }
-
+        this.speedOMeter.draw(context);
+        
         function drawText() {
             context.font = '30px Arial';
             context.fillStyle = DEBUG_GREEN;
@@ -195,7 +121,7 @@ class Vehicle extends PhysicsRect2d {
 class PlayerVehicle extends Vehicle {
     constructor(rect, clipRect, speed, lane, spriteSheet) {
         super(rect, clipRect, speed, lane, LANE_CHANGE_COOLDOWN_SECONDS);
-        this.rageMeter = new Meter('#ff0000', 10, 10, 4, 10, '#000000');
+        this.rageMeter = new BarMeter('#ff0000', 10, 10, 4, 10, '#000000');
         this.animQueue = new AnimationQueue();
         this.setAnimations(spriteSheet);
     }
@@ -322,8 +248,8 @@ class Road extends Gameobject {
         this.rects.push(rect);
         this.rects.push(new Rect(new Vector2d(rect.position.x, rect.position.y - rect.height), rect.width, rect.height));
 
-        this.speedSectionCount = 5;
-        this.speedValue = 0;
+        this.maxSpeed = this.speedSectionCount = 5;
+        this.minSpeed = this.speedValue = 0
 
         this.stripeYOffset = 0;
         this._offsetTick = 0;
@@ -393,7 +319,14 @@ class Road extends Gameobject {
     }
 
 
-    setSpeed(speed) { return this.speedValue = speed; }
+    setSpeed(speed) {
+        if (speed < this.minSpeed) {
+            speed = this.minSpeed;
+        } else if (speed > this.maxSpeed) {
+            speed = this.maxSpeed;
+        }
+        this.speedValue = speed; 
+    }
     getSpeed() { return this.speedValue; }
     getHeight() { return this.rects[0].height; }
     getWidth() { return this.rects[0].width; }

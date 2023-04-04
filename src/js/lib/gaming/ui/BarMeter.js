@@ -1,4 +1,4 @@
-class Meter {
+class BarMeter {
     constructor(colorHex, initial, max, width, height, borderColorHex='#ffffff') {
         this.borderColorHex = borderColorHex;
         this.colorHex = colorHex;
@@ -53,4 +53,4 @@ class Meter {
     }
 }
 
-export default Meter;
+export default BarMeter;

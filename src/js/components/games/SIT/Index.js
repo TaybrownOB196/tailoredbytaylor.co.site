@@ -197,7 +197,6 @@ class SIT extends EngineBase {
 
         if (!this.isDriving) return;
         this.dashboard.update(this.road.speedValue)
-        console.log(this.road.speedValue * 180/Math.PI)
         this.road.update(this.tickDelta);
         this.player.update(this.tickDelta, this.frameMultiplier);
         for (let vehicle of this.vehicles) {
