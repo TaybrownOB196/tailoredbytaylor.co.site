@@ -74,8 +74,8 @@ class SIT extends EngineBase {
         
         this.dashboard = new Dashboard(
             new Rect(
-                new Vector2d(this.xOffset, this.road.getHeight()),
-                roadW * this.scaleW, 
+                new Vector2d(0, this.road.getHeight()),
+                this.canvas.clientWidth, 
                 (this.canvas.clientHeight - roadH) * this.scaleH),
                 '#8f563b');
 
@@ -190,21 +190,14 @@ class SIT extends EngineBase {
             timeToLive,
             spawnAbove));
     }
-    canDespawnOffscreen(vehicle) {
-        if (vehicle.isExpired() && 
-            (vehicle.rect.position.y + vehicle.rect.height < this.road.position.y || 
-            vehicle.rect.position.y >= this.road.position.y + this.road.rects[0].height)) {
-            console.log('despawn vehicle', this.vehicles);
-            return false;
-        }
-
-        return true;
-    }
     update() {
+        canDespawnOffscreen = canDespawnOffscreen.bind(this);
         let fps = this.getFps();
         this.hud.update({fps: fps});
 
         if (!this.isDriving) return;
+        this.dashboard.update(this.road.speedValue)
+        console.log(this.road.speedValue * 180/Math.PI)
         this.road.update(this.tickDelta);
         this.player.update(this.tickDelta, this.frameMultiplier);
         for (let vehicle of this.vehicles) {
@@ -227,7 +220,17 @@ class SIT extends EngineBase {
             }
         );
 
-        this.vehicles = Utility.RemoveAll(this.vehicles, (vehicle) => { return !vehicle.isAlive() || this.canDespawnOffscreen(vehicle) });
+        this.vehicles = Utility.RemoveAll(this.vehicles, (vehicle) => { return !vehicle.isAlive() || canDespawnOffscreen(vehicle) });
+    
+        function canDespawnOffscreen(vehicle) {
+            if (vehicle.isExpired() && 
+                (vehicle.rect.position.y + vehicle.rect.height < this.road.position.y || 
+                vehicle.rect.position.y >= this.road.position.y + this.road.rects[0].height)) {
+                return false;
+            }
+    
+            return true;
+        }
     }
     draw() {
         for (let vehicle of this.vehicles) {

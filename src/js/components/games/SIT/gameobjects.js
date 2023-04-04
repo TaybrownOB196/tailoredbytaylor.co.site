@@ -4,6 +4,7 @@ import Vector2d from '../../../lib/gaming/Vector2d';
 import Rect from '../../../lib/gaming/Rect';
 import Meter from '../../../lib/gaming/ui/Meter';
 import { Animation, AnimationQueue, HitboxFrame } from '../../../lib/gaming/animation';
+import Transformation2d from '../../../lib/gaming/Transformation2d';
 
 // this.driftAnimation.draw(this.context, this.player.rect, this.spritesheetAnimSS);
 
@@ -12,16 +13,117 @@ const LANE_CHANGE_SECONDS = 1000;
 const LANE_CHANGE_COOLDOWN_SECONDS = 3000;
 
 const DEBUG_GREEN = '#00ff00';
+const BLACK = '#000';
+
+class SpeedOMeter {
+    constructor(position, radius, minValue=0,maxValue=100,initValue=0) {
+        this.position = position;
+        this.radius = radius;
+        this.minValue = minValue;
+        this.maxValue = maxValue;
+        this.initValue = initValue;
+    }
+
+    update(value) {
+        this.value = value;
+    }
+
+    draw(context) {
+        let v0 = Vector2d.pointsToVector({x:x, y:y}, {x:x - this.radius, y:y});
+        
+        context.strokeStyle = BLACK;
+        context.beginPath();
+        context.ellipse(
+            this.position.x,
+            this.position.y, 
+            this.radius, 
+            this.radius, 
+            0, 0, Math.PI, true);
+        context.stroke();
+
+        context.strokeStyle = '#ff0000';
+        context.beginPath();
+        context.moveTo(x,y);
+        let res = Transformation2d.rotateVector2dAroundPoint(v0, this.value, {x:x,y:y});
+        context.lineTo(
+            res.x,
+            res.y);
+        context.stroke();
+
+        context.fillStyle = BLACK;
+        context.beginPath();
+        context.ellipse(x,y, 4, 2, 0, 0, 2 * Math.PI, true);
+        context.fill()
+        context.stroke();
+    }
+}
 
 class Dashboard {
     constructor(rect, color) {
         this.rect = rect;
         this.color = color;
+
+        this.speed = 30;
+        this.collisions = 0;
     }
 
-    draw(context, spriteSheet) {
+    update(speed) {
+        this.speed = speed;
+    }
+
+    draw(context) {
+        drawText = drawText.bind(this);
+        drawSpeedOMeter = drawSpeedOMeter.bind(this);
         context.fillStyle = this.color;
         context.fillRect(this.rect.position.x, this.rect.position.y, this.rect.width, this.rect.height);
+
+        // drawText();
+        drawSpeedOMeter();
+
+        function drawSpeedOMeter() {
+            let degree = this.speed;
+            let yOffset = 5;
+            let radiusX = 25;
+            let radiusY = 15;
+            let x = this.rect.position.x + (this.rect.width - radiusX/2)/2;
+            let y = this.rect.position.y + (this.rect.height - radiusY) + context.lineWidth + yOffset;
+            let v0 = Vector2d.pointsToVector({x:x, y:y}, {x:x - radiusX, y:y});
+            
+            context.strokeStyle = BLACK;
+            context.beginPath();
+            context.ellipse(x,y, radiusX, radiusY, 0, 0, Math.PI, true);
+            context.stroke();
+
+            context.strokeStyle = '#ff0000';
+            context.beginPath();
+            context.moveTo(x,y);
+            // context.lineTo(x - radiusX, y);
+            let res = Transformation2d.rotateVector2dAroundPoint(v0, degree, {x:x,y:y});
+            context.lineTo(
+                res.x,
+                res.y);
+                // Math.sin(degree) * v0.x + Math.cos(degree) * v0.y);
+            context.stroke();
+
+            context.fillStyle = BLACK;
+            context.beginPath();
+            context.ellipse(x,y, 4, 2, 0, 0, 2 * Math.PI, true);
+            context.fill()
+            context.stroke();
+        }
+
+        function drawText() {
+            context.font = '30px Arial';
+            context.fillStyle = DEBUG_GREEN;
+            let textMetrics = context.measureText(this.speed);
+            let textWidth = textMetrics.width;
+            let textHeight = textMetrics.actualBoundingBoxDescent || textMetrics.actualBoundingBoxAscent;
+            
+            context.fillText(
+                this.speed, 
+                this.rect.position.x + (this.rect.width - textWidth)/2, 
+                this.rect.position.y + (this.rect.height + textHeight)/2);
+        }
     }
 }
 
