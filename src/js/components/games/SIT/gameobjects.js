@@ -5,13 +5,70 @@ import Rect from '../../../lib/gaming/Rect';
 import BarMeter from '../../../lib/gaming/ui/BarMeter';
 import { Animation, AnimationQueue, HitboxFrame } from '../../../lib/gaming/animation';
 import NeedleMeter from '../../../lib/gaming/ui/NeedleMeter';
-// this.driftAnimation.draw(this.context, this.player.rect, this.spritesheetAnimSS);
+import Pubsub from '../../../lib/gaming/Pubsub';
+import Transformation2d from '../../../lib/gaming/Transformation2d';
 
 const LANE_CHANGE_FRAME_TICKER_COUNT = 5;
+const COLLISION_FRAME_TICKER_COUNT = 5;
 const LANE_CHANGE_SECONDS = 1000;
-const LANE_CHANGE_COOLDOWN_SECONDS = 3000;
+const LANE_CHANGE_COOLDOWN_SECONDS = 2000;
+const COLLISION_COOLDOWN_SECONDS = 4000;
 
 const DEBUG_GREEN = '#00ff00';
+
+class SpeedOMeter extends NeedleMeter {
+    constructor(position, radius, max, init) {
+        super(position, radius, max, init);
+    }
+
+    draw(context) {
+        let radians = (this.value/this.maxValue * Math.PI);
+        let v0 = Vector2d.pointsToVector(
+            {x:this.position.x, y:this.position.y}, 
+            {x:this.position.x - this.radius, y:this.position.y});
+        
+        // draw arc
+        context.strokeStyle = this.color;
+        context.beginPath();
+        context.arc(this.position.x,this.position.y, this.radius, Math.PI, 0);
+        context.stroke();
+
+        //draw ticks
+
+        //draw numbers
+        let numberCount = 3;
+        let fontSize = this.radius/numberCount;
+        context.font = `${fontSize}px Arial`;
+        for (let idx=0; idx<=numberCount; idx++) {
+            let text = Math.ceil(idx/numberCount * this.maxValue);
+            console.log(text)
+            let textMetrics = context.measureText(text);
+            let textWidth = textMetrics.width;
+            let textHeight = textMetrics.fontBoundingBoxAscent;
+            context.strokeText(
+                text, 
+                this.position.x - textWidth/2, 
+                this.position.y - this.radius + textHeight);
+        }
+
+
+        //draw needle
+        context.strokeStyle = this.needleColor;
+        context.beginPath();
+        context.moveTo(this.position.x - context.lineWidth, this.position.y - context.lineWidth);
+        let res = Transformation2d.rotateVector2dAroundPoint(v0, radians, {x:this.position.x,y:this.position.y});
+        context.lineTo(
+            res.x,
+            res.y);
+        context.stroke();
+
+        //draw needle center
+        context.fillStyle = this.color;
+        context.beginPath();
+        context.arc(this.position.x, this.position.y, this.dotSize, Math.PI, 0);
+        context.fill();
+    }
+}
 
 class Dashboard {
     constructor(rect, color) {
@@ -23,11 +80,16 @@ class Dashboard {
 
         let x = this.rect.position.x + (this.rect.width - radius/2)/2;
         let y = this.rect.position.y + (radius) + 2;
-        this.speedOMeter = new NeedleMeter(new Vector2d(x,y), 25, 5, 0);
+
+        this.speedOMeter = new SpeedOMeter(new Vector2d(x,y), radius, 5, 0);
+    }
+
+    addHit() {
+        this.collisions++;
     }
 
     update(speed) {
-        this.speedOMeter.update(speed);
+        this.speedOMeter.updateValue(speed);
     }
 
     draw(context) {
@@ -35,26 +97,27 @@ class Dashboard {
         context.fillStyle = this.color;
         context.fillRect(this.rect.position.x, this.rect.position.y, this.rect.width, this.rect.height);
 
-        // drawText();
         this.speedOMeter.draw(context);
+        drawText();
         
         function drawText() {
-            context.font = '30px Arial';
+            let text = `Hits: ${this.collisions}`;
+            context.font = '15px Arial';
             context.fillStyle = DEBUG_GREEN;
-            let textMetrics = context.measureText(this.speed);
+            let textMetrics = context.measureText(text);
             let textWidth = textMetrics.width;
             let textHeight = textMetrics.actualBoundingBoxDescent || textMetrics.actualBoundingBoxAscent;
             
             context.fillText(
-                this.speed, 
-                this.rect.position.x + (this.rect.width - textWidth)/2, 
+                text, 
+                this.speedOMeter.position.x + this.speedOMeter.radius, 
                 this.rect.position.y + (this.rect.height + textHeight)/2);
         }
     }
 }
 
 class Vehicle extends PhysicsRect2d {
-    constructor(rect, clipRect, speed, lane = 1, laneChangeCooldown = LANE_CHANGE_COOLDOWN_SECONDS) {
+    constructor(rect, clipRect, speed, lane = 1, laneChangeCooldown = LANE_CHANGE_COOLDOWN_SECONDS, collisionCooldown = COLLISION_COOLDOWN_SECONDS) {
         super(rect, 10, null);
         this.clipRect = clipRect;
         this.lane = lane;
@@ -65,9 +128,13 @@ class Vehicle extends PhysicsRect2d {
         this.targetLaneX = null;
         this.targetLaneTicks = 0;
         this.laneChangeDirection = null;
+
+        this.collisionCooldown = collisionCooldown;
+        this.collisionCooldownTicks = 0;
     }
 
     update(tickDelta, frameMultiplier) {
+        changingLane = changingLane.bind(this);
         let xMod = 1;
         if (this.laneChangeDirection === 'left') {
             xMod *= -1;
@@ -75,20 +142,25 @@ class Vehicle extends PhysicsRect2d {
         if (this.canChangeLaneTicks < this.laneChangeCooldown) {
             this.canChangeLaneTicks += tickDelta;
         }
+        this.collisionCooldownTicks += tickDelta;
 
-        if (!this.targetLaneX) return;
+        changingLane();
 
-        this.targetLaneTicks += tickDelta;
+        function changingLane() {
+            if (!this.targetLaneX) return;
 
-        if (this.targetLaneTicks >= LANE_CHANGE_SECONDS) {
-            this.rect.position.x = this.targetLaneX;
-            this.targetLaneX = null;
-            this.laneChangeDirection = null;
-            this.targetLaneTicks = 0;
-        } else {
-            this.rect.position.x = this.rect.position.x + (
-                (this.targetLaneTicks / LANE_CHANGE_SECONDS) * Math.abs(this.rect.position.x - this.targetLaneX))
-                * xMod;
+            this.targetLaneTicks += tickDelta;
+
+            if (this.targetLaneTicks >= LANE_CHANGE_SECONDS) {
+                this.rect.position.x = this.targetLaneX;
+                this.targetLaneX = null;
+                this.laneChangeDirection = null;
+                this.targetLaneTicks = 0;
+            } else {
+                this.rect.position.x = this.rect.position.x + (
+                    (this.targetLaneTicks / LANE_CHANGE_SECONDS) * Math.abs(this.rect.position.x - this.targetLaneX))
+                    * xMod;
+            }
         }
     }
 
@@ -123,7 +195,16 @@ class PlayerVehicle extends Vehicle {
         super(rect, clipRect, speed, lane, LANE_CHANGE_COOLDOWN_SECONDS);
         this.rageMeter = new BarMeter('#ff0000', 10, 10, 4, 10, '#000000');
         this.animQueue = new AnimationQueue();
+        this.pubsub = new Pubsub();
         this.setAnimations(spriteSheet);
+    }
+
+    collision(direction) {
+        if (this.collisionCooldownTicks >= this.collisionCooldown) {
+            this.animQueue.setState(direction, false);
+            this.collisionCooldownTicks = 0;
+            this.pubsub.publish('collision');
+        }
     }
 
     changeLane(lane, laneWidth, laneCount) {
@@ -136,7 +217,9 @@ class PlayerVehicle extends Vehicle {
         let idleAnim = new Animation(spriteSheet, 1, true);
         let turnLeftAnim = new Animation(spriteSheet, 10, false);
         let turnRightAnim = new Animation(spriteSheet, 10, false);
-        
+        let frontCollisionAnim = new Animation(spriteSheet, 5, false);
+        let rearCollisionAnim = new Animation(spriteSheet, 5, false);
+
         idleAnim.addFrame(
             new HitboxFrame(
                 new Rect(new Vector2d(0,0), 0,0), 
@@ -188,9 +271,49 @@ class PlayerVehicle extends Vehicle {
                 true, 
                 LANE_CHANGE_FRAME_TICKER_COUNT));
         
+        frontCollisionAnim.addFrame(
+            new HitboxFrame(
+                new Rect(new Vector2d(0,0), 0,0), 
+                new Rect(new Vector2d(512,0), 64,64),
+                true, 
+                COLLISION_FRAME_TICKER_COUNT));
+        frontCollisionAnim.addFrame(
+            new HitboxFrame(
+                new Rect(new Vector2d(0,0), 0,0), 
+                new Rect(new Vector2d(576,0), 64,64),
+                true, 
+                COLLISION_FRAME_TICKER_COUNT));
+        frontCollisionAnim.addFrame(
+            new HitboxFrame(
+                new Rect(new Vector2d(0,0), 0,0), 
+                new Rect(new Vector2d(640,0), 64,64),
+                true, 
+                COLLISION_FRAME_TICKER_COUNT));
+
+        rearCollisionAnim.addFrame(
+            new HitboxFrame(
+                new Rect(new Vector2d(0,0), 0,0), 
+                new Rect(new Vector2d(704,0), 64,64),
+                true, 
+                COLLISION_FRAME_TICKER_COUNT));
+        rearCollisionAnim.addFrame(
+            new HitboxFrame(
+                new Rect(new Vector2d(0,0), 0,0), 
+                new Rect(new Vector2d(768,0), 64,64),
+                true, 
+                COLLISION_FRAME_TICKER_COUNT));
+        rearCollisionAnim.addFrame(
+            new HitboxFrame(
+                new Rect(new Vector2d(0,0), 0,0), 
+                new Rect(new Vector2d(832,0), 64,64),
+                true, 
+                COLLISION_FRAME_TICKER_COUNT));
+
         this.animQueue.addState('idle', idleAnim);
         this.animQueue.addState('left', turnLeftAnim);
         this.animQueue.addState('right', turnRightAnim);
+        this.animQueue.addState('front', frontCollisionAnim);
+        this.animQueue.addState('rear', rearCollisionAnim);
         this.animQueue.build();
     }
 

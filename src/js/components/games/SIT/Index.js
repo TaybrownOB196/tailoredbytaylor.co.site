@@ -79,6 +79,10 @@ class SIT extends EngineBase {
                 (this.canvas.clientHeight - roadH) * this.scaleH),
                 '#8f563b');
 
+        this.player.pubsub.subscribe('collision', () => {
+            this.dashboard.addHit();
+        });
+
         this.vehicles = [];
         this.maxVehicles = laneCount;
 
@@ -210,8 +214,8 @@ class SIT extends EngineBase {
                 if (result) {
                     let vCenter = vehicle.rect.center();
                     let pCenter = player.rect.center();
-                    console.log(`${ vCenter.x < pCenter.x > 0 ? 'left' : 'right'}`);
-                    console.log(`${ vCenter.y < pCenter.y > 0 ? 'down' : 'up'}`);
+                    let direction = vCenter.y < pCenter.y > 0 ? 'rear' : 'front';
+                    player.collision(direction);
                     player.rect.position.x -= result.normal.x * result.depth;
 
                     vehicle.health = false;

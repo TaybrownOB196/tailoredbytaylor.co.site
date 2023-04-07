@@ -14,7 +14,7 @@ class NeedleMeter {
         this.needleColor = needleColor || '#ff0000';
     }
 
-    update(value) {
+    updateValue(value) {
         if (value < this.minValue) {
             value = this.minValue;
         } else if (value > this.maxValue) {
@@ -30,11 +30,13 @@ class NeedleMeter {
             {x:this.position.x, y:this.position.y}, 
             {x:this.position.x - this.radius, y:this.position.y});
         
+        // draw arc
         context.strokeStyle = this.color;
         context.beginPath();
         context.arc(this.position.x,this.position.y, this.radius, Math.PI, 0);
         context.stroke();
 
+        //draw needle
         context.strokeStyle = this.needleColor;
         context.beginPath();
         context.moveTo(this.position.x - context.lineWidth, this.position.y - context.lineWidth);
@@ -44,6 +46,7 @@ class NeedleMeter {
             res.y);
         context.stroke();
 
+        //draw needle center
         context.fillStyle = this.color;
         context.beginPath();
         context.arc(this.position.x, this.position.y, this.dotSize, Math.PI, 0);
