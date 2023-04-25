@@ -1,6 +1,9 @@
-import { Rect, Vector2d, Spritesheet,  PhysicsRect2d, PhysicsCircle2d } from '../../../lib/gaming/common';
+import Rect from '../../../lib/gaming/Rect';
+import Vector2d from '../../../lib/gaming/Vector2d';
+import PhysicsRect2d from '../../../lib/gaming/PhysicsRect2d';
+import { PhysicsCircle2d } from '../../../lib/gaming/common';
 import { Keyboardhandler, Pointerhandler } from './../../../lib/gaming/input';
-import { Animationclip, Animationcontroller } from '../../../lib/gaming/animation';
+import { Animation, AnimationFrame } from '../../../lib/gaming/animation';
 import EngineBase from '../../../lib/gaming/EngineBase';
 import spritesheet from './../../../../png/Basketball/basketball_spritesheet.png';
 import '../../../../sass/basketball.scss';
@@ -53,19 +56,19 @@ class Hooper extends Entity {
     }
 
     attemptShot(defHooper) {
-        return new ActionResult(0, `${this.name} attempts shot`);
+        // return new ActionResult(0, `${this.name} attempts shot`);
     }
 
     attemptPass(defHooper, tmHooper) {
-        return new ActionResult(0, `${this.name} attempts pass to ${tmHooper.name}`);
+        // return new ActionResult(0, `${this.name} attempts pass to ${tmHooper.name}`);
     }
 
     attemptSteal(offHooper) {
-        return new ActionResult(0, `${this.name} attempts steal on ${offHooper.name}`);
+        // return new ActionResult(0, `${this.name} attempts steal on ${offHooper.name}`);
     }
 
     attemptBlock(offHooper) {
-        return new ActionResult(0, `${this.name} attempts block on ${offHooper.name}`);
+        // return new ActionResult(0, `${this.name} attempts block on ${offHooper.name}`);
     }
 
     boost() {
@@ -77,14 +80,27 @@ class Basketball extends EngineBase {
     constructor() {
         super('Basketball', 'BasketballContainer');
         this.spritesheet = new Spritesheet(spritesheet);
-        var rects = [ 
-            new Rect(new Vector2d(0,256), 128, 128), 
-            new Rect(new Vector2d(128,256), 128, 128), 
-            new Rect(new Vector2d(256,256), 128, 128),
-            new Rect(new Vector2d(384,256), 128, 128)
-        ];
-        this.anim = new Animationclip(this.spritesheet, rects, true, 5);
-
+        this.anim = new Animation(this.spritesheet, 1);
+        this.anim.addFrame(
+            new AnimationFrame(
+                new Rect(new Vector2d(0,256), 128, 128),
+                true, 
+                5));
+            this.anim.addFrame(
+                new AnimationFrame(
+                    new Rect(new Vector2d(128,256), 128, 128),
+                    true, 
+                    5));
+            this.anim.addFrame(
+                new AnimationFrame(
+                    new Rect(new Vector2d(256,256), 128, 128),
+                    true, 
+                    5));
+            this.anim.addFrame(
+                new AnimationFrame(
+                    new Rect(new Vector2d(384,256), 128, 128),
+                    true, 
+                    5));
         this.keyboardhandler = new Keyboardhandler(window);
         this.keyboardhandler.pubsub.subscribe('keydown', (ev) => {
             switch (ev.key) {
