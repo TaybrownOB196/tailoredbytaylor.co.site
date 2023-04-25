@@ -17,8 +17,18 @@ class Utility {
         return Math.floor(Math.random() * (max - min + 1) + min);
     }
 
+    static fillRange(fill, count) {
+        let toReturn = [];
+        for(let idx=0; idx<count; idx+=1) {
+            toReturn.push(fill);
+        }
+
+        return toReturn;
+    }
+
     static range(end, start=0, step=1) {
         let toReturn = [];
+        if (end < start || step < 1) return toReturn;
         for(let idx=start; idx<end; idx+=step) {
             toReturn.push(idx);
         }

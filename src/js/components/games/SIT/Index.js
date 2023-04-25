@@ -17,9 +17,7 @@ import { MAXSPEED, MINSPEED, NpcVehicleFactory, NpcVehicleTypes } from './gameob
 import './../../../../sass/sit.scss';
 
 import spritesheet from './../../../../png/cars.png';
-import spritesheetAnimSS from './../../../../png/cars_ss.png';
 import mainCarSS from './../../../../png/main_car_ss.png';
-import semiSS from './../../../../png/semi_one_ss.png';
 
 //TODO: Implement different car types that have varying performance based on:
     //Acceleration: How quickly vehicle can catch up to the cursor
@@ -38,12 +36,10 @@ class SIT extends EngineBase {
         let stripeWidth = 4;
         let laneCount = 3;
         this.xOffset = Math.ceil((this.canvas.clientWidth - roadW * this.scaleW) / 2);
-        this.spawnTimerIntervalCallback = setInterval(this.spawnVehicle, 5000);
+        this.spawnTimerIntervalCallback = setInterval(this.spawnVehicle, 2000);
         this.isDriving = false;
         this.spritesheet = new Spritesheet(spritesheet);
-        this.spritesheetAnimSS = new Spritesheet(spritesheetAnimSS);
         this.mainCarSS = new Spritesheet(mainCarSS);
-        this.semiSS = new Spritesheet(semiSS);
         this.road = new Road(
             new Rect(
                 new Vector2d(this.xOffset, 0), 
@@ -164,6 +160,14 @@ class SIT extends EngineBase {
     spawnVehicle() {
         if (this.vehicles.length >= this.maxVehicles || !this.isDriving) return;
         let lane = Utility.getRandomIntInclusive(1, this.road.laneCount);
+        if (this.vehicles.length > 1) {
+            let t = Utility.fillRange(0,this.road.laneCount);
+            for (let vehicle of this.vehicles) {
+                t[vehicle.lane - 1]++;
+            }
+
+            lane = t.indexOf(Math.min(t));
+        }
         let speed = 0;
         let startX = this.xOffset + 
             this.road.getLaneWidth() * this.scaleW * (lane) - 
@@ -178,11 +182,10 @@ class SIT extends EngineBase {
             speed = Utility.getRandomIntInclusive(MAXSPEED/2, MAXSPEED-2);
             startY = this.road.position.y + this.road.rects[0].height;
         }
-        let semiOrCoupe = Utility.getTrueOrFalse();
         let npc = NpcVehicleFactory.create(
-            semiOrCoupe 
+            Utility.getTrueOrFalse() // SEMI or COUPE
                 ? NpcVehicleTypes.SEMI 
-                : Utility.getTrueOrFalse()
+                : Utility.getTrueOrFalse() // COUPE variants
                     ? NpcVehicleTypes.SHEEP
                     : NpcVehicleTypes.COP,
             new Vector2d(startX, startY), 
