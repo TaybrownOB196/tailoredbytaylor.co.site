@@ -117,15 +117,15 @@ class Dashboard {
         context.fillStyle = this.color;
         context.fillRect(this.rect.position.x, this.rect.position.y, this.rect.width, this.rect.height);
 
-        this.speedOMeter.draw(context);
         drawText();
+        this.speedOMeter.draw(context);
         
+        //TODO: Add cooldown meter for lane changing here
         function drawText() {
             let text = `Hits: ${this.collisions}`;
             context.font = '15px Arial';
             context.fillStyle = DEBUG_GREEN;
             let textMetrics = context.measureText(text);
-            let textWidth = textMetrics.width;
             let textHeight = textMetrics.actualBoundingBoxDescent || textMetrics.actualBoundingBoxAscent;
             
             context.fillText(
