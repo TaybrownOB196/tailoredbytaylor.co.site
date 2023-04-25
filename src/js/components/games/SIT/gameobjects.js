@@ -7,7 +7,10 @@ import { Animation, AnimationQueue, HitboxFrame } from '../../../lib/gaming/anim
 import NeedleMeter from '../../../lib/gaming/ui/NeedleMeter';
 import Pubsub from '../../../lib/gaming/Pubsub';
 import Transformation2d from '../../../lib/gaming/Transformation2d';
+import Utility from '../../../lib/Utility';
 
+const MAXSPEED = 5;
+const MINSPEED = 1;
 const LANE_CHANGE_FRAME_TICKER_COUNT = 5;
 const COLLISION_FRAME_TICKER_COUNT = 5;
 const LANE_CHANGE_SECONDS = 1000;
@@ -16,9 +19,16 @@ const COLLISION_COOLDOWN_SECONDS = 4000;
 
 const DEBUG_GREEN = '#00ff00';
 
+const NpcVehicleTypes = {
+    SEMI: 'SEMI',
+    COP: 'COP',
+    SHEEP: 'SHEEP',
+};
+
 class SpeedOMeter extends NeedleMeter {
-    constructor(position, radius, max, init) {
+    constructor(position, radius, fontSize, max, init) {
         super(position, radius, max, init);
+        this.fontSize = fontSize;
     }
 
     draw(context) {
@@ -37,20 +47,30 @@ class SpeedOMeter extends NeedleMeter {
 
         //draw numbers
         let numberCount = 3;
-        let fontSize = this.radius/numberCount;
-        context.font = `${fontSize}px Arial`;
+        context.font = `${this.fontSize}px Arial`;
         for (let idx=0; idx<=numberCount; idx++) {
-            let text = Math.ceil(idx/numberCount * this.maxValue);
-            console.log(text)
+            let text = Math.floor(idx/numberCount * this.maxValue);
             let textMetrics = context.measureText(text);
             let textWidth = textMetrics.width;
             let textHeight = textMetrics.fontBoundingBoxAscent;
-            context.strokeText(
-                text, 
-                this.position.x - textWidth/2, 
-                this.position.y - this.radius + textHeight);
-        }
 
+            if (idx == 0) {
+                context.strokeText(
+                    text, 
+                    this.position.x - this.radius + textWidth, 
+                    this.position.y - textHeight/2);
+            } else if (idx == numberCount) {
+                context.strokeText(
+                    text, 
+                    this.position.x + this.radius - textWidth * 2, 
+                    this.position.y - textHeight/2);
+            } else {
+                context.strokeText(
+                    text, 
+                    this.position.x - textWidth/2, 
+                    this.position.y - this.radius + textHeight);
+            }
+        }
 
         //draw needle
         context.strokeStyle = this.needleColor;
@@ -81,7 +101,7 @@ class Dashboard {
         let x = this.rect.position.x + (this.rect.width - radius/2)/2;
         let y = this.rect.position.y + (radius) + 2;
 
-        this.speedOMeter = new SpeedOMeter(new Vector2d(x,y), radius, 5, 0);
+        this.speedOMeter = new SpeedOMeter(new Vector2d(x,y), radius, 8, 5, 0);
     }
 
     addHit() {
@@ -117,7 +137,7 @@ class Dashboard {
 }
 
 class Vehicle extends PhysicsRect2d {
-    constructor(rect, clipRect, speed, lane = 1, laneChangeCooldown = LANE_CHANGE_COOLDOWN_SECONDS, collisionCooldown = COLLISION_COOLDOWN_SECONDS) {
+    constructor(rect, clipRect, speed, lane, spriteSheet, laneChangeCooldown = LANE_CHANGE_COOLDOWN_SECONDS, collisionCooldown = COLLISION_COOLDOWN_SECONDS) {
         super(rect, 10, null);
         this.clipRect = clipRect;
         this.lane = lane;
@@ -131,6 +151,7 @@ class Vehicle extends PhysicsRect2d {
 
         this.collisionCooldown = collisionCooldown;
         this.collisionCooldownTicks = 0;
+        this.spriteSheet = spriteSheet;
     }
 
     update(tickDelta, frameMultiplier) {
@@ -181,8 +202,8 @@ class Vehicle extends PhysicsRect2d {
         this.canChangeLaneTicks = 0;
     }
 
-    draw(context, spriteSheet) {
-        spriteSheet.draw(context, this.rect, this.clipRect);
+    draw(context) {
+        this.spriteSheet.draw(context, this.rect, this.clipRect);
         context.strokeStyle = DEBUG_GREEN;
         context.lineWidth = 1;
         context.setLineDash([1, 0]);
@@ -192,11 +213,11 @@ class Vehicle extends PhysicsRect2d {
 
 class PlayerVehicle extends Vehicle {
     constructor(rect, clipRect, speed, lane, spriteSheet) {
-        super(rect, clipRect, speed, lane, LANE_CHANGE_COOLDOWN_SECONDS);
+        super(rect, clipRect, speed, lane, spriteSheet, LANE_CHANGE_COOLDOWN_SECONDS);
         this.rageMeter = new BarMeter('#ff0000', 10, 10, 4, 10, '#000000');
         this.animQueue = new AnimationQueue();
         this.pubsub = new Pubsub();
-        this.setAnimations(spriteSheet);
+        this.setAnimations();
     }
 
     collision(direction) {
@@ -213,12 +234,12 @@ class PlayerVehicle extends Vehicle {
         this.animQueue.setState(this.laneChangeDirection, true);
     }
 
-    setAnimations(spriteSheet) {
-        let idleAnim = new Animation(spriteSheet, 1, true);
-        let turnLeftAnim = new Animation(spriteSheet, 10, false);
-        let turnRightAnim = new Animation(spriteSheet, 10, false);
-        let frontCollisionAnim = new Animation(spriteSheet, 5, false);
-        let rearCollisionAnim = new Animation(spriteSheet, 5, false);
+    setAnimations() {
+        let idleAnim = new Animation(this.spriteSheet, 1, true);
+        let turnLeftAnim = new Animation(this.spriteSheet, 10, false);
+        let turnRightAnim = new Animation(this.spriteSheet, 10, false);
+        let frontCollisionAnim = new Animation(this.spriteSheet, 5, false);
+        let rearCollisionAnim = new Animation(this.spriteSheet, 5, false);
 
         idleAnim.addFrame(
             new HitboxFrame(
@@ -325,14 +346,15 @@ class PlayerVehicle extends Vehicle {
 }
 
 class NpcVehicle extends Vehicle {
-    constructor(rect, clipRect, speed, lane, timeToLive, isSpawnAbove) {
-        super(rect, clipRect, speed, lane);
+    constructor(rect, clipRect, speed, lane, spriteSheet, timeToLive, isSpawnAbove) {
+        super(rect, clipRect, speed, lane, spriteSheet);
         this.initPosition = new Vector2d(rect.position.x, rect.position.y);
         this.health = true;
         this.canDespawn = false;
         this.timeToLive = timeToLive;
         this._ttlTicks = 0;
         this.isSpawnAbove = isSpawnAbove;
+        this.spriteSheet = spriteSheet;
     }
 
     update(tickDelta, frameMultiplier, road) {
@@ -355,6 +377,61 @@ class NpcVehicle extends Vehicle {
 
     isExpired() { return this.canDespawn; }
     isAlive() { return this.health; }
+}
+
+class NpcVehicleFactory {
+    static create(type, startPos, dim, speed, lane, spritesheet, isSpawnAbove) {
+        switch (type) {
+            case NpcVehicleTypes.COP:
+                return new NpcVehicle(
+                    new Rect(
+                        new Vector2d(startPos.x, startPos.y),
+                        dim.x, 
+                        dim.y),
+                    new Rect(
+                        new Vector2d(0,0),
+                        64,
+                        64),
+                    speed,
+                    lane,
+                    spritesheet,
+                    2000,
+                    isSpawnAbove);
+
+            case NpcVehicleTypes.SEMI:
+                return new NpcVehicle(
+                    new Rect(
+                        new Vector2d(startPos.x, startPos.y),
+                        dim.x, 
+                        dim.y * 2),
+                    new Rect(
+                        new Vector2d(0,64),
+                        64,
+                        128),
+                    Utility.getRandomIntInclusive(MINSPEED, MAXSPEED/2),
+                    lane, 
+                    spritesheet,
+                    10000,
+                    isSpawnAbove);
+
+            default:
+            case NpcVehicleTypes.SHEEP:
+                return new NpcVehicle(
+                    new Rect(
+                        new Vector2d(startPos.x, startPos.y),
+                        dim.x, 
+                        dim.y),
+                    new Rect(
+                        new Vector2d(0,192),
+                        64,
+                        64),
+                    speed,
+                    lane,
+                    spritesheet,
+                    2000,
+                    isSpawnAbove);
+        }
+    }
 }
 
 class Road extends Gameobject {
@@ -402,7 +479,7 @@ class Road extends Gameobject {
         drawLanes(context, this.rects[0]);
         drawLanes(context, this.rects[1]);
 
-        drawSpeedSections(context);
+        // drawSpeedSections(context);
 
         function drawLanes(context, rect) {
             let laneWidth = this.getWidth() / this.laneCount;
@@ -463,7 +540,6 @@ class Road extends Gameobject {
             return null;
         }
         while(laneWidth * (idx-1) < width && idx <= this.laneCount) {
-            // console.log(`compare ${posX} [${laneWidth * (idx - 1)},${laneWidth * idx}]`);
             if (posX >= laneWidth * (idx - 1) && posX <= laneWidth * idx) {
                 break;
             } else {
@@ -478,5 +554,10 @@ class Road extends Gameobject {
 export {
     Dashboard,
     Road, 
-    Vehicle, NpcVehicle, PlayerVehicle
+    NpcVehicle,
+    NpcVehicleFactory,
+    PlayerVehicle,
+    NpcVehicleTypes,
+    MAXSPEED,
+    MINSPEED
 }

@@ -10,17 +10,17 @@ import {
     Dashboard, 
     Road, 
     PlayerVehicle, 
-    NpcVehicle
 } from './gameobjects';
+
+import { MAXSPEED, MINSPEED, NpcVehicleFactory, NpcVehicleTypes } from './gameobjects';
 
 import './../../../../sass/sit.scss';
 
 import spritesheet from './../../../../png/cars.png';
 import spritesheetAnimSS from './../../../../png/cars_ss.png';
 import mainCarSS from './../../../../png/main_car_ss.png';
+import semiSS from './../../../../png/semi_one_ss.png';
 
-const MAXSPEED = 5;
-const MINSPEED = 1;
 //TODO: Implement different car types that have varying performance based on:
     //Acceleration: How quickly vehicle can catch up to the cursor
     //Control: How quickly a vehicle can switch lanes
@@ -43,6 +43,7 @@ class SIT extends EngineBase {
         this.spritesheet = new Spritesheet(spritesheet);
         this.spritesheetAnimSS = new Spritesheet(spritesheetAnimSS);
         this.mainCarSS = new Spritesheet(mainCarSS);
+        this.semiSS = new Spritesheet(semiSS);
         this.road = new Road(
             new Rect(
                 new Vector2d(this.xOffset, 0), 
@@ -122,7 +123,6 @@ class SIT extends EngineBase {
 
             switch (ev.key) {
                 case 'd':
-
                 break;
             }
         });
@@ -163,9 +163,6 @@ class SIT extends EngineBase {
     }
     spawnVehicle() {
         if (this.vehicles.length >= this.maxVehicles || !this.isDriving) return;
-
-        let timeToLive = 2000;
-        let spawnAbove = Utility.getTrueOrFalse();
         let lane = Utility.getRandomIntInclusive(1, this.road.laneCount);
         let speed = 0;
         let startX = this.xOffset + 
@@ -173,26 +170,29 @@ class SIT extends EngineBase {
             this.vehicleDim * this.scaleW - 
             this.road.stripeWidth;
         let startY = 0;
-        if (spawnAbove) {
+        let isSpawnAbove = Utility.getTrueOrFalse();
+        if (isSpawnAbove) {
             speed = Utility.getRandomIntInclusive(MINSPEED, MAXSPEED/2);
             startY = this.road.position.y - this.vehicleDim * this.scaleH;
         } else {
             speed = Utility.getRandomIntInclusive(MAXSPEED/2, MAXSPEED-2);
             startY = this.road.position.y + this.road.rects[0].height;
         }
-        this.vehicles.push(new NpcVehicle(
-            new Rect(
-                new Vector2d(startX, startY),
-                this.vehicleDim * this.scaleW, 
-                this.vehicleDim * this.scaleH),
-            new Rect(
-                new Vector2d(0,256),
-                64,
-                64),
+        let semiOrCoupe = Utility.getTrueOrFalse();
+        let npc = NpcVehicleFactory.create(
+            semiOrCoupe 
+                ? NpcVehicleTypes.SEMI 
+                : Utility.getTrueOrFalse()
+                    ? NpcVehicleTypes.SHEEP
+                    : NpcVehicleTypes.COP,
+            new Vector2d(startX, startY), 
+            new Vector2d(this.vehicleDim * this.scaleW, this.vehicleDim * this.scaleH),
             speed,
             lane,
-            timeToLive,
-            spawnAbove));
+            this.spritesheet,
+            isSpawnAbove);
+
+        this.vehicles.push(npc);
     }
     update() {
         canDespawnOffscreen = canDespawnOffscreen.bind(this);
@@ -237,10 +237,10 @@ class SIT extends EngineBase {
     }
     draw() {
         for (let vehicle of this.vehicles) {
-            vehicle.draw(this.context, this.spritesheet);
+            vehicle.draw(this.context);
         }        
         this.road.draw(this.context);
-        this.player.draw(this.context, this.spritesheet);
+        this.player.draw(this.context);
         this.dashboard.draw(this.context);
     }
     run() {
