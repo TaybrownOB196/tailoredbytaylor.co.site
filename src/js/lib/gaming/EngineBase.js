@@ -13,7 +13,6 @@ class EngineBase extends EngineRunnerBase {
         console.log(this.canvas.clientWidth, this.canvas.clientHeight);
         this.isHorizontal = this.canvas.clientWidth > this.canvas.clientHeight;
         this.gameRect = new Rect(new Point2d(0, 0), this.canvas.clientWidth, this.canvas.clientHeight);
-        console.log(this.gameRect.width, this.gameRect.height);
         this.context = this.canvas.getContext('2d');
     }
 
@@ -26,7 +25,7 @@ class EngineBase extends EngineRunnerBase {
 
     run() {
         super.run();
-        this.context.clearRect(0,0, this.canvas.width, this.canvas.height);
+        this.context.clearRect(0,0, this.canvas.clientWidth, this.canvas.clientHeight);
     }
 }
 
