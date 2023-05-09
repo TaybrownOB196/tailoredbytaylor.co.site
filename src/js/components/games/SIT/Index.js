@@ -31,36 +31,36 @@ class SIT extends EngineBase {
         this.scaleW = this.DEFAULT_CANVAS_WIDTH/this.canvas.clientWidth;
         this.scaleH = this.DEFAULT_CANVAS_HEIGHT/this.canvas.clientHeight;
         this.spawnVehicle = this.spawnVehicle.bind(this);
-        let roadW = this.canvas.clientWidth * .7;
-        let roadH = this.canvas.clientHeight * .8;
+        let roadW = this.canvas.clientWidth * .7 * this.scaleW;
+        let roadH = this.canvas.clientHeight * .8 * this.scaleH;
         let stripeWidth = 4;
         let laneCount = 3;
-        this.xOffset = Math.ceil((this.canvas.clientWidth - roadW * this.scaleW) / 2);
+        this.xOffset = (this.canvas.clientWidth - roadW) / 2;
         this.spawnTimerIntervalCallback = setInterval(this.spawnVehicle, 2000);
         this.isDriving = false;
         this.spritesheet = new Spritesheet(spritesheet);
         this.mainCarSS = new Spritesheet(mainCarSS);
         this.road = new Road(
             new Rect(
-                new Vector2d(this.xOffset, 0), 
-                roadW * this.scaleW, 
-                roadH * this.scaleH), 
+                new Vector2d(this.xOffset/2, 0), 
+                roadW, 
+                roadH), 
             laneCount,
             stripeWidth * this.scaleW);
-
-        this.vehicleDim = Math.ceil(this.road.getLaneWidth()) - this.road.stripeWidth;
+        this.audio = new Audio();
+        this.vehicleDim = 64;
         let lane = 1;
         let speed = 0;//TODO: initial speed will be calculated based upon start height
         let startX = this.xOffset + 
             this.road.getLaneWidth() * this.scaleW * (lane) - 
             this.vehicleDim * this.scaleW - 
             this.road.stripeWidth;
-        let startY = roadH * this.scaleH - this.vehicleDim * this.scaleH;
+        let startY = roadH - this.vehicleDim * this.scaleH;
         this.player = new PlayerVehicle(
             new Rect(
                 new Vector2d(startX, startY), 
-                this.vehicleDim * this.scaleW, 
-                this.vehicleDim * this.scaleH),
+                this.vehicleDim, 
+                this.vehicleDim),
             new Rect(
                 new Vector2d(0,192), 
                 64,

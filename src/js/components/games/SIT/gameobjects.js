@@ -11,8 +11,10 @@ import Utility from '../../../lib/Utility';
 
 const MAXSPEED = 5;
 const MINSPEED = 1;
+
 const LANE_CHANGE_FRAME_TICKER_COUNT = 5;
 const COLLISION_FRAME_TICKER_COUNT = 5;
+
 const LANE_CHANGE_SECONDS = 1000;
 const LANE_CHANGE_COOLDOWN_SECONDS = 500;
 const COLLISION_COOLDOWN_SECONDS = 4000;
@@ -446,7 +448,12 @@ class Road extends Gameobject {
 
         this.rects = [];
         this.rects.push(rect);
-        this.rects.push(new Rect(new Vector2d(rect.position.x, rect.position.y - rect.height), rect.width, rect.height));
+        this.rects.push(
+            new Rect(
+                new Vector2d(rect.position.x, rect.position.y - rect.height), 
+                rect.width, 
+                rect.height)
+        );
 
         this.maxSpeed = this.speedSectionCount = 5;
         this.minSpeed = this.speedValue = 0
@@ -478,6 +485,10 @@ class Road extends Gameobject {
 
         drawLanes(context, this.rects[0]);
         drawLanes(context, this.rects[1]);
+
+        context.strokeStyle = 'red';
+        console.log(this.rects[0].width, this.position.x)
+        context.strokeRect(this.position.x, this.position.y, this.rects[0].width, this.rects[0].height)
 
         // drawSpeedSections(context);
 
