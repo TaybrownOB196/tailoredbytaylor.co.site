@@ -10,7 +10,7 @@ class AnimationQueue {
         this.queue = [];
     }
 
-    animate(context, positionRect) {
+    animate(context, positionRect, isPaused = false) {
         if (this.queue.length > 0 && this.queue.at(0).isCompleted()) {
             this.queue.shift().reset();
         }
@@ -22,7 +22,7 @@ class AnimationQueue {
         if (this.queue.length == 0) throw new Error('queue is empty');
         
         let anim = this.queue.at(0);
-        anim.draw(context, positionRect);
+        anim.draw(context, positionRect, isPaused);
     }
     
     setState(stateKey, isClear=false) {
@@ -87,7 +87,7 @@ class Animation {
         this.isBuilt = true;
     }
 
-    draw(context, positionRect) {
+    draw(context, positionRect, isPaused = false) {
         getNext = getNext.bind(this);
         reset = reset.bind(this);
 
@@ -98,13 +98,15 @@ class Animation {
             }
         }
 
-        let frame = getNext();
+        let frame = getNext(isPaused);
         this.spritesheet.draw(context,
             frame.offsetRect(positionRect),
             frame.spritesheetRect);
         
-        function getNext() {
+        function getNext(isPaused) {
             let toReturn = this.frames[this.frameIndex];
+            if (isPaused) return toReturn;
+
             this.isRunning = true;
             if (this._frameTicker >= this.frames[this.frameIndex].count) {
                 if (this.frameIndex < this.frames.length-1) {

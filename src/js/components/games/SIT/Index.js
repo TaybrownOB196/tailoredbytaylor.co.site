@@ -27,35 +27,32 @@ import mainCarSS from './../../../../png/main_car_ss.png';
 
 class SIT extends EngineBase {
     constructor() {
-        super('SIT', 'SITContainer');
-        this.scaleW = this.DEFAULT_CANVAS_WIDTH/this.canvas.clientWidth;
-        this.scaleH = this.DEFAULT_CANVAS_HEIGHT/this.canvas.clientHeight;
+        super('SIT', 'SITContainer', 360, 640);
         this.spawnVehicle = this.spawnVehicle.bind(this);
-        let roadW = this.canvas.clientWidth * .7 * this.scaleW;
-        let roadH = this.canvas.clientHeight * .8 * this.scaleH;
+        let roadW = this.canvas.clientWidth * .7;
+        let roadH = this.canvas.clientHeight * .8;
         let stripeWidth = 4;
         let laneCount = 3;
         this.xOffset = (this.canvas.clientWidth - roadW) / 2;
         this.spawnTimerIntervalCallback = setInterval(this.spawnVehicle, 2000);
         this.isDriving = false;
+        this.drivingTimer = 0;
         this.spritesheet = new Spritesheet(spritesheet);
         this.mainCarSS = new Spritesheet(mainCarSS);
         this.road = new Road(
             new Rect(
-                new Vector2d(this.xOffset/2, 0), 
+                new Vector2d(this.xOffset, 0), 
                 roadW, 
                 roadH), 
             laneCount,
-            stripeWidth * this.scaleW);
+            stripeWidth);
         this.audio = new Audio();
         this.vehicleDim = 64;
         let lane = 1;
         let speed = 0;//TODO: initial speed will be calculated based upon start height
-        let startX = this.xOffset + 
-            this.road.getLaneWidth() * this.scaleW * (lane) - 
-            this.vehicleDim * this.scaleW - 
-            this.road.stripeWidth;
-        let startY = roadH - this.vehicleDim * this.scaleH;
+        let startX = this.xOffset + this.road.getLaneWidth() *
+            (lane) - this.vehicleDim - this.road.stripeWidth;
+        let startY = roadH - this.vehicleDim;
         this.player = new PlayerVehicle(
             new Rect(
                 new Vector2d(startX, startY), 
@@ -73,7 +70,7 @@ class SIT extends EngineBase {
             new Rect(
                 new Vector2d(0, this.road.getHeight()),
                 this.canvas.clientWidth, 
-                (this.canvas.clientHeight - roadH) * this.scaleH),
+                (this.canvas.clientHeight - roadH)),
                 '#8f563b');
 
         this.player.pubsub.subscribe('collision', () => {
@@ -126,7 +123,7 @@ class SIT extends EngineBase {
 
     getMousePosition(x, y) {
         let t = super.getMousePosition(x,y);
-        return new Point2d(t.x * this.scaleW, t.y * this.scaleH);
+        return new Point2d(t.x, t.y);
     }
     handleMove(msePos) {
         if (!this.isDriving) return;
@@ -138,7 +135,7 @@ class SIT extends EngineBase {
         }
         this.hud.update({spd: this.road.speedValue});
 
-        let mseY = msePos.y - this.player.rect.height * this.scaleH;
+        let mseY = msePos.y - this.player.rect.height;
         if (mseY >= 0 && mseY <= this.road.getHeight() - this.player.rect.height) {
             this.player.rect.position.y = mseY;
         }
@@ -170,14 +167,14 @@ class SIT extends EngineBase {
         }
         let speed = 0;
         let startX = this.xOffset + 
-            this.road.getLaneWidth() * this.scaleW * (lane) - 
-            this.vehicleDim * this.scaleW - 
+            this.road.getLaneWidth() * (lane) - 
+            this.vehicleDim - 
             this.road.stripeWidth;
         let startY = 0;
         let isSpawnAbove = Utility.getTrueOrFalse();
         if (isSpawnAbove) {
             speed = Utility.getRandomIntInclusive(MINSPEED, MAXSPEED/2);
-            startY = this.road.position.y - this.vehicleDim * this.scaleH;
+            startY = this.road.position.y - this.vehicleDim;
         } else {
             speed = Utility.getRandomIntInclusive(MAXSPEED/2, MAXSPEED-2);
             startY = this.road.position.y + this.road.rects[0].height;
@@ -189,7 +186,7 @@ class SIT extends EngineBase {
                     ? NpcVehicleTypes.SHEEP
                     : NpcVehicleTypes.COP,
             new Vector2d(startX, startY), 
-            new Vector2d(this.vehicleDim * this.scaleW, this.vehicleDim * this.scaleH),
+            new Vector2d(this.vehicleDim, this.vehicleDim),
             speed,
             lane,
             this.spritesheet,
@@ -203,7 +200,8 @@ class SIT extends EngineBase {
         this.hud.update({fps: fps});
 
         if (!this.isDriving) return;
-        this.dashboard.update(this.road.speedValue)
+        this.drivingTimer += this.tickDelta;
+        this.dashboard.update(this.road.speedValue, this.drivingTimer/1000)
         this.road.update(this.tickDelta);
         this.player.update(this.tickDelta, this.frameMultiplier);
         for (let vehicle of this.vehicles) {
@@ -239,11 +237,11 @@ class SIT extends EngineBase {
         }
     }
     draw() {
+        this.road.draw(this.context);
         for (let vehicle of this.vehicles) {
             vehicle.draw(this.context);
         }        
-        this.road.draw(this.context);
-        this.player.draw(this.context);
+        this.player.draw(this.context, !this.isDriving);
         this.dashboard.draw(this.context);
     }
     run() {

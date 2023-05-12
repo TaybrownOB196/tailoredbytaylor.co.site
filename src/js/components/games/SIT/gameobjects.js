@@ -38,17 +38,12 @@ class SpeedOMeter extends NeedleMeter {
         let v0 = Vector2d.pointsToVector(
             {x:this.position.x, y:this.position.y}, 
             {x:this.position.x - this.radius, y:this.position.y});
-        
-        // draw arc
-        context.strokeStyle = this.color;
-        context.beginPath();
-        context.arc(this.position.x,this.position.y, this.radius, Math.PI, 0);
-        context.stroke();
 
         //draw ticks
 
         //draw numbers
         let numberCount = 3;
+        context.lineWidth = 1;
         context.font = `${this.fontSize}px Arial`;
         for (let idx=0; idx<=numberCount; idx++) {
             let text = Math.floor(idx/numberCount * this.maxValue);
@@ -72,9 +67,18 @@ class SpeedOMeter extends NeedleMeter {
                     this.position.x - textWidth/2, 
                     this.position.y - this.radius + textHeight);
             }
+
+            // draw arc
+            context.lineWidth = 3;
+            context.setLineDash([]);
+            context.strokeStyle = this.color;
+            context.beginPath();
+            context.arc(this.position.x,this.position.y, this.radius, Math.PI, 0);
+            context.stroke();
         }
 
         //draw needle
+        context.setLineDash([]);
         context.strokeStyle = this.needleColor;
         context.beginPath();
         context.moveTo(this.position.x - context.lineWidth, this.position.y - context.lineWidth);
@@ -97,21 +101,24 @@ class Dashboard {
         this.rect = rect;
         this.color = color;
 
-        let radius = 25;
+        let fontSize = 8;
+        let radius = this.rect.height * .33;
         this.collisions = 0;
+        this.time = 0;
 
-        let x = this.rect.position.x + (this.rect.width - radius/2)/2;
-        let y = this.rect.position.y + (radius) + 2;
+        let x = this.rect.position.x + (this.rect.width - radius /4)/2;
+        let y = this.rect.position.y + (this.rect.height - radius/8) / 2;
 
-        this.speedOMeter = new SpeedOMeter(new Vector2d(x,y), radius, 8, 5, 0);
+        this.speedOMeter = new SpeedOMeter(new Vector2d(x,y), radius, fontSize, 5, 0);
     }
 
     addHit() {
         this.collisions++;
     }
 
-    update(speed) {
+    update(speed, time) {
         this.speedOMeter.updateValue(speed);
+        this.time = time;
     }
 
     draw(context) {
@@ -124,16 +131,25 @@ class Dashboard {
         
         //TODO: Add cooldown meter for lane changing here
         function drawText() {
-            let text = `Hits: ${this.collisions}`;
+            let text = `Hits: ${this.collisions}`
+            let text2 = `Time: ${Math.round(this.time)}`;
             context.font = '15px Arial';
             context.fillStyle = DEBUG_GREEN;
             let textMetrics = context.measureText(text);
+            let textMetrics2 = context.measureText(text2);
             let textHeight = textMetrics.actualBoundingBoxDescent || textMetrics.actualBoundingBoxAscent;
+            let textHeight2 = textMetrics2.actualBoundingBoxDescent || textMetrics.actualBoundingBoxAscent;
             
+            let offsetY = (this.rect.height + textHeight)/2;
             context.fillText(
                 text, 
                 this.speedOMeter.position.x + this.speedOMeter.radius, 
-                this.rect.position.y + (this.rect.height + textHeight)/2);
+                this.rect.position.y + offsetY);
+
+                context.fillText(
+                    text2, 
+                    this.speedOMeter.position.x + this.speedOMeter.radius, 
+                    this.rect.position.y + offsetY + textHeight2);
         }
     }
 }
@@ -340,8 +356,8 @@ class PlayerVehicle extends Vehicle {
         this.animQueue.build();
     }
 
-    draw(context) {
-        this.animQueue.animate(context, this.rect);
+    draw(context, isPaused) {
+        this.animQueue.animate(context, this.rect, isPaused);
         this.rageMeter.draw(context, 
             new Vector2d(this.rect.position.x, this.rect.position.y + this.rageMeter.height/2));
     }
@@ -362,7 +378,6 @@ class NpcVehicle extends Vehicle {
     update(tickDelta, frameMultiplier, road) {
         super.update(tickDelta);
         let yMod = 1;
-        // if (road.speedValue == this.speedValue)
         if (road.speedValue == this.speedValue)
             yMod = 0;
         else if (road.speedValue < this.speedValue) {
@@ -483,12 +498,10 @@ class Road extends Gameobject {
         drawSpeedSections = drawSpeedSections.bind(this);
         getSpeedSectionHeight = getSpeedSectionHeight.bind(this);
 
+        context.fillStyle= ' black';
+        context.fillRect(this.position.x-2, this.position.y, this.rects[0].width+8, this.rects[0].height)
         drawLanes(context, this.rects[0]);
         drawLanes(context, this.rects[1]);
-
-        context.strokeStyle = 'red';
-        console.log(this.rects[0].width, this.position.x)
-        context.strokeRect(this.position.x, this.position.y, this.rects[0].width, this.rects[0].height)
 
         // drawSpeedSections(context);
 
@@ -500,10 +513,10 @@ class Road extends Gameobject {
                 context.setLineDash([this.stripeLength, this.stripeGap]);
                 context.beginPath();
                 context.moveTo(
-                    rect.position.x + (idx * laneWidth) - (this.stripeWidth), 
+                    rect.position.x + (idx * laneWidth) + (this.stripeWidth/2), 
                     rect.position.y);
                 context.lineTo(
-                    rect.position.x + (idx * laneWidth) - (this.stripeWidth), 
+                    rect.position.x + (idx * laneWidth) + (this.stripeWidth/2), 
                     rect.position.y + rect.height);
                 context.stroke();
             }

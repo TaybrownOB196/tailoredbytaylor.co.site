@@ -1,3 +1,9 @@
+// import { AudioClip, AudioController } from '../../../lib/gaming/audio/audio';
+// this.audioCtrl = new AudioController(document.getElementById('SITAudio_0'));
+// this.audioCtrl.setClip('swerve', new AudioClip(.5, .6));
+// this.audioCtrl.playClip('swerve')
+// .catch(err => console.log(err));
+
 class AudioClip {
     constructor(start, stop) {
         this.start = start;
