@@ -1,5 +1,4 @@
 import EngineBase from '../../../lib/gaming/EngineBase';
-import Utility from '../../../lib/Utility';
 import { Point2d, Spritesheet } from '../../../lib/gaming/common';
 import { Keyboardhandler, Pointerhandler } from './../../../lib/gaming/input';
 import Vector2d from '../../../lib/gaming/Vector2d';
@@ -12,7 +11,7 @@ import {
     PlayerVehicle, 
 } from './gameobjects';
 
-import { MAXSPEED, MINSPEED, NpcVehicleFactory, NpcVehicleTypes } from './gameobjects';
+import { MAXSPEED, VehicleOrchestrator } from './gameobjects';
 
 import './../../../../sass/sit.scss';
 
@@ -28,17 +27,16 @@ import mainCarSS from './../../../../png/main_car_ss.png';
 class SIT extends EngineBase {
     constructor() {
         super('SIT', 'SITContainer', 360, 640);
-        this.spawnVehicle = this.spawnVehicle.bind(this);
         let roadW = this.canvas.clientWidth * .7;
         let roadH = this.canvas.clientHeight * .8;
         let stripeWidth = 4;
         let laneCount = 3;
         this.xOffset = (this.canvas.clientWidth - roadW) / 2;
-        this.spawnTimerIntervalCallback = setInterval(this.spawnVehicle, 2000);
         this.isDriving = false;
         this.drivingTimer = 0;
         this.spritesheet = new Spritesheet(spritesheet);
         this.mainCarSS = new Spritesheet(mainCarSS);
+        this.vehicleOrchestrator = new VehicleOrchestrator(laneCount * 2 - 1, laneCount + 1, this.spritesheet);
         this.road = new Road(
             new Rect(
                 new Vector2d(this.xOffset, 0), 
@@ -51,21 +49,22 @@ class SIT extends EngineBase {
         let lane = 1;
         let speed = 0;//TODO: initial speed will be calculated based upon start height
         let startX = this.xOffset + this.road.getLaneWidth() *
-            (lane) - this.vehicleDim - this.road.stripeWidth;
+        (lane) - this.vehicleDim - this.road.stripeWidth;
         let startY = roadH - this.vehicleDim;
         this.player = new PlayerVehicle(
             new Rect(
                 new Vector2d(startX, startY), 
                 this.vehicleDim, 
                 this.vehicleDim),
-            new Rect(
+                new Rect(
                 new Vector2d(0,192), 
                 64,
                 64),
                 speed,
                 lane,
                 this.mainCarSS);
-        
+                
+        this.spawnTimerIntervalCallback = setInterval(() => this.vehicleOrchestrator.spawnVehicle(this.player, this.road), 2000);
         this.dashboard = new Dashboard(
             new Rect(
                 new Vector2d(0, this.road.getHeight()),
@@ -76,9 +75,6 @@ class SIT extends EngineBase {
         this.player.pubsub.subscribe('collision', () => {
             this.dashboard.addHit();
         });
-
-        this.vehicles = [];
-        this.maxVehicles = laneCount;
 
         this.hud = new Hud(new Point2d(
             this.xOffset, this.road.getHeight()),
@@ -154,63 +150,20 @@ class SIT extends EngineBase {
             }
         }
     }
-    spawnVehicle() {
-        if (this.vehicles.length >= this.maxVehicles || !this.isDriving) return;
-        let lane = Utility.getRandomIntInclusive(1, this.road.laneCount);
-        if (this.vehicles.length > 1) {
-            let t = Utility.fillRange(0,this.road.laneCount);
-            for (let vehicle of this.vehicles) {
-                t[vehicle.lane - 1]++;
-            }
-
-            lane = t.indexOf(Math.min(t));
-        }
-        let speed = 0;
-        let startX = this.xOffset + 
-            this.road.getLaneWidth() * (lane) - 
-            this.vehicleDim - 
-            this.road.stripeWidth;
-        let startY = 0;
-        let isSpawnAbove = Utility.getTrueOrFalse();
-        if (isSpawnAbove) {
-            speed = Utility.getRandomIntInclusive(MINSPEED, MAXSPEED/2);
-            startY = this.road.position.y - this.vehicleDim;
-        } else {
-            speed = Utility.getRandomIntInclusive(MAXSPEED/2, MAXSPEED-2);
-            startY = this.road.position.y + this.road.rects[0].height;
-        }
-        let npc = NpcVehicleFactory.create(
-            Utility.getTrueOrFalse() // SEMI or COUPE
-                ? NpcVehicleTypes.SEMI 
-                : Utility.getTrueOrFalse() // COUPE variants
-                    ? NpcVehicleTypes.SHEEP
-                    : NpcVehicleTypes.COP,
-            new Vector2d(startX, startY), 
-            new Vector2d(this.vehicleDim, this.vehicleDim),
-            speed,
-            lane,
-            this.spritesheet,
-            isSpawnAbove);
-
-        this.vehicles.push(npc);
-    }
     update() {
-        canDespawnOffscreen = canDespawnOffscreen.bind(this);
         let fps = this.getFps();
         this.hud.update({fps: fps});
 
         if (!this.isDriving) return;
         this.drivingTimer += this.tickDelta;
-        this.dashboard.update(this.road.speedValue, this.drivingTimer/1000)
+        this.dashboard.update(this.road.speedValue, this.drivingTimer/1000);
+        this.vehicleOrchestrator.updateVehicles(this.tickDelta, this.road);
         this.road.update(this.tickDelta);
         this.player.update(this.tickDelta, this.frameMultiplier);
-        for (let vehicle of this.vehicles) {
-            vehicle.update(this.tickDelta, this.frameMultiplier, this.road);
-        }
 
         this.handleCollisions(
             this.player, 
-            this.vehicles,
+            this.vehicleOrchestrator.vehicles,
             (result, player, vehicle) => {
                 if (result) {
                     let vCenter = vehicle.rect.center();
@@ -223,24 +176,10 @@ class SIT extends EngineBase {
                 }
             }
         );
-
-        this.vehicles = Utility.RemoveAll(this.vehicles, (vehicle) => { return !vehicle.isAlive() || canDespawnOffscreen(vehicle) });
-    
-        function canDespawnOffscreen(vehicle) {
-            if (vehicle.isExpired() && 
-                (vehicle.rect.position.y + vehicle.rect.height < this.road.position.y || 
-                vehicle.rect.position.y >= this.road.position.y + this.road.rects[0].height)) {
-                return false;
-            }
-    
-            return true;
-        }
     }
     draw() {
         this.road.draw(this.context);
-        for (let vehicle of this.vehicles) {
-            vehicle.draw(this.context);
-        }        
+        this.vehicleOrchestrator.drawVehicles(this.context);       
         this.player.draw(this.context, !this.isDriving);
         this.dashboard.draw(this.context);
     }

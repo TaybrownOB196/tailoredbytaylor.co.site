@@ -4,7 +4,6 @@ import Vector2d from "../Vector2d";
 class NeedleMeter {
     constructor(position, radius, maxValue=100,initValue=0, color=null, dotSize=null, needleColor=null) {
         this.position = position;
-        console.log(this.position)
         this.radius = radius;
         this.minValue = 0;
         this.maxValue = maxValue;

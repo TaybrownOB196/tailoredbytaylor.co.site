@@ -172,7 +172,7 @@ class Vehicle extends PhysicsRect2d {
         this.spriteSheet = spriteSheet;
     }
 
-    update(tickDelta, frameMultiplier) {
+    update(tickDelta) {
         changingLane = changingLane.bind(this);
         let xMod = 1;
         if (this.laneChangeDirection === 'left') {
@@ -363,6 +363,29 @@ class PlayerVehicle extends Vehicle {
     }
 }
 
+class Raycast {
+    constructor(vector2d0, vector2d1, lineWidth=2, lineStyle='red') {
+        this.v0 = vector2d0;
+        this.v1 = vector2d1;
+        this.lineWidth = lineWidth;
+        this.lineStyle = lineStyle;
+    }
+
+    update(v0, v1) {
+        this.v0 = v0;
+        this.v1 = v1;
+    }
+
+    draw(context) {
+        context.beginPath();
+        context.strokeStyle = this.lineStyle;
+        context.lineWidth = this.lineWidth;
+        context.moveTo(this.v0.x, this.v0.y);
+        context.lineTo(this.v1.x, this.v1.y);
+        context.stroke();
+    }
+}
+
 class NpcVehicle extends Vehicle {
     constructor(rect, clipRect, speed, lane, spriteSheet, timeToLive, isSpawnAbove) {
         super(rect, clipRect, speed, lane, spriteSheet);
@@ -373,14 +396,17 @@ class NpcVehicle extends Vehicle {
         this._ttlTicks = 0;
         this.isSpawnAbove = isSpawnAbove;
         this.spriteSheet = spriteSheet;
+        this._collision_raycast = new Raycast(
+            new Vector2d(this.rect.position.x + this.rect.width/2, this.rect.position.y),
+            new Vector2d(this.rect.position.x + this.rect.width/2, this.rect.position.y - 32)
+        );
     }
 
-    update(tickDelta, frameMultiplier, road) {
-        super.update(tickDelta);
+    update(tickDelta, roadSpeed) {
         let yMod = 1;
-        if (road.speedValue == this.speedValue)
+        if (roadSpeed == this.speedValue)
             yMod = 0;
-        else if (road.speedValue < this.speedValue) {
+        else if (roadSpeed < this.speedValue) {
             yMod *= -1;
         }
 
@@ -390,10 +416,140 @@ class NpcVehicle extends Vehicle {
         } else {
             this.canDespawn = true;
         }
+        super.update(tickDelta);
+        this._collision_raycast.update(new Vector2d(this.rect.position.x + this.rect.width/2, this.rect.position.y),
+        new Vector2d(this.rect.position.x + this.rect.width/2, this.rect.position.y - 32))
+    }
+
+    draw(context) {
+        super.draw(context);
+        this._collision_raycast.draw(context);
     }
 
     isExpired() { return this.canDespawn; }
     isAlive() { return this.health; }
+}
+
+class VehicleOrchestrator {
+    constructor(maxCarCount, maxSemiCount, spritesheet) {
+        this.maxSemiCount = maxSemiCount;
+        this._semiCount = 0;
+        this.maxCarCount = maxCarCount;
+        this._carCount = 0;
+        this.spritesheet = spritesheet;
+        this.vehicles = [];
+    }
+
+    updateVehicles(tickDelta, road) {
+        canDespawnOffscreen = canDespawnOffscreen.bind(this);
+        this.vehicles = Utility.RemoveAll(this.vehicles, (vehicle) => { return !vehicle.isAlive() || canDespawnOffscreen(vehicle) });
+
+        for (let vehicle of this.vehicles) {
+            vehicle.update(tickDelta, road.speedValue);
+        }
+    
+        function canDespawnOffscreen(vehicle) {
+            if (vehicle.isExpired() && 
+                (vehicle.rect.position.y + vehicle.rect.height < road.position.y || 
+                vehicle.rect.position.y >= road.position.y + road.rects[0].height)) {
+                return false;
+            }
+    
+            return true;
+        }
+    }
+
+    drawVehicles(context) {
+        for (let vehicle of this.vehicles) {
+            vehicle.draw(context);
+        }
+    }
+
+    spawnVehicle(playerVehicle, road) {
+        if (this.vehicles.length >= this.maxSemiCount + this.maxCarCount) return;
+
+        getLane_ByLeastVehicles = getLane_ByLeastVehicles.bind(this);
+        getLane_ByPlayerVehicle = getLane_ByPlayerVehicle.bind(this);
+
+        let vehicleType = Utility.getTrueOrFalse() || (this._semiCount < this.maxSemiCount && this._carCount >= this.maxCarCount) ?
+            NpcVehicleTypes.SEMI :
+                Utility.getTrueOrFalse() ?
+                    NpcVehicleTypes.SHEEP :
+                    NpcVehicleTypes.COP;
+        let width = 0, height = 0;
+        switch(vehicleType) {
+            case NpcVehicleTypes.SEMI:
+                width = 64;
+                height = 128;
+                this._semiCount++;
+            break;
+                
+            case NpcVehicleTypes.SHEEP:
+            case NpcVehicleTypes.COP:
+            default:
+                width = 64;
+                height = 64;
+                this._carCount++;
+            break;
+        }
+        let speed = 0;
+        let startY = 0;
+        let isSpawnAbove = Utility.getTrueOrFalse();
+        if (isSpawnAbove) {
+            speed = Utility.getRandomIntInclusive(MINSPEED, MAXSPEED/2);
+            startY = road.position.y - height;
+        } else {
+            speed = Utility.getRandomIntInclusive(MAXSPEED/2, MAXSPEED-2);
+            startY = road.rects[0].height + height;
+        }
+        
+        let lane = getLane_ByLeastVehicles();
+        let startX = road.position.x + road.getLaneWidth() * (lane) - width - road.stripeWidth;
+            
+        this.vehicles.push(
+            NpcVehicleFactory.create(
+                vehicleType,
+                new Vector2d(startX, startY), 
+                new Vector2d(width, height),
+                speed,
+                lane,
+                this.spritesheet,
+                isSpawnAbove));
+
+        function getLane_ByLeastVehicles() {
+            if (this.vehicles.length > 1) {
+                let t = Utility.fillRange(0, road.laneCount);
+                for (let vehicle of this.vehicles) {
+                    t[vehicle.lane - 1]++;
+                }
+                t[playerVehicle.lane - 1]--;
+                return t.indexOf(Math.min(...t)) + 1;
+            }
+
+            return Utility.getRandomIntInclusive(1, road.laneCount);          
+        }
+
+        function getLane_ByPlayerVehicle() {
+            if (this.vehicles.length > 1) {
+                let t = Utility.fillRange(0, road.laneCount);
+                for (let vehicle of this.vehicles) {
+                    t[vehicle.lane - 1]++;
+                }
+            }
+
+            //If the player's current lane has the most number of cars,
+            //then place the vehicle in the lane next to the player
+            if (playerVehicle.lane == t.indexOf(Math.max(...t))) {
+                if (playerVehicle.lane >= road.laneCount) {
+                    return playerVehicle.lane - 1;
+                } else {
+                    return playerVehicle.lane + 1;
+                }
+            }
+
+            return playerVehicle.lane;
+        }
+    }
 }
 
 class NpcVehicleFactory {
@@ -498,7 +654,7 @@ class Road extends Gameobject {
         drawSpeedSections = drawSpeedSections.bind(this);
         getSpeedSectionHeight = getSpeedSectionHeight.bind(this);
 
-        context.fillStyle= ' black';
+        context.fillStyle = 'black';
         context.fillRect(this.position.x-2, this.position.y, this.rects[0].width+8, this.rects[0].height)
         drawLanes(context, this.rects[0]);
         drawLanes(context, this.rects[1]);
@@ -581,6 +737,7 @@ export {
     NpcVehicle,
     NpcVehicleFactory,
     PlayerVehicle,
+    VehicleOrchestrator,
     NpcVehicleTypes,
     MAXSPEED,
     MINSPEED
