@@ -66,6 +66,25 @@ class Rect {
         return { min, max };
     }
 
+    lineIntersects(p0x, p0y, p1x, p1y) {
+        let left =   lineLine(p0x,p0y,p1x,p1y, this.position.x,this.position.y,this.position.x, this.position.y+this.height);
+        let right =  lineLine(p0x,p0y,p1x,p1y, this.position.x + this.width,this.position.y, this.position.x+this.width,this.position.y+this.height);
+        let top =    lineLine(p0x,p0y,p1x,p1y, this.position.x,this.position.y, this.position.x+this.width,this.position.y);
+        let bottom = lineLine(p0x,p0y,p1x,p1y, this.position.x,this.position.y+this.height, this.position.x+this.width,this.position.y+this.height);
+  
+        return (left || right || top || bottom);
+        
+        function lineLine(x1, y1, x2, y2, x3, y3, x4, y4) {
+            let uA = ((x4-x3)*(y1-y3) - (y4-y3)*(x1-x3)) / ((y4-y3)*(x2-x1) - (x4-x3)*(y2-y1));
+            let uB = ((x2-x1)*(y1-y3) - (y2-y1)*(x1-x3)) / ((y4-y3)*(x2-x1) - (x4-x3)*(y2-y1));
+        
+            return (uA >= 0 && uA <= 1 && uB >= 0 && uB <= 1);
+        }
+    }
+  
+  
+  // LINE/LINE
+
     checkCollision(other) {
         let depth = Math.min();
         let normal = null;
@@ -99,7 +118,7 @@ class Rect {
             _normal = new Vector2d(-normal.x, -normal.y);
         }
         
-        return { depth: _depth, normal: normal };
+        return { depth: _depth, normal: _normal };
     }
 }
 

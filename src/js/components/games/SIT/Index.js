@@ -6,50 +6,56 @@ import Rect from '../../../lib/gaming/Rect';
 import Hud from '../../../lib/gaming/ui/Hud';
 
 import { 
-    Dashboard, 
-    Road, 
-    PlayerVehicle, 
+    Dashboard,
+    PlayerVehicle,
+    Road,
+    VehiclesOrchestrator
 } from './gameobjects';
-
-import { MAXSPEED, VehicleOrchestrator } from './gameobjects';
 
 import './../../../../sass/sit.scss';
 
 import spritesheet from './../../../../png/cars.png';
 import mainCarSS from './../../../../png/main_car_ss.png';
 
-//TODO: Implement different car types that have varying performance based on:
+//TODO: Implement different vehicle types that have varying performance based on:
     //Acceleration: How quickly vehicle can catch up to the cursor
+    //ReactionRange: The distance that a vehicle can see a car infront of it and adjust speed
     //Control: How quickly a vehicle can switch lanes
     //Size: How large vehicle is (hitbox)
-//Vehicle specs
+
+const VEHICLE_DIM = 64; 
+const MAXSPEED = 5;
+const MINSPEED = 1;
+const VEHICLE_SPAWN_SECONDS = 2000;
 
 class SIT extends EngineBase {
     constructor() {
         super('SIT', 'SITContainer', 360, 640);
         let roadW = this.canvas.clientWidth * .7;
         let roadH = this.canvas.clientHeight * .8;
-        let stripeWidth = 4;
+        let laneWidth = 4;
+        let startLane = 1;
+        let startSpeed = 0;
         let laneCount = 3;
+        
         this.xOffset = (this.canvas.clientWidth - roadW) / 2;
         this.isDriving = false;
         this.drivingTimer = 0;
         this.spritesheet = new Spritesheet(spritesheet);
         this.mainCarSS = new Spritesheet(mainCarSS);
-        this.vehicleOrchestrator = new VehicleOrchestrator(laneCount * 2 - 1, laneCount + 1, this.spritesheet);
+        this.vehiclesOrchestrator = new VehiclesOrchestrator(laneCount * 2 - 1, laneCount + 1, this.spritesheet, MAXSPEED, MINSPEED);
         this.road = new Road(
             new Rect(
                 new Vector2d(this.xOffset, 0), 
                 roadW, 
-                roadH), 
+                roadH),
+            MAXSPEED,
             laneCount,
-            stripeWidth);
+            laneWidth);
         this.audio = new Audio();
-        this.vehicleDim = 64;
-        let lane = 1;
-        let speed = 0;//TODO: initial speed will be calculated based upon start height
+        this.vehicleDim = VEHICLE_DIM;
         let startX = this.xOffset + this.road.getLaneWidth() *
-        (lane) - this.vehicleDim - this.road.stripeWidth;
+            (startLane) - this.vehicleDim - this.road.stripeWidth;
         let startY = roadH - this.vehicleDim;
         this.player = new PlayerVehicle(
             new Rect(
@@ -58,13 +64,13 @@ class SIT extends EngineBase {
                 this.vehicleDim),
                 new Rect(
                 new Vector2d(0,192), 
-                64,
-                64),
-                speed,
-                lane,
+                VEHICLE_DIM,
+                VEHICLE_DIM),
+                startSpeed,
+                startLane,
                 this.mainCarSS);
                 
-        this.spawnTimerIntervalCallback = setInterval(() => this.vehicleOrchestrator.spawnVehicle(this.player, this.road), 2000);
+        this.spawnTimerIntervalCallback = setInterval(() => this.vehiclesOrchestrator.spawnVehicle(this.player, this.road), VEHICLE_SPAWN_SECONDS);
         this.dashboard = new Dashboard(
             new Rect(
                 new Vector2d(0, this.road.getHeight()),
@@ -78,8 +84,8 @@ class SIT extends EngineBase {
 
         this.hud = new Hud(new Point2d(
             this.xOffset, this.road.getHeight()),
-            50,
-            50,
+            VEHICLE_DIM,
+            VEHICLE_DIM,
             { fps: '', mse: '', kbi: '', spd: this.road.speedIndex});
 
         this.pointerhandler = new Pointerhandler(this.canvas);
@@ -116,7 +122,6 @@ class SIT extends EngineBase {
             }
         });
     }
-
     getMousePosition(x, y) {
         let t = super.getMousePosition(x,y);
         return new Point2d(t.x, t.y);
@@ -157,13 +162,13 @@ class SIT extends EngineBase {
         if (!this.isDriving) return;
         this.drivingTimer += this.tickDelta;
         this.dashboard.update(this.road.speedValue, this.drivingTimer/1000);
-        this.vehicleOrchestrator.updateVehicles(this.tickDelta, this.road);
+        this.vehiclesOrchestrator.updateVehicles(this.tickDelta, this.road);
         this.road.update(this.tickDelta);
         this.player.update(this.tickDelta, this.frameMultiplier);
 
         this.handleCollisions(
             this.player, 
-            this.vehicleOrchestrator.vehicles,
+            this.vehiclesOrchestrator.vehicles,
             (result, player, vehicle) => {
                 if (result) {
                     let vCenter = vehicle.rect.center();
@@ -179,7 +184,7 @@ class SIT extends EngineBase {
     }
     draw() {
         this.road.draw(this.context);
-        this.vehicleOrchestrator.drawVehicles(this.context);       
+        this.vehiclesOrchestrator.drawVehicles(this.context);       
         this.player.draw(this.context, !this.isDriving);
         this.dashboard.draw(this.context);
     }

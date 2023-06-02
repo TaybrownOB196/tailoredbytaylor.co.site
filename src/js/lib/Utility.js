@@ -1,4 +1,11 @@
 class Utility {
+    static average(args) {
+        return Array.reduce.apply(null, [
+            arguments,
+            (total, currentValue) => total + currentValue
+        ])/arguments.length;
+    }
+    
     static GetRandomInt(max) {
         return Math.floor(Math.random() * max);
     }

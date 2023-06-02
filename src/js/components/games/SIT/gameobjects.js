@@ -9,8 +9,7 @@ import Pubsub from '../../../lib/gaming/Pubsub';
 import Transformation2d from '../../../lib/gaming/Transformation2d';
 import Utility from '../../../lib/Utility';
 
-const MAXSPEED = 5;
-const MINSPEED = 1;
+const VEHICLE_COLLISION_RAYCAST_LENGTH = 32;
 
 const LANE_CHANGE_FRAME_TICKER_COUNT = 5;
 const COLLISION_FRAME_TICKER_COUNT = 5;
@@ -40,7 +39,7 @@ class SpeedOMeter extends NeedleMeter {
             {x:this.position.x - this.radius, y:this.position.y});
 
         //draw ticks
-
+        
         //draw numbers
         let numberCount = 3;
         context.lineWidth = 1;
@@ -67,15 +66,15 @@ class SpeedOMeter extends NeedleMeter {
                     this.position.x - textWidth/2, 
                     this.position.y - this.radius + textHeight);
             }
-
-            // draw arc
-            context.lineWidth = 3;
-            context.setLineDash([]);
-            context.strokeStyle = this.color;
-            context.beginPath();
-            context.arc(this.position.x,this.position.y, this.radius, Math.PI, 0);
-            context.stroke();
         }
+        
+        // draw arc
+        context.lineWidth = 3;
+        context.setLineDash([]);
+        context.strokeStyle = this.color;
+        context.beginPath();
+        context.arc(this.position.x,this.position.y, this.radius, Math.PI, 0);
+        context.stroke();
 
         //draw needle
         context.setLineDash([]);
@@ -387,7 +386,14 @@ class Raycast {
 }
 
 class NpcVehicle extends Vehicle {
-    constructor(rect, clipRect, speed, lane, spriteSheet, timeToLive, isSpawnAbove) {
+    constructor(rect, 
+            clipRect, 
+            speed, 
+            lane, 
+            spriteSheet, 
+            timeToLive, 
+            isSpawnAbove, 
+            reactionDistanceRange={min: Math.round(VEHICLE_COLLISION_RAYCAST_LENGTH/2), max: VEHICLE_COLLISION_RAYCAST_LENGTH}) {
         super(rect, clipRect, speed, lane, spriteSheet);
         this.initPosition = new Vector2d(rect.position.x, rect.position.y);
         this.health = true;
@@ -396,58 +402,90 @@ class NpcVehicle extends Vehicle {
         this._ttlTicks = 0;
         this.isSpawnAbove = isSpawnAbove;
         this.spriteSheet = spriteSheet;
-        this._collision_raycast = new Raycast(
+        this.reactionDistance = Utility.getRandomIntInclusive(reactionDistanceRange.min, reactionDistanceRange.max);
+        this.isTrafficJammed = false;
+        this.collision_raycast = new Raycast(
             new Vector2d(this.rect.position.x + this.rect.width/2, this.rect.position.y),
-            new Vector2d(this.rect.position.x + this.rect.width/2, this.rect.position.y - 32)
+            new Vector2d(this.rect.position.x + this.rect.width/2, this.rect.position.y - this.reactionDistance)
         );
     }
 
     update(tickDelta, roadSpeed) {
+        if (this._ttlTicks < this.timeToLive) {
+            this._ttlTicks += tickDelta;
+        } else {
+            this.canDespawn = true;
+        }
+
         let yMod = 1;
         if (roadSpeed == this.speedValue)
             yMod = 0;
         else if (roadSpeed < this.speedValue) {
             yMod *= -1;
         }
-
         this.rect.position.y += this.speedValue * yMod;
-        if (this._ttlTicks < this.timeToLive) {
-            this._ttlTicks += tickDelta;
-        } else {
-            this.canDespawn = true;
-        }
-        super.update(tickDelta);
-        this._collision_raycast.update(new Vector2d(this.rect.position.x + this.rect.width/2, this.rect.position.y),
-        new Vector2d(this.rect.position.x + this.rect.width/2, this.rect.position.y - 32))
+
+        super.update(tickDelta);//currently holds lane changing logic
+        this.collision_raycast.update(
+            new Vector2d(this.rect.position.x + this.rect.width/2, this.rect.position.y),
+            new Vector2d(this.rect.position.x + this.rect.width/2, this.rect.position.y - this.reactionDistance));
     }
 
     draw(context) {
         super.draw(context);
-        this._collision_raycast.draw(context);
+        this.collision_raycast.draw(context);
     }
 
     isExpired() { return this.canDespawn; }
     isAlive() { return this.health; }
 }
 
-class VehicleOrchestrator {
-    constructor(maxCarCount, maxSemiCount, spritesheet) {
+class VehiclesOrchestrator {
+    constructor(maxCarCount, maxSemiCount, spritesheet, maxSpeed=5, minSpeed=1) {
         this.maxSemiCount = maxSemiCount;
         this._semiCount = 0;
         this.maxCarCount = maxCarCount;
         this._carCount = 0;
+
         this.spritesheet = spritesheet;
+        this.maxSpeed = maxSpeed;
+        this.minSpeed = minSpeed;
         this.vehicles = [];
     }
 
     updateVehicles(tickDelta, road) {
         canDespawnOffscreen = canDespawnOffscreen.bind(this);
-        this.vehicles = Utility.RemoveAll(this.vehicles, (vehicle) => { return !vehicle.isAlive() || canDespawnOffscreen(vehicle) });
-
+        
         for (let vehicle of this.vehicles) {
             vehicle.update(tickDelta, road.speedValue);
         }
-    
+        
+        this.vehicles = Utility.RemoveAll(this.vehicles, (vehicle) => { return !vehicle.isAlive() || canDespawnOffscreen(vehicle) });
+        let vehiclesByLane = this.vehicles.reduce((pv, cv) => {
+            pv[cv.lane - 1] = pv[cv.lane - 1] || [];
+            pv[cv.lane - 1].push(cv);
+            return pv;
+        }, []);
+
+        for (let laneVehicles of vehiclesByLane) {
+            if (!laneVehicles || laneVehicles.length > 1) continue;
+            laneVehicles = laneVehicles.sort((a,b) => { return a.position.y > b.position.y ? 1 : a.position.y == b.position.y ? 0 : -1});
+            let [vehicle, ...otherVehicles] = laneVehicles;
+            handleTrafficJam(vehicle, otherVehicles)
+        }
+
+        function handleTrafficJam(vehicle, otherVehicles) {
+            if (!otherVehicles.length) return;
+            for (let otherVehicle in otherVehicles) {
+                //if this vehicle is not traffic jammed and it is infront of the other vehicle, then continue
+                console.log(!vehicle.isTrafficJammed, vehicle.rect.lineIntersects(otherVehicle.collision_raycast.v0.x,otherVehicle.collision_raycast.v0.y, otherVehicle.collision_raycast.v1.x,otherVehicle.collision_raycast.v1.y))
+                if (!vehicle.isTrafficJammed && vehicle.rect.lineIntersects(otherVehicle.collision_raycast.v0.x,otherVehicle.collision_raycast.v0.y, otherVehicle.collision_raycast.v1.x,otherVehicle.collision_raycast.v1.y)) {
+                    vehicle.speedValue = otherVehicle.speedValue;
+                    vehicle.isTrafficJammed = true;
+                }
+            }
+        }
+
         function canDespawnOffscreen(vehicle) {
             if (vehicle.isExpired() && 
                 (vehicle.rect.position.y + vehicle.rect.height < road.position.y || 
@@ -496,10 +534,10 @@ class VehicleOrchestrator {
         let startY = 0;
         let isSpawnAbove = Utility.getTrueOrFalse();
         if (isSpawnAbove) {
-            speed = Utility.getRandomIntInclusive(MINSPEED, MAXSPEED/2);
+            speed = Utility.getRandomIntInclusive(this.minSpeed, this.maxSpeed/2);
             startY = road.position.y - height;
         } else {
-            speed = Utility.getRandomIntInclusive(MAXSPEED/2, MAXSPEED-2);
+            speed = Utility.getRandomIntInclusive(this.maxSpeed/2, this.maxSpeed-2);
             startY = road.rects[0].height + height;
         }
         
@@ -581,7 +619,7 @@ class NpcVehicleFactory {
                         new Vector2d(0,64),
                         64,
                         128),
-                    Utility.getRandomIntInclusive(MINSPEED, MAXSPEED/2),
+                    speed,
                     lane, 
                     spritesheet,
                     10000,
@@ -608,7 +646,7 @@ class NpcVehicleFactory {
 }
 
 class Road extends Gameobject {
-    constructor(rect, laneCount=3, stripeWidth=8, stripeLength=16, stripeGap=16, stripeColor='#ffffff') {
+    constructor(rect, maxSpeed, laneCount=3, stripeWidth=8, stripeLength=16, stripeGap=16, stripeColor='#ffffff') {
         super();
         this.position = new Vector2d(rect.position.x, rect.position.y);
         this.laneCount = laneCount;
@@ -626,7 +664,7 @@ class Road extends Gameobject {
                 rect.height)
         );
 
-        this.maxSpeed = this.speedSectionCount = 5;
+        this.maxSpeed = this.speedSectionCount = maxSpeed;
         this.minSpeed = this.speedValue = 0
 
         this.stripeYOffset = 0;
@@ -737,8 +775,6 @@ export {
     NpcVehicle,
     NpcVehicleFactory,
     PlayerVehicle,
-    VehicleOrchestrator,
-    NpcVehicleTypes,
-    MAXSPEED,
-    MINSPEED
+    VehiclesOrchestrator,
+    NpcVehicleTypes
 }
