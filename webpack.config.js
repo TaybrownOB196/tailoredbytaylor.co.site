@@ -7,7 +7,9 @@ module.exports = {
   entry: './src/js/index.js',
   mode: 'development',
   devServer: {
-    contentBase: path.join(__dirname, 'dist'),
+    static: {
+      directory: path.join(__dirname, './')
+    },
     compress: true,
     port: 9999
   },
@@ -30,7 +32,13 @@ module.exports = {
     rules: [
       {
         test: /\.scss$/,
-        use: ['style-loader', MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader'],
+        use: ['style-loader', 
+        {
+          loader: MiniCssExtractPlugin.loader,
+          options: {
+            esModule: false
+          }
+        }, 'css-loader', 'sass-loader'],
       },
       {
        test: /\.(js|jsx)$/,
