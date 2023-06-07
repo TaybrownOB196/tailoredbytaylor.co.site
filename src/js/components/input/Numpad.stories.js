@@ -1,4 +1,4 @@
-import { Numpad } from './Numpad';
+import Numpad from './Numpad';
 
 export default {
   title: 'Numpad',

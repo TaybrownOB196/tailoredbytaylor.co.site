@@ -1,4 +1,4 @@
-import { Keypad } from './Keypad';
+import Keypad from './Keypad';
 
 // More on how to set up stories at: https://storybook.js.org/docs/react/writing-stories/introduction
 export default {

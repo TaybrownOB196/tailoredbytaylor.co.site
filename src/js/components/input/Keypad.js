@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 
 import './Keypad.css';
 
-export function Keypad({...props}) {
+export default function Keypad({...props}) {
     return (
         <div className='keypad'>
         {
