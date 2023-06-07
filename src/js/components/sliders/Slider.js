@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-class Slider extends React.Component {
+export class Slider extends React.Component {
     constructor(props) {
         super(props);
         this.initValue = props.initValue;
@@ -46,5 +46,3 @@ class Slider extends React.Component {
         );
     }
 }
-
-export default Slider;

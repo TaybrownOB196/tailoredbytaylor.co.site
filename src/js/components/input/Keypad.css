@@ -1,0 +1,31 @@
+.keypad {
+    display: grid;
+    row-gap: .5rem;
+    place-items: center;
+}
+    
+.keypad div {     
+    border: 1px solid black;
+    /* padding: 8px; */
+    min-width: 1.5rem;
+    /* width: 2rem; */
+    /* text-align: center; */
+    height: 1.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: white;
+    cursor: pointer;
+    border-bottom: double;
+    border-right: double;
+    
+}
+
+.keypad div:hover {
+    color: black;
+    background-color: lightgrey;
+    border-bottom: 1px solid;
+    border-right: 1px solid;
+    border-top: double;
+    border-left: double;
+}

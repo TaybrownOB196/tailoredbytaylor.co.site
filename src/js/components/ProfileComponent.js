@@ -1,7 +1,7 @@
 import React from 'react';
 
 import profile_img from './../../jpg/20220716_113150.jpg'
-import SocialMediaTrayComponent from './banners/SocialMediaTrayComponent';
+import SocialMediaTray from './banners/SocialMediaTray';
 
 function ProfileComponent() {
     return (
@@ -20,7 +20,7 @@ function ProfileComponent() {
             </div>
             
             <div id='socialMediaTray-container'>
-                <SocialMediaTrayComponent />
+                <SocialMediaTray />
             </div>
 
             <div id='intro-container'>

@@ -1,20 +1,22 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
-import Keypad from './Keypad';
+import { Keypad } from './Keypad';
 
-class Numpad extends React.Component {
-    constructor(props) {
-        super(props);
-        this.keys = [0,1,2,3,4,5,6,7,8,9];
-    }
+import './Numpad.css';
 
-    render() {
-        return (
-            <span className='numpad'>
-                <Keypad handleClick={this.props.handleClick} keys={this.keys} />
-            </span>
-        );
-    }
+export function Numpad({...props}) {
+    return (
+        <span className='numpad'>
+            <Keypad handleClick={props.handleClick} keys={[0,1,2,3,4,5,6,7,8,9]} />
+        </span>
+    );
 }
 
-export default Numpad;
+Numpad.propTypes = {
+    handleClick: PropTypes.func.isRequired,
+};
+
+Numpad.defaultProps = {
+    handleClick: (e) => alert(e.target.innerHTML)
+};

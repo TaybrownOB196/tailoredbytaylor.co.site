@@ -1,0 +1,4 @@
+.numpad .keypad {
+    grid-template-columns: 33% 34% 33%;
+    width: 6.5rem;
+}
