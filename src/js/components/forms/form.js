@@ -1,5 +1,5 @@
 class Baseform {
-    constructor(elementID, submitUrl, options={method:'POST',headers: { 'Content-Type': 'application/json' }}) {
+    constructor(elementID, submitUrl, options={method:'POST', headers: { 'Content-Type': 'application/json' }}) {
         this.ID = elementID;
         this.submitUrl = submitUrl;
         this.options = options;
@@ -30,7 +30,6 @@ class Baseform {
 
     Submit() {
         let payload = this.GetPayload();
-        console.log(payload);
         if (payload) {
             //Concrete logic goes here for basic submission
             this.options.body = JSON.stringify(payload);

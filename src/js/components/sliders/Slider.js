@@ -1,48 +1,39 @@
 import React, { useState } from 'react';
 
-export class Slider extends React.Component {
-    constructor(props) {
-        super(props);
-        this.initValue = props.initValue;
-        this.maxValue = props.maxValue;
-        this.minValue = props.minValue;
-        this.onClick = this.onClick.bind(this);
-        this.state = {
-            prevValue: this.initValue,
-            dotStyle: {
-                left: '0px'
-            },
-            highLineStyle: {
-                width: '0px'
-            }
-        };
-    }
+export default function Slider({...props}) {
+    const minValue = props.minValue;
+    const maxValue = props.maxValue;
+    const dotStyle = { left: `0px` };
+    const highLineStyle = { width: `0px` };
+    const [prevValue, setPrevValue] = useState(props.initValue);
 
-    onClick(e) {
+    function handleOnClick(e) {
+        console.log(e);
         let { left } = e.target.getBoundingClientRect();
         let width = e.target.parentElement.clientWidth;
         let ratio = (e.clientX - left) 
             / width;
-        let value = Math.round(ratio * 10);
+        let value = Math.round(ratio * maxValue);
         let dotWidth = width * ratio;
-        if (this.state.value != value && this.props.onChange) {
-            this.setState({
-                ...this.state,
-                dotStyle: { left: `${dotWidth}px` },
-                highLineStyle: { width: `${dotWidth}px` },
-                prevValue: value
-            });
-            this.props.onChange(value);
+        if (prevValue != value && props.onChange) {
+            // this.setState({
+            //     ...this.state,
+            //     dotStyle: { left: `${dotWidth}px` },
+            //     highLineStyle: { width: `${dotWidth}px` },
+            //     prevValue: value
+            // });
+            dotStyle = { left: `${dotWidth}px` };
+            highLineStyle = { width: `${dotWidth}px` };
+            setPrevValue(value);
+            props.onChange(value);
         }
     }
-
-    render() {
-        return (
-            <span className='slider' onClick={this.onClick}>
-                <div id='dot' style={this.state.dotStyle}></div>
-                <div id='line'></div>
-                <div id='highline' style={this.state.highLineStyle}></div>
-            </span>
-        );
-    }
+    
+    return (
+        <span className='slider' onClick={(ev) => handleOnClick(ev)}>
+            <div id='dot' style={dotStyle}></div>
+            <div id='line'></div>
+            <div id='highline' style={highLineStyle}></div>
+        </span>
+    );
 }

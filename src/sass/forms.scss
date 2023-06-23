@@ -32,3 +32,73 @@
     align-items: center;
     justify-content: center;
 }
+
+
+
+input.showAnswer.valid {
+    background: green;
+}
+
+input.showAnswer.invalid {
+    background: red;
+}
+
+.problem {
+    width: 128px;
+    height: 64px;
+    position: relative;
+    
+
+    &.vertical {
+        * {
+            text-align: right;
+            float: left;
+            clear: none;
+            width: 32px;
+        }
+
+        :first-child {
+            width: 64px;
+            
+        }
+        
+        .operator {
+            text-align: left;
+        }
+    
+        .equalSign {
+            display: none;
+        }
+        
+        .equalBar {
+            width: 64px;
+            border-top: 2px solid black;
+        }
+        
+        input {
+            width: 64px;
+            border-width: 0px;
+        }
+    }
+
+    &.horizontal {
+        * {
+            text-align: center;
+            width: 32px;
+            padding-right: 8px;
+        }
+        
+        .operator {
+            text-align: left;
+        }
+        
+        .equalBar {
+            display: none;
+        }
+        
+        input {
+            width: 32px;
+            border-width: 0px;
+        }
+    }
+}

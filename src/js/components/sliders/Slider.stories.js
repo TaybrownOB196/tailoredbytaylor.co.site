@@ -1,33 +1,11 @@
-import { Slider } from './Slider';
+import Slider from './Slider';
 
 export default {
   title: 'Slider',
   component: Slider,
-  tags: ['autodocs'],
-//   argTypes: {
-//     backgroundColor: { control: 'color' },
-//   },
+  tags: ['autodocs']
 };
 
 export const Primary = {
+  render: () => <Slider minValue={0} maxValue={10} initValue={5} />
 };
-
-// export const Secondary = {
-//   args: {
-//     label: 'Button',
-//   },
-// };
-
-// export const Large = {
-//   args: {
-//     size: 'large',
-//     label: 'Button',
-//   },
-// };
-
-// export const Small = {
-//   args: {
-//     size: 'small',
-//     label: 'Button',
-//   },
-// };

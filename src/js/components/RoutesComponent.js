@@ -4,7 +4,6 @@ import React from 'react';
 import { HashRouter as Router } from 'react-router-dom';
 import { Routes, Route } from 'react-router-dom';
 import Resume from './routes/Resume';
-import Blurbs from './routes/Blurbs';
 import CarouselComponent from './carousel/CarouselComponent';
 import About from './routes/About';
 import Utility from './../lib/Utility';
@@ -18,6 +17,7 @@ import SandboxComponent from './games/Sandbox/SandboxComponent';
 import DeckComponent from './games/DeckComponent';
 import UserInfoComponent from './forms/UserInfoComponent';
 import UserLoginComponent from './forms/UserLoginComponent';
+import WorksheetComponent from './forms/WorksheetComponent';
 
 class RoutesComponent extends React.Component {
     constructor(props) {
@@ -48,6 +48,7 @@ class RoutesComponent extends React.Component {
                         <Route path='misc' element={<Projects />} >
                             <Route path='userform' element={<UserInfoComponent id='userInfoForm' formID='userInfoForm' submitUrl='https://jsonplaceholder.typicode.com/posts' />} />
                             <Route path='loginform' element={<UserLoginComponent id='loginForm' formID='loginForm' submitUrl='https://jsonplaceholder.typicode.com/posts' />} />
+                            <Route path='worksheet' element={<WorksheetComponent id='worksheet' formID='worksheet' />} />
                             <Route path='sandbox' element={<SandboxComponent />} />
                             <Route path='deck' element={<DeckComponent />} />
 

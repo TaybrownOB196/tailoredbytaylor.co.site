@@ -10,6 +10,7 @@ class Projects extends React.Component {
             ,{ ref: 'deck', text: 'Deck(WIP)' }
             ,{ ref: 'userform', text: 'UserForm' }
             ,{ ref: 'loginform', text: 'LoginForm' }
+            ,{ ref: 'worksheet', text: 'Worksheet' }
         ];
     }
 

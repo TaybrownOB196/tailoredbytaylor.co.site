@@ -1,0 +1,4 @@
+.alphabetpad .keypad {
+    grid-template-columns: 12.5% 12.5% 12.5% 12.5% 12.5% 12.5% 12.5% 12.5%;
+    width: 17rem;
+}

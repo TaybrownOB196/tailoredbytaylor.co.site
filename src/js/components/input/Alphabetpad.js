@@ -1,26 +1,22 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import Keypad from './Keypad';
 
-class Alphabetpad extends React.Component {
-    constructor(props) {
-        super(props);
+import './Alphabetpad.css';
 
-        this.handleClick = this.handleClick.bind(this);
-        this.keys = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
-    }
-
-    handleClick(e) {
-        this.props.handleClick(e);
-    }
-
-    render() {
-        return (
-            <span className='alphabetpad'>
-                <Keypad handleClick={this.handleClick} keys={this.keys} />
-            </span>
-        );
-    }
+export default function Alphabetpad({...props}) {
+    return (
+        <span className='alphabetpad'>
+            <Keypad handleClick={props.handleClick} keys={['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']} />
+        </span>
+    );
 }
 
-export default Alphabetpad;
+Alphabetpad.propTypes = {
+    handleClick: PropTypes.func.isRequired,
+};
+
+Alphabetpad.defaultProps = {
+    handleClick: (e) => alert(e.target.innerHTML)
+};
