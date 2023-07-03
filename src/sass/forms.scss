@@ -43,17 +43,23 @@ input.showAnswer.invalid {
     background: red;
 }
 
+.problems {
+    display: grid;
+    grid-template-columns: 64px 64px;
+    column-gap: 16px;
+    justify-content: space-around;
+}
+
 .problem {
     width: 128px;
     height: 64px;
-    position: relative;
-    
+    text-align: right;
 
     &.vertical {
         * {
             text-align: right;
             float: left;
-            clear: none;
+            clear: left;
             width: 32px;
         }
 
