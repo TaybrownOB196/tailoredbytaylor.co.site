@@ -14,13 +14,11 @@ export default function WorksheetComponent({...props}) {
     const selectedOperators = useRef({});
 
     function handleOnToggleOperator(ev) {
-        console.log(selectedOperators.current, ev.target.checked);
         let newSelectedOperators = {
             ...selectedOperators.current
         };
         newSelectedOperators[MathOperators[ev.target.name]] = ev.target.checked;
         selectedOperators.current = newSelectedOperators;
-        console.log(selectedOperators.current);
     }
 
     function handleOnToggleVertical(ev) {
@@ -154,7 +152,7 @@ export default function WorksheetComponent({...props}) {
                         key={idx}
                         name={operName}
                         value={MathOperators[operName]}
-                        isChecked={selectedOperators.current[MathOperators[operName]]}
+                        isChecked={props.selectedOperators[MathOperators[operName]]}
                         onChange={handleOnToggleOperator} />
                 })}
             </>
@@ -181,9 +179,9 @@ export default function WorksheetComponent({...props}) {
                         checked={isVertical}
                         onChange={handleOnToggleVertical} />
                     <label>Toggle Vertical</label>
-                    <MathOperatorsComponent 
-                        
-                        />
+                    <MathOperatorsComponent
+                        selectedOperators={selectedOperators.current}
+                        operators={Object.keys(MathOperators)} />
                 </div>
                 <ProblemsComponent
                     formID={props.formID} 
