@@ -15,7 +15,6 @@ class AudioController {
     constructor(audioElement) {
         if (!audioElement)
         throw Error(`invalid audio element ${audioElement} passed`);
-        console.log(audioElement)
         this.handleTimeUpdate = this.handleTimeUpdate.bind(this);
         this.audio = audioElement;
         this.audioClips = {};

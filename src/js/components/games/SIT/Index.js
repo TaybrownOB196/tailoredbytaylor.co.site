@@ -4,7 +4,7 @@ import { Keyboardhandler, Pointerhandler } from './../../../lib/gaming/input';
 import Vector2d from '../../../lib/gaming/Vector2d';
 import Rect from '../../../lib/gaming/Rect';
 import Hud from '../../../lib/gaming/ui/Hud';
-
+import { AudioController, AudioClip } from '../../../lib/gaming/audio/audio';
 import { 
     Dashboard,
     PlayerVehicle,
@@ -27,6 +27,7 @@ const VEHICLE_DIM = 64;
 const MAXSPEED = 5;
 const MINSPEED = 1;
 const VEHICLE_SPAWN_SECONDS = 2000;
+const ISDEBUG = true;
 
 class SIT extends EngineBase {
     constructor() {
@@ -37,13 +38,15 @@ class SIT extends EngineBase {
         let startLane = 1;
         let startSpeed = 0;
         let laneCount = 3;
+        this.version = '1.0.0';
         
         this.xOffset = (this.canvas.clientWidth - roadW) / 2;
         this.isDriving = false;
         this.drivingTimer = 0;
         this.spritesheet = new Spritesheet(spritesheet);
         this.mainCarSS = new Spritesheet(mainCarSS);
-        this.vehiclesOrchestrator = new VehiclesOrchestrator(laneCount * 2 - 1, laneCount + 1, this.spritesheet, MAXSPEED, MINSPEED);
+        this.vehiclesOrchestrator = new VehiclesOrchestrator(8, 0, this.spritesheet, MAXSPEED, MINSPEED);
+        // this.vehiclesOrchestrator = new VehiclesOrchestrator(laneCount * 2 - 1, laneCount + 1, this.spritesheet, MAXSPEED, MINSPEED);
         this.road = new Road(
             new Rect(
                 new Vector2d(this.xOffset, 0), 
@@ -57,6 +60,8 @@ class SIT extends EngineBase {
         let startX = this.xOffset + this.road.getLaneWidth() *
             (startLane) - this.vehicleDim - this.road.stripeWidth;
         let startY = roadH - this.vehicleDim;
+        this.audioCtrl = new AudioController(document.getElementById('SITAudio_0'));
+        this.audioCtrl.setClip('swerve', new AudioClip(.5, .6));
         this.player = new PlayerVehicle(
             new Rect(
                 new Vector2d(startX, startY), 
@@ -68,10 +73,15 @@ class SIT extends EngineBase {
                 VEHICLE_DIM),
                 startSpeed,
                 startLane,
-                this.mainCarSS);
-                
-        this.spawnTimerIntervalCallback = setInterval(() => this.vehiclesOrchestrator.spawnVehicle(this.player, this.road), VEHICLE_SPAWN_SECONDS);
-        this.dashboard = new Dashboard(
+                this.mainCarSS, 
+                this.audioCtrl);
+                this.spawnTimerIntervalCallback = setInterval(
+                    () => this.vehiclesOrchestrator.spawnVehicle(
+                        this.player, 
+                        this.road, 
+                        this.isDriving)
+                    , VEHICLE_SPAWN_SECONDS);
+                this.dashboard = new Dashboard(
             new Rect(
                 new Vector2d(0, this.road.getHeight()),
                 this.canvas.clientWidth, 
@@ -101,7 +111,7 @@ class SIT extends EngineBase {
         this.pointerhandler.pubsub.subscribe('pointermove', (ev) => {
             let msePos = this.getMousePosition(ev.layerX, ev.layerY);
             this.hud.update({mse: `(${msePos.x},${msePos.y})`});
-
+            
             this.handleMove(msePos);
         });
         this.pointerhandler.pubsub.subscribe('pointerenter', (ev) => {
@@ -111,14 +121,14 @@ class SIT extends EngineBase {
         this.pointerhandler.pubsub.subscribe('pointerleave', (ev) => {
             this.hud.update({mse: '( , )'});
         });
-
+        
         this.keyboardhandler = new Keyboardhandler(window);
         this.keyboardhandler.pubsub.subscribe('keydown', (ev) => {
             this.hud.update({kbi: ev.key});
-
+            
             switch (ev.key) {
                 case 'd':
-                break;
+                    break;
             }
         });
     }
@@ -175,7 +185,7 @@ class SIT extends EngineBase {
                     let pCenter = player.rect.center();
                     let direction = vCenter.y < pCenter.y > 0 ? 'rear' : 'front';
                     player.collision(direction);
-                    player.rect.position.x -= result.normal.x * result.depth;
+                    // player.rect.position.x -= result.normal.x * result.depth;
 
                     vehicle.health = false;
                 }
@@ -183,10 +193,10 @@ class SIT extends EngineBase {
         );
     }
     draw() {
-        this.road.draw(this.context);
-        this.vehiclesOrchestrator.drawVehicles(this.context);       
-        this.player.draw(this.context, !this.isDriving);
-        this.dashboard.draw(this.context);
+        this.road.draw(this.context, ISDEBUG);
+        this.vehiclesOrchestrator.drawVehicles(this.context, ISDEBUG);       
+        this.player.draw(this.context, !this.isDriving, ISDEBUG);
+        this.dashboard.draw(this.context, ISDEBUG);
     }
     run() {
         super.run();

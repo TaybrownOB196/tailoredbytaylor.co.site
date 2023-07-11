@@ -32,7 +32,7 @@ class SpeedOMeter extends NeedleMeter {
         this.fontSize = fontSize;
     }
 
-    draw(context) {
+    draw(context, isDebug) {
         let radians = (this.value/this.maxValue * Math.PI);
         let v0 = Vector2d.pointsToVector(
             {x:this.position.x, y:this.position.y}, 
@@ -120,13 +120,13 @@ class Dashboard {
         this.time = time;
     }
 
-    draw(context) {
+    draw(context, isDebug) {
         drawText = drawText.bind(this);
         context.fillStyle = this.color;
         context.fillRect(this.rect.position.x, this.rect.position.y, this.rect.width, this.rect.height);
 
         drawText();
-        this.speedOMeter.draw(context);
+        this.speedOMeter.draw(context, isDebug);
         
         //TODO: Add cooldown meter for lane changing here
         function drawText() {
@@ -219,8 +219,9 @@ class Vehicle extends PhysicsRect2d {
         this.canChangeLaneTicks = 0;
     }
 
-    draw(context) {
+    draw(context, isDebug) {
         this.spriteSheet.draw(context, this.rect, this.clipRect);
+        if (!isDebug) return;
         context.strokeStyle = DEBUG_GREEN;
         context.lineWidth = 1;
         context.setLineDash([1, 0]);
@@ -229,26 +230,28 @@ class Vehicle extends PhysicsRect2d {
 }
 
 class PlayerVehicle extends Vehicle {
-    constructor(rect, clipRect, speed, lane, spriteSheet) {
+    constructor(rect, clipRect, speed, lane, spriteSheet, audioController) {
         super(rect, clipRect, speed, lane, spriteSheet, LANE_CHANGE_COOLDOWN_SECONDS);
         this.rageMeter = new BarMeter('#ff0000', 10, 10, 4, 10, '#000000');
         this.animQueue = new AnimationQueue();
         this.pubsub = new Pubsub();
+        this.audioCtrl = audioController;
         this.setAnimations();
     }
 
     collision(direction) {
-        if (this.collisionCooldownTicks >= this.collisionCooldown) {
-            this.animQueue.setState(direction, false);
-            this.collisionCooldownTicks = 0;
-            this.pubsub.publish('collision');
-        }
+        // if (this.collisionCooldownTicks >= this.collisionCooldown) {
+        //     this.animQueue.setState(direction, false);
+        //     this.collisionCooldownTicks = 0;
+        //     this.pubsub.publish('collision');
+        // }
     }
 
     changeLane(lane, laneWidth, laneCount) {
         if (isNaN(lane) || lane == this.lane) return;
         super.changeLane(lane, laneWidth, laneCount);
         this.animQueue.setState(this.laneChangeDirection, true);
+        this.audioCtrl.playClip('swerve');
     }
 
     setAnimations() {
@@ -355,33 +358,10 @@ class PlayerVehicle extends Vehicle {
         this.animQueue.build();
     }
 
-    draw(context, isPaused) {
+    draw(context, isPaused, isDebug) {
         this.animQueue.animate(context, this.rect, isPaused);
         this.rageMeter.draw(context, 
             new Vector2d(this.rect.position.x, this.rect.position.y + this.rageMeter.height/2));
-    }
-}
-
-class Raycast {
-    constructor(vector2d0, vector2d1, lineWidth=2, lineStyle='red') {
-        this.v0 = vector2d0;
-        this.v1 = vector2d1;
-        this.lineWidth = lineWidth;
-        this.lineStyle = lineStyle;
-    }
-
-    update(v0, v1) {
-        this.v0 = v0;
-        this.v1 = v1;
-    }
-
-    draw(context) {
-        context.beginPath();
-        context.strokeStyle = this.lineStyle;
-        context.lineWidth = this.lineWidth;
-        context.moveTo(this.v0.x, this.v0.y);
-        context.lineTo(this.v1.x, this.v1.y);
-        context.stroke();
     }
 }
 
@@ -404,10 +384,12 @@ class NpcVehicle extends Vehicle {
         this.spriteSheet = spriteSheet;
         this.reactionDistance = Utility.getRandomIntInclusive(reactionDistanceRange.min, reactionDistanceRange.max);
         this.isTrafficJammed = false;
-        this.collision_raycast = new Raycast(
-            new Vector2d(this.rect.position.x + this.rect.width/2, this.rect.position.y),
-            new Vector2d(this.rect.position.x + this.rect.width/2, this.rect.position.y - this.reactionDistance)
-        );
+        this.collision_rect = new Rect(
+            new Vector2d(
+                this.rect.position.x, 
+                this.rect.position.y - this.reactionDistance),
+            this.rect.width,
+            this.reactionDistance);
     }
 
     update(tickDelta, roadSpeed) {
@@ -426,14 +408,22 @@ class NpcVehicle extends Vehicle {
         this.rect.position.y += this.speedValue * yMod;
 
         super.update(tickDelta);//currently holds lane changing logic
-        this.collision_raycast.update(
-            new Vector2d(this.rect.position.x + this.rect.width/2, this.rect.position.y),
-            new Vector2d(this.rect.position.x + this.rect.width/2, this.rect.position.y - this.reactionDistance));
+        this.collision_rect.position.y = this.rect.position.y - this.reactionDistance;
     }
 
-    draw(context) {
-        super.draw(context);
-        this.collision_raycast.draw(context);
+    draw(context, isDebug) {
+        super.draw(context, isDebug);
+        this.spriteSheet.draw(context, this.rect, this.clipRect);
+        if (!isDebug) return;
+
+        context.strokeStyle = DEBUG_GREEN;
+        context.lineWidth = 1;
+        context.setLineDash([1, 0]);
+        context.strokeRect(
+            this.collision_rect.position.x, 
+            this.collision_rect.position.y, 
+            this.collision_rect.width, 
+            this.collision_rect.height);
     }
 
     isExpired() { return this.canDespawn; }
@@ -468,18 +458,22 @@ class VehiclesOrchestrator {
         }, []);
 
         for (let laneVehicles of vehiclesByLane) {
-            if (!laneVehicles || laneVehicles.length > 1) continue;
-            laneVehicles = laneVehicles.sort((a,b) => { return a.position.y > b.position.y ? 1 : a.position.y == b.position.y ? 0 : -1});
+            if (!laneVehicles || laneVehicles.length <= 1) continue;
+            
+            laneVehicles = laneVehicles.sort((a,b) => { 
+                return a.rect.position.y > b.rect.position.y ? 1 : a.rect.position.y == b.rect.position.y ? 0 : -1
+            });
             let [vehicle, ...otherVehicles] = laneVehicles;
             handleTrafficJam(vehicle, otherVehicles)
         }
 
+        //TODO: fix this
         function handleTrafficJam(vehicle, otherVehicles) {
-            if (!otherVehicles.length) return;
-            for (let otherVehicle in otherVehicles) {
-                //if this vehicle is not traffic jammed and it is infront of the other vehicle, then continue
-                console.log(!vehicle.isTrafficJammed, vehicle.rect.lineIntersects(otherVehicle.collision_raycast.v0.x,otherVehicle.collision_raycast.v0.y, otherVehicle.collision_raycast.v1.x,otherVehicle.collision_raycast.v1.y))
-                if (!vehicle.isTrafficJammed && vehicle.rect.lineIntersects(otherVehicle.collision_raycast.v0.x,otherVehicle.collision_raycast.v0.y, otherVehicle.collision_raycast.v1.x,otherVehicle.collision_raycast.v1.y)) {
+            if (otherVehicles.length < 1) return;
+            for (let otherVehicle of otherVehicles) {
+                if (otherVehicle && 
+                    // !vehicle.isTrafficJammed && 
+                    vehicle.rect.checkCollision(otherVehicle.collision_rect) !== null) {
                     vehicle.speedValue = otherVehicle.speedValue;
                     vehicle.isTrafficJammed = true;
                 }
@@ -497,18 +491,21 @@ class VehiclesOrchestrator {
         }
     }
 
-    drawVehicles(context) {
+    drawVehicles(context, isDebug) {
         for (let vehicle of this.vehicles) {
-            vehicle.draw(context);
+            vehicle.draw(context, isDebug);
         }
     }
 
-    spawnVehicle(playerVehicle, road) {
-        if (this.vehicles.length >= this.maxSemiCount + this.maxCarCount) return;
+    spawnVehicle(playerVehicle, road, isDriving) {
+        if (!isDriving || this.vehicles.length >= this.maxSemiCount + this.maxCarCount) return;
 
+        getLane_By1 = getLane_By1.bind(this);
+        getLane_ByPlayer = getLane_ByPlayer.bind(this);
         getLane_ByLeastVehicles = getLane_ByLeastVehicles.bind(this);
         getLane_ByPlayerVehicle = getLane_ByPlayerVehicle.bind(this);
 
+        //Fix logic to return one of the 3 or nothing
         let vehicleType = Utility.getTrueOrFalse() || (this._semiCount < this.maxSemiCount && this._carCount >= this.maxCarCount) ?
             NpcVehicleTypes.SEMI :
                 Utility.getTrueOrFalse() ?
@@ -535,12 +532,13 @@ class VehiclesOrchestrator {
         let isSpawnAbove = Utility.getTrueOrFalse();
         if (isSpawnAbove) {
             speed = Utility.getRandomIntInclusive(this.minSpeed, this.maxSpeed/2);
-            startY = road.position.y - height;
+            startY = road.position.y - height * 2;
         } else {
             speed = Utility.getRandomIntInclusive(this.maxSpeed/2, this.maxSpeed-2);
-            startY = road.rects[0].height + height;
+            startY = road.rects[0].height;
         }
         
+        // let lane = getLane_By1();
         let lane = getLane_ByLeastVehicles();
         let startX = road.position.x + road.getLaneWidth() * (lane) - width - road.stripeWidth;
             
@@ -554,6 +552,12 @@ class VehiclesOrchestrator {
                 this.spritesheet,
                 isSpawnAbove));
 
+        function getLane_By1() {
+            return 1;
+        }
+        function getLane_ByPlayer() {
+            return playerVehicle.lane;
+        }
         function getLane_ByLeastVehicles() {
             if (this.vehicles.length > 1) {
                 let t = Utility.fillRange(0, road.laneCount);
@@ -566,7 +570,6 @@ class VehiclesOrchestrator {
 
             return Utility.getRandomIntInclusive(1, road.laneCount);          
         }
-
         function getLane_ByPlayerVehicle() {
             if (this.vehicles.length > 1) {
                 let t = Utility.fillRange(0, road.laneCount);
@@ -687,7 +690,7 @@ class Road extends Gameobject {
         }
     }
 
-    draw(context) {
+    draw(context, isDebug) {
         drawLanes = drawLanes.bind(this);
         drawSpeedSections = drawSpeedSections.bind(this);
         getSpeedSectionHeight = getSpeedSectionHeight.bind(this);
@@ -697,7 +700,9 @@ class Road extends Gameobject {
         drawLanes(context, this.rects[0]);
         drawLanes(context, this.rects[1]);
 
-        // drawSpeedSections(context);
+        if (isDebug) {
+            drawSpeedSections(context);
+        }
 
         function drawLanes(context, rect) {
             let laneWidth = this.getWidth() / this.laneCount;
