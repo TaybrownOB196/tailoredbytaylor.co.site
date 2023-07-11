@@ -240,11 +240,11 @@ class PlayerVehicle extends Vehicle {
     }
 
     collision(direction) {
-        // if (this.collisionCooldownTicks >= this.collisionCooldown) {
-        //     this.animQueue.setState(direction, false);
-        //     this.collisionCooldownTicks = 0;
-        //     this.pubsub.publish('collision');
-        // }
+        if (this.collisionCooldownTicks >= this.collisionCooldown) {
+            this.pubsub.publish('collision');
+            this.animQueue.setState(direction, false);
+            this.collisionCooldownTicks = 0;
+        }
     }
 
     changeLane(lane, laneWidth, laneCount) {
@@ -450,7 +450,8 @@ class VehiclesOrchestrator {
             vehicle.update(tickDelta, road.speedValue);
         }
         
-        this.vehicles = Utility.RemoveAll(this.vehicles, (vehicle) => { return !vehicle.isAlive() || canDespawnOffscreen(vehicle) });
+        let newVehicles = Utility.RemoveAll(this.vehicles, (vehicle) => { console.log(vehicle.isAlive()); return !canDespawnOffscreen(vehicle) || vehicle.isAlive()});
+        this.vehicles = newVehicles;
         let vehiclesByLane = this.vehicles.reduce((pv, cv) => {
             pv[cv.lane - 1] = pv[cv.lane - 1] || [];
             pv[cv.lane - 1].push(cv);
