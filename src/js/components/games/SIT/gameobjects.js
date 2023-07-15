@@ -16,7 +16,7 @@ const COLLISION_FRAME_TICKER_COUNT = 5;
 
 const LANE_CHANGE_SECONDS = 1000;
 const LANE_CHANGE_COOLDOWN_SECONDS = 500;
-const COLLISION_COOLDOWN_SECONDS = 4000;
+const COLLISION_COOLDOWN_SECONDS = 1200;
 
 const DEBUG_GREEN = '#00ff00';
 
@@ -103,52 +103,58 @@ class Dashboard {
         let fontSize = 8;
         let radius = this.rect.height * .33;
         this.collisions = 0;
-        this.time = 0;
+        this.score = 0;
+        this.drivingElapsed = 0;
 
         let x = this.rect.position.x + (this.rect.width - radius /4)/2;
-        let y = this.rect.position.y + (this.rect.height - radius/8) / 2;
+        let y = this.rect.position.y + (this.rect.height - radius/8)/2;
 
         this.speedOMeter = new SpeedOMeter(new Vector2d(x,y), radius, fontSize, 5, 0);
     }
 
-    addHit() {
-        this.collisions++;
+    addScore(value) {
+        this.score += value;
     }
 
-    update(speed, time) {
+    addHit() {
+        this.collisions++;
+        this.drivingElapsed = 0;
+    }
+
+    update(speed, tickDelta) {
+        this.drivingElapsed += tickDelta;
         this.speedOMeter.updateValue(speed);
-        this.time = time;
     }
 
     draw(context, isDebug) {
         drawText = drawText.bind(this);
         context.fillStyle = this.color;
         context.fillRect(this.rect.position.x, this.rect.position.y, this.rect.width, this.rect.height);
-
+        let text = [
+            `Hits: ${this.collisions}`, 
+            `Time: ${Math.round(this.drivingElapsed/1000)}`, 
+            `Score ${this.score}`,
+        ];
         drawText();
         this.speedOMeter.draw(context, isDebug);
         
         //TODO: Add cooldown meter for lane changing here
-        function drawText() {
-            let text = `Hits: ${this.collisions}`
-            let text2 = `Time: ${Math.round(this.time)}`;
-            context.font = '15px Arial';
-            context.fillStyle = DEBUG_GREEN;
-            let textMetrics = context.measureText(text);
-            let textMetrics2 = context.measureText(text2);
-            let textHeight = textMetrics.actualBoundingBoxDescent || textMetrics.actualBoundingBoxAscent;
-            let textHeight2 = textMetrics2.actualBoundingBoxDescent || textMetrics.actualBoundingBoxAscent;
-            
-            let offsetY = (this.rect.height + textHeight)/2;
-            context.fillText(
-                text, 
-                this.speedOMeter.position.x + this.speedOMeter.radius, 
-                this.rect.position.y + offsetY);
-
+        function drawText() {            
+            //Divided by 2 due to the canvas stretching
+            let font = Math.floor(this.rect.height / text.length / 2);
+            context.font = `${font}px Arial`;
+            context.fillStyle = '#ff0f00';
+            let cnt = 1;
+            let offsetX = 16;
+            for (let line of text) {
+                let textMetrics = context.measureText(line);
+                let offsetY = this.rect.position.y + font * (cnt/text.length) * text.length;
                 context.fillText(
-                    text2, 
-                    this.speedOMeter.position.x + this.speedOMeter.radius, 
-                    this.rect.position.y + offsetY + textHeight2);
+                    line, 
+                    this.speedOMeter.position.x + this.speedOMeter.radius + offsetX, 
+                    offsetY);
+                cnt++;
+            }
         }
     }
 }
@@ -167,7 +173,7 @@ class Vehicle extends PhysicsRect2d {
         this.laneChangeDirection = null;
 
         this.collisionCooldown = collisionCooldown;
-        this.collisionCooldownTicks = 0;
+        this.collisionCooldownTicks = collisionCooldown;
         this.spriteSheet = spriteSheet;
     }
 
@@ -202,13 +208,11 @@ class Vehicle extends PhysicsRect2d {
         }
     }
 
-    canChangeLane() {
-        return this.canChangeLaneTicks >= this.laneChangeCooldown && !this.targetLaneX;
+    canChangeLane(lane) {
+        return !isNaN(lane) && lane !== this.lane && this.canChangeLaneTicks >= this.laneChangeCooldown && !this.targetLaneX;
     }
 
-    changeLane(lane, laneWidth) {
-        if (isNaN(lane) || lane == this.lane) return;
-        
+    changeLane(lane, laneWidth) {        
         this.laneChangeDirection = lane > this.lane ? 'right' : 'left';
         if (this.laneChangeDirection == 'left') {
             laneWidth *= -1;
@@ -242,13 +246,13 @@ class PlayerVehicle extends Vehicle {
     collision(direction) {
         if (this.collisionCooldownTicks >= this.collisionCooldown) {
             this.pubsub.publish('collision');
+            // this.pubsub.publish('score', -20);
             this.animQueue.setState(direction, false);
             this.collisionCooldownTicks = 0;
         }
     }
 
     changeLane(lane, laneWidth, laneCount) {
-        if (isNaN(lane) || lane == this.lane) return;
         super.changeLane(lane, laneWidth, laneCount);
         this.animQueue.setState(this.laneChangeDirection, true);
         this.audioCtrl.playClip('swerve');
@@ -450,7 +454,7 @@ class VehiclesOrchestrator {
             vehicle.update(tickDelta, road.speedValue);
         }
         
-        let newVehicles = Utility.RemoveAll(this.vehicles, (vehicle) => { console.log(vehicle.isAlive()); return !canDespawnOffscreen(vehicle) || vehicle.isAlive()});
+        let newVehicles = Utility.RemoveAll(this.vehicles, (vehicle) => { return canDespawnOffscreen(vehicle) && vehicle.isAlive() });
         this.vehicles = newVehicles;
         let vehiclesByLane = this.vehicles.reduce((pv, cv) => {
             pv[cv.lane - 1] = pv[cv.lane - 1] || [];
@@ -475,7 +479,9 @@ class VehiclesOrchestrator {
                 if (otherVehicle && 
                     // !vehicle.isTrafficJammed && 
                     vehicle.rect.checkCollision(otherVehicle.collision_rect) !== null) {
-                    vehicle.speedValue = otherVehicle.speedValue;
+                    let speed = Math.min(vehicle.speedValue, otherVehicle.speedValue);
+                    vehicle.speedValue = speed;
+                    otherVehicle.speedValue = speed;
                     vehicle.isTrafficJammed = true;
                 }
             }

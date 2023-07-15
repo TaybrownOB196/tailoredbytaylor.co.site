@@ -178,6 +178,12 @@ class Text {
         this.fillStyle = colorHex;
     }
 
+    update(value, font, colorHex) {
+        this.value = value;
+        this.font = font || this.font;
+        this.fillStyle = colorHex || this.fillStyle;
+    }
+
     getWidth(context) {
         // console.log(context.measureText(this.value));
         return context.measureText(this.value).width;

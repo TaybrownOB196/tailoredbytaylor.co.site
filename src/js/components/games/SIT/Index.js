@@ -27,7 +27,9 @@ const VEHICLE_DIM = 64;
 const MAXSPEED = 5;
 const MINSPEED = 1;
 const VEHICLE_SPAWN_SECONDS = 2000;
+const SCORE_INCREMENT_SECCONDS = 100;
 const ISDEBUG = true;
+const LANECOUNT = 3;
 
 class SIT extends EngineBase {
     constructor() {
@@ -35,14 +37,15 @@ class SIT extends EngineBase {
         let roadW = this.canvas.clientWidth * .7;
         let roadH = this.canvas.clientHeight * .8;
         let laneWidth = 4;
+        let laneCount = LANECOUNT;
         let startLane = 1;
         let startSpeed = 0;
-        let laneCount = 3;
-        this.version = '1.0.0';
         
+        this.drivingScore = 0;
+        this.scoreCooldown = 0;
         this.xOffset = (this.canvas.clientWidth - roadW) / 2;
         this.isDriving = false;
-        this.drivingTimer = 0;
+        this.isGameOver = false;
         this.spritesheet = new Spritesheet(spritesheet);
         this.mainCarSS = new Spritesheet(mainCarSS);
         this.vehiclesOrchestrator = new VehiclesOrchestrator(8, 0, this.spritesheet, MAXSPEED, MINSPEED);
@@ -75,21 +78,33 @@ class SIT extends EngineBase {
                 startLane,
                 this.mainCarSS, 
                 this.audioCtrl);
-                this.spawnTimerIntervalCallback = setInterval(
-                    () => this.vehiclesOrchestrator.spawnVehicle(
+        this.spawnTimerIntervalCallback = setInterval(
+            () => {
+                if (!this.isGameOver && this.isDriving) {
+                    this.vehiclesOrchestrator.spawnVehicle(
                         this.player, 
                         this.road, 
-                        this.isDriving)
-                    , VEHICLE_SPAWN_SECONDS);
-                this.dashboard = new Dashboard(
+                        this.isDriving);
+                }
+            }, VEHICLE_SPAWN_SECONDS);
+        this.incrementScoreCallback = setInterval(
+            () => {
+                if (!this.isGameOver && this.isDriving) {
+                    let score = Math.floor(this.road.speedValue * this.dashboard.drivingElapsed/1000);
+                    this.dashboard.addScore(score);
+                }
+            }, SCORE_INCREMENT_SECCONDS);
+        this.dashboard = new Dashboard(
             new Rect(
                 new Vector2d(0, this.road.getHeight()),
                 this.canvas.clientWidth, 
                 (this.canvas.clientHeight - roadH)),
                 '#8f563b');
-
+                
         this.player.pubsub.subscribe('collision', () => {
+            this.drivingScore = this.dashboard.drivingElapsed;
             this.dashboard.addHit();
+            this.endGame();
         });
 
         this.hud = new Hud(new Point2d(
@@ -128,6 +143,9 @@ class SIT extends EngineBase {
             
             switch (ev.key) {
                 case 'd':
+                    if (ISDEBUG) {
+                        this.endGame();
+                    }
                     break;
             }
         });
@@ -148,12 +166,13 @@ class SIT extends EngineBase {
 
         let mseY = msePos.y - this.player.rect.height;
         if (mseY >= 0 && mseY <= this.road.getHeight() - this.player.rect.height) {
-            this.player.rect.position.y = mseY;
+            this.player.rect.position.y = mseY+(this.player.rect.height/2);
         }
 
-        if (this.player.canChangeLane()) {
-            let mseX = msePos.x - this.xOffset;
-            this.player.changeLane(this.road.getLane(mseX), this.road.getLaneWidth());
+        let mseX = msePos.x - this.xOffset;
+        let lane = this.road.getLane(mseX);
+        if (this.player.canChangeLane(lane)) {
+            this.player.changeLane(lane, this.road.getLaneWidth());
         }
     }
     handleCollisions(player, vehicles, resolution) {
@@ -165,13 +184,16 @@ class SIT extends EngineBase {
             }
         }
     }
+    endGame() {
+        this.isDriving = false;
+        this.isGameOver = true;
+    }
     update() {
         let fps = this.getFps();
         this.hud.update({fps: fps});
 
         if (!this.isDriving) return;
-        this.drivingTimer += this.tickDelta;
-        this.dashboard.update(this.road.speedValue, this.drivingTimer/1000);
+        this.dashboard.update(this.road.speedValue, this.tickDelta);
         this.vehiclesOrchestrator.updateVehicles(this.tickDelta, this.road);
         this.road.update(this.tickDelta);
         this.player.update(this.tickDelta, this.frameMultiplier);
@@ -185,7 +207,6 @@ class SIT extends EngineBase {
                     let pCenter = player.rect.center();
                     let direction = vCenter.y < pCenter.y > 0 ? 'rear' : 'front';
                     player.collision(direction);
-                    // player.rect.position.x -= result.normal.x * result.depth;
 
                     vehicle.health = false;
                 }
@@ -193,10 +214,36 @@ class SIT extends EngineBase {
         );
     }
     draw() {
+        drawGameOver = drawGameOver.bind(this);
         this.road.draw(this.context, ISDEBUG);
         this.vehiclesOrchestrator.drawVehicles(this.context, ISDEBUG);       
         this.player.draw(this.context, !this.isDriving, ISDEBUG);
         this.dashboard.draw(this.context, ISDEBUG);
+        if (this.isGameOver) {
+            drawGameOver();
+        }
+
+        function drawGameOver() {
+            let text = [
+                'GAME OVER',
+                `Time: ${Math.floor(this.drivingScore/1000)}`, 
+                `Score ${this.dashboard.score}`,
+            ];
+            let goHeight = this.canvas.clientHeight/3;
+            let font = Math.floor(goHeight / text.length / 2);
+            this.context.font = `${font}px Arial`;
+            this.context.fillStyle = '#000fff';
+            let cnt = 1;
+            for (let line of text) {
+                // let textMetrics = context.measureText(line);
+                let offsetY = this.gameRect.position.y + goHeight + font * (cnt/text.length) * text.length;
+                this.context.fillText(
+                    line, 
+                    0, 
+                    offsetY);
+                cnt++;
+            }
+        }
     }
     run() {
         super.run();
