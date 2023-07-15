@@ -2,7 +2,7 @@ import React from 'react';
 import SIT from './Index';
 import spritesheet from '../../../../png/cars_ss.png';
 
-const VERSION = '0.3.0';
+const VERSION = '0.4.0';
 const DISPLAY_NONE = {
     display: 'none'
 }

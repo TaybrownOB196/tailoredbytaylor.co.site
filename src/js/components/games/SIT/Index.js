@@ -49,7 +49,6 @@ class SIT extends EngineBase {
         this.spritesheet = new Spritesheet(spritesheet);
         this.mainCarSS = new Spritesheet(mainCarSS);
         this.vehiclesOrchestrator = new VehiclesOrchestrator(8, 0, this.spritesheet, MAXSPEED, MINSPEED);
-        // this.vehiclesOrchestrator = new VehiclesOrchestrator(laneCount * 2 - 1, laneCount + 1, this.spritesheet, MAXSPEED, MINSPEED);
         this.road = new Road(
             new Rect(
                 new Vector2d(this.xOffset, 0), 
@@ -120,7 +119,6 @@ class SIT extends EngineBase {
             this.handleMove(msePos);
         });
         this.pointerhandler.pubsub.subscribe('pointerup', (ev) => {
-            // let msePos = this.getMousePosition(ev.layerX, ev.layerY);
             this.isDriving = false;
         });
         this.pointerhandler.pubsub.subscribe('pointermove', (ev) => {
@@ -224,22 +222,26 @@ class SIT extends EngineBase {
         }
 
         function drawGameOver() {
+            this.context.fillStyle = "rgba(255, 255, 255, 0.5)";
+            this.context.fillRect(0, 0, this.canvas.clientWidth, this.canvas.clientHeight);
+
             let text = [
                 'GAME OVER',
                 `Time: ${Math.floor(this.drivingScore/1000)}`, 
-                `Score ${this.dashboard.score}`,
+                `Score: ${this.dashboard.score}`,
             ];
             let goHeight = this.canvas.clientHeight/3;
             let font = Math.floor(goHeight / text.length / 2);
             this.context.font = `${font}px Arial`;
             this.context.fillStyle = '#000fff';
+
             let cnt = 1;
             for (let line of text) {
-                // let textMetrics = context.measureText(line);
+                let textMetrics = this.context.measureText(line);
                 let offsetY = this.gameRect.position.y + goHeight + font * (cnt/text.length) * text.length;
                 this.context.fillText(
                     line, 
-                    0, 
+                    (this.canvas.clientWidth/2) - (Math.ceil(textMetrics.width)/2), 
                     offsetY);
                 cnt++;
             }
