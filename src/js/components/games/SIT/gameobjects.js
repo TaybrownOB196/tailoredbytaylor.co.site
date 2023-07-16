@@ -113,6 +113,7 @@ class Dashboard {
     }
 
     resetScore() {
+        this.collisions = 0;
         this.score = 0;
     }
     addScore(value) {
