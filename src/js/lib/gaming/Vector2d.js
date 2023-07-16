@@ -1,6 +1,3 @@
-//Normalized vectors (also known as unit vectors)
-import { Point2d } from './common';
-
 class Vector2d {
     constructor(x,y) {
         this.x = x;

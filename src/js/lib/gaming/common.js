@@ -1,5 +1,3 @@
-import Vector2d from "./Vector2d";
-
 const gravity = 9.8;
 const dragValue = 0.47;
 const fluidDensity = 1.29;
@@ -144,19 +142,20 @@ class Gameobject {
 
 class Spritesheet {
     constructor(sheet, imageElem = null) {
-        this.sheet = new Image();
+        this.img = new Image();
         if (imageElem) {
-            this.sheet = imageElem;
+            this.img = imageElem;
         } else {
-            this.sheet.src = sheet;
+            this.img.src = sheet;
         }
         this.clipMap = {};
     }
 
     draw(context, rect, clipRect) {
         context.drawImage(
-            this.sheet, 
+            this.img, 
             clipRect.position.x, clipRect.position.y, clipRect.width, clipRect.height,
+            // rect.position.x, rect.position.y, rect.width, rect.height);
             rect.position.x, rect.position.y, rect.width, rect.height);
     }
 }
@@ -177,6 +176,12 @@ class Text {
         this.value = value;
         this.font = font;
         this.fillStyle = colorHex;
+    }
+
+    update(value, font, colorHex) {
+        this.value = value;
+        this.font = font || this.font;
+        this.fillStyle = colorHex || this.fillStyle;
     }
 
     getWidth(context) {

@@ -14,6 +14,7 @@ import TictactoeComponent from './games/Tictactoe/TictactoeComponent';
 import Projects from './routes/Projects';
 import ContentComponent from './ContentComponent';
 import SandboxComponent from './games/Sandbox/SandboxComponent';
+import SITComponent from './games/SIT/SITComponent';
 import DeckComponent from './games/DeckComponent';
 import UserInfoComponent from './forms/UserInfoComponent';
 import UserLoginComponent from './forms/UserLoginComponent';
@@ -51,6 +52,7 @@ class RoutesComponent extends React.Component {
                             <Route path='worksheet' element={<WorksheetComponent id='worksheet' formID='worksheet' />} />
                             <Route path='sandbox' element={<SandboxComponent />} />
                             <Route path='deck' element={<DeckComponent />} />
+                            <Route path='sit' element={<SITComponent />} />
 
                         </Route>
                     </Route>

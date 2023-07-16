@@ -1,5 +1,5 @@
 import PhysicsRect2d from '../../../lib/gaming/PhysicsRect2d';
-import Meter from '../../../lib/gaming/ui/Meter';
+import BarMeter from '../../../lib/gaming/ui/BarMeter';
 import Rect from '../../../lib/gaming/Rect';
 import { Point2d } from '../../../lib/gaming/common';
 
@@ -68,7 +68,7 @@ class Cursor extends PhysicsRect2d {
     constructor(rect, borderHex) {
         super(rect, 10, null);
         this.borderHex = borderHex;
-        this.health = new Meter('#00ff00', 100, 100, 24, 4);
+        this.health = new BarMeter('#00ff00', 100, 100, 24, 4);
     }
 
     isAlive() {

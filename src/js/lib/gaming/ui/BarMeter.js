@@ -1,4 +1,4 @@
-class Meter {
+class BarMeter {
     constructor(colorHex, initial, max, width, height, borderColorHex='#ffffff') {
         this.borderColorHex = borderColorHex;
         this.colorHex = colorHex;
@@ -37,15 +37,20 @@ class Meter {
     draw(context, position) {
 
         context.beginPath();
-        context.lineWidth = "2";
+        context.lineWidth = "1";
         context.strokeStyle = this.borderColorHex;
         context.rect(position.x, position.y, this.width, this.height);
         context.stroke();
 
         context.fillStyle = this.colorHex;
-        context.fillRect(position.x, position.y, 
-            this.width * (this.value/this.max), this.height);
+        if (this.width > this.height) {
+            context.fillRect(position.x, position.y, 
+                this.width * (this.value/this.max), this.height);
+        } else {
+            let meterMod = this.height * (this.value/this.max);
+            context.fillRect(position.x, position.y + this.height - meterMod, this.width, meterMod);
+        }
     }
 }
 
-export default Meter;
+export default BarMeter;

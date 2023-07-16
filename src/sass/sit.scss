@@ -1,0 +1,19 @@
+#SITComponent {
+    display: flex;
+    justify-content: center;
+    
+    #SITContainer {
+        display: flex;
+        justify-content: center;
+    }
+    
+    canvas {
+        image-rendering: pixelated;
+        background-color: lightgrey;
+        background-color: #8f563b;
+    }
+
+    .tbt-spritesheet {
+        display: none;
+    }
+}

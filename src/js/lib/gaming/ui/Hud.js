@@ -1,8 +1,5 @@
 import { Text, Point2d } from '../common';
 
-const PADDINGX = 4;
-const PADDINGY = 4;
-
 class Hud {
     constructor(position, width, height, initialDisplay={fps: ''}, colorHex='#00ff00') {
         this.position = position;
@@ -10,7 +7,7 @@ class Hud {
         this.width = width;
         this.height = height;
         this.textDict = initialDisplay;
-        this.fontHeight = (height / Object.keys(initialDisplay).length - 1) - PADDINGY;
+        this.fontHeight = (height / Object.keys(initialDisplay).length - 1) - 2;
         this.font = `${this.fontHeight}px Arial`;
         for (let key in initialDisplay) {
             this.textDict[key] = new Text(initialDisplay[key], this.font, this.colorHex);
@@ -30,7 +27,7 @@ class Hud {
         for (let key in this.textDict) {
             this.textDict[key].draw(context, 
                 new Point2d(
-                    this.position.x + PADDINGX,
+                    this.position.x + 2,
                     this.position.y + count * this.fontHeight
                     ));
                 count++;

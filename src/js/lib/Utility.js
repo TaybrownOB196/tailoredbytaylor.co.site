@@ -1,6 +1,21 @@
 class Utility {
+    static average(args) {
+        return Array.reduce.apply(null, [
+            arguments,
+            (total, currentValue) => total + currentValue
+        ])/arguments.length;
+    }
+    
     static GetRandomInt(max) {
         return Math.floor(Math.random() * max);
+    }
+
+    static getZeroOrOne() {
+        return Utility.getRandomIntInclusive(0,1);
+    }
+
+    static getTrueOrFalse() {
+        return Utility.getRandomIntInclusive(0,1) == 1 ? true : false;
     }
 
     static getRandomIntInclusive(min, max) {
@@ -9,8 +24,18 @@ class Utility {
         return Math.floor(Math.random() * (max - min + 1) + min);
     }
 
+    static fillRange(fill, count) {
+        let toReturn = [];
+        for(let idx=0; idx<count; idx+=1) {
+            toReturn.push(fill);
+        }
+
+        return toReturn;
+    }
+
     static range(end, start=0, step=1) {
         let toReturn = [];
+        if (end < start || step < 1) return toReturn;
         for(let idx=start; idx<end; idx+=step) {
             toReturn.push(idx);
         }
@@ -22,7 +47,7 @@ class Utility {
         let chars = ['A', 'B', 'C', 'D', 'E', 'F'];
         let nums = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
         function _getColorComponentValue() {
-            if (Utility.getRandomIntInclusive(0,1)) {
+            if (Utility.getZeroOrOne()) {
                 return chars[Utility.GetRandomInt(chars.length)];
             } else {
                 return nums[Utility.GetRandomInt(nums.length)];
