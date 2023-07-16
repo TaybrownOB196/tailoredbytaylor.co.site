@@ -112,6 +112,9 @@ class Dashboard {
         this.speedOMeter = new SpeedOMeter(new Vector2d(x,y), radius, fontSize, 5, 0);
     }
 
+    resetScore() {
+        this.score = 0;
+    }
     addScore(value) {
         this.score += value;
     }
@@ -445,6 +448,12 @@ class VehiclesOrchestrator {
         this.maxSpeed = maxSpeed;
         this.minSpeed = minSpeed;
         this.vehicles = [];
+    }
+
+    clearVehicles() {
+        this.vehicles = [];
+        this._semiCount = 0;
+        this._carCount = 0;
     }
 
     updateVehicles(tickDelta, road) {

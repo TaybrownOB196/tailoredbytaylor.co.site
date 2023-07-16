@@ -28,18 +28,19 @@ const MAXSPEED = 5;
 const MINSPEED = 1;
 const VEHICLE_SPAWN_SECONDS = 2000;
 const SCORE_INCREMENT_SECCONDS = 100;
-const ISDEBUG = true;
+const ISDEBUG = false;
+const START_LANE = 1;
 const LANECOUNT = 3;
+const ROAD_WIDTH_MULTIPLIER = .7;
+const ROAD_HEIGHT_MULTIPLIER = .8;
 
 class SIT extends EngineBase {
     constructor() {
         super('SIT', 'SITContainer', 360, 640);
-        let roadW = this.canvas.clientWidth * .7;
-        let roadH = this.canvas.clientHeight * .8;
+        let roadW = this.canvas.clientWidth * ROAD_WIDTH_MULTIPLIER;
+        let roadH = this.canvas.clientHeight * ROAD_HEIGHT_MULTIPLIER;
         let laneWidth = 4;
         let laneCount = LANECOUNT;
-        let startLane = 1;
-        let startSpeed = 0;
         
         this.drivingScore = 0;
         this.scoreCooldown = 0;
@@ -60,7 +61,7 @@ class SIT extends EngineBase {
         this.audio = new Audio();
         this.vehicleDim = VEHICLE_DIM;
         let startX = this.xOffset + this.road.getLaneWidth() *
-            (startLane) - this.vehicleDim - this.road.stripeWidth;
+            (START_LANE) - this.vehicleDim - this.road.stripeWidth;
         let startY = roadH - this.vehicleDim;
         this.audioCtrl = new AudioController(document.getElementById('SITAudio_0'));
         this.audioCtrl.setClip('swerve', new AudioClip(.5, .6));
@@ -73,8 +74,8 @@ class SIT extends EngineBase {
                 new Vector2d(0,192), 
                 VEHICLE_DIM,
                 VEHICLE_DIM),
-                startSpeed,
-                startLane,
+                0,
+                START_LANE,
                 this.mainCarSS, 
                 this.audioCtrl);
         this.spawnTimerIntervalCallback = setInterval(
@@ -138,13 +139,17 @@ class SIT extends EngineBase {
         this.keyboardhandler = new Keyboardhandler(window);
         this.keyboardhandler.pubsub.subscribe('keydown', (ev) => {
             this.hud.update({kbi: ev.key});
-            
             switch (ev.key) {
                 case 'd':
                     if (ISDEBUG) {
                         this.endGame();
                     }
                     break;
+            case 'Escape':
+                if (this.isGameOver) {
+                    this.startGame();
+                }
+                break;
             }
         });
     }
@@ -181,6 +186,16 @@ class SIT extends EngineBase {
                 resolution(result, player, vehicle);
             }
         }
+    }
+    startGame() {
+        this.isGameOver = false;
+        this.dashboard.resetScore();
+        let roadH = this.canvas.clientHeight * ROAD_HEIGHT_MULTIPLIER;
+        let startX = this.xOffset + this.road.getLaneWidth() *
+            (START_LANE) - this.vehicleDim - this.road.stripeWidth;
+        let startY = roadH - this.vehicleDim;
+        this.player.rect.position = new Vector2d(startX, startY);
+        this.vehiclesOrchestrator.clearVehicles();
     }
     endGame() {
         this.isDriving = false;
