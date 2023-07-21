@@ -1,11 +1,5 @@
 class EngineRunnerBase {
-    constructor(name, containerID, fps=30) {
-        this.container = document.getElementById(containerID);
-        if (!this.container) {
-            console.log(`unable to load "${name}" game using "${containerID}"`);
-            throw `unable to load "${name}" game using "${containerID}`;
-        }
-
+    constructor(name, fps=30) {
         this.name = name;
         this.tickDelta = 0;
         this.ticks = 0;

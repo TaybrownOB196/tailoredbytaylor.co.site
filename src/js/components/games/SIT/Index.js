@@ -37,47 +37,19 @@ const ROAD_HEIGHT_MULTIPLIER = .8;
 class SIT extends EngineBase {
     constructor() {
         super('SIT', 'SITContainer', 360, 640);
-        let roadW = this.canvas.clientWidth * ROAD_WIDTH_MULTIPLIER;
-        let roadH = this.canvas.clientHeight * ROAD_HEIGHT_MULTIPLIER;
-        let laneWidth = 4;
-        let laneCount = LANECOUNT;
-        
-        this.drivingScore = 0;
-        this.scoreCooldown = 0;
-        this.xOffset = (this.canvas.clientWidth - roadW) / 2;
-        this.isDriving = false;
-        this.isGameOver = false;
         this.spritesheet = new Spritesheet(spritesheet);
         this.mainCarSS = new Spritesheet(mainCarSS);
-        this.vehiclesOrchestrator = new VehiclesOrchestrator(8, 0, this.spritesheet, MAXSPEED, MINSPEED);
-        this.road = new Road(
-            new Rect(
-                new Vector2d(this.xOffset, 0), 
-                roadW, 
-                roadH),
-            MAXSPEED,
-            laneCount,
-            laneWidth);
+        //TODO: Move audio logic into player vehicle class
         this.audio = new Audio();
-        this.vehicleDim = VEHICLE_DIM;
-        let startX = this.xOffset + this.road.getLaneWidth() *
-            (START_LANE) - this.vehicleDim - this.road.stripeWidth;
-        let startY = roadH - this.vehicleDim;
         this.audioCtrl = new AudioController(document.getElementById('SITAudio_0'));
         this.audioCtrl.setClip('swerve', new AudioClip(.5, .6));
-        this.player = new PlayerVehicle(
-            new Rect(
-                new Vector2d(startX, startY), 
-                this.vehicleDim, 
-                this.vehicleDim),
-                new Rect(
-                new Vector2d(0,192), 
-                VEHICLE_DIM,
-                VEHICLE_DIM),
-                0,
-                START_LANE,
-                this.mainCarSS, 
-                this.audioCtrl);
+        this.init(this.canvas.clientWidth, this.canvas.clientHeight);        
+        this.drivingScore = 0;
+        this.scoreCooldown = 0;
+        this.isDriving = false;
+        this.isGameOver = false;
+        this.vehiclesOrchestrator = new VehiclesOrchestrator(8, 0, this.spritesheet, MAXSPEED, MINSPEED);
+
         this.spawnTimerIntervalCallback = setInterval(
             () => {
                 if (!this.isGameOver && this.isDriving) {
@@ -94,24 +66,12 @@ class SIT extends EngineBase {
                     this.dashboard.addScore(score);
                 }
             }, SCORE_INCREMENT_SECCONDS);
-        this.dashboard = new Dashboard(
-            new Rect(
-                new Vector2d(0, this.road.getHeight()),
-                this.canvas.clientWidth, 
-                (this.canvas.clientHeight - roadH)),
-                '#8f563b');
                 
         this.player.pubsub.subscribe('collision', () => {
             this.drivingScore = this.dashboard.drivingElapsed;
             this.dashboard.addHit();
             this.endGame();
         });
-
-        this.hud = new Hud(new Point2d(
-            this.xOffset, this.road.getHeight()),
-            VEHICLE_DIM,
-            VEHICLE_DIM,
-            { fps: '', mse: '', kbi: '', spd: this.road.speedIndex});
 
         this.pointerhandler = new Pointerhandler(this.canvas);
         this.pointerhandler.pubsub.subscribe('pointerdown', (ev) => {
@@ -137,6 +97,7 @@ class SIT extends EngineBase {
         });
         
         this.keyboardhandler = new Keyboardhandler(window);
+        this.addKeyboardControls(this.keyboardhandler.pubsub);
         this.keyboardhandler.pubsub.subscribe('keydown', (ev) => {
             this.hud.update({kbi: ev.key});
             switch (ev.key) {
@@ -150,13 +111,69 @@ class SIT extends EngineBase {
                     this.startGame();
                 }
                 break;
+            case 'f':
+                this.toggleFullscreen();
+                if (this.isFullscreen) {
+
+                } else {
+                    this.resizeCanvas(360, 640);
+                }
+                break;
             }
         });
     }
-    getMousePosition(x, y) {
-        let t = super.getMousePosition(x,y);
-        return new Point2d(t.x, t.y);
+
+    onResize(width, height) {
+        this.init(width, height);
     }
+
+    init(width, height) {
+        console.log(`resize to ${width}x${height}`)
+        let roadW = width * ROAD_WIDTH_MULTIPLIER;
+        let roadH = height * ROAD_HEIGHT_MULTIPLIER;
+        let laneWidth = 4;
+        let laneCount = LANECOUNT;
+        
+        this.xOffset = (width - roadW) / 2;
+        this.road = new Road(
+            new Rect(
+                new Vector2d(this.xOffset, 0), 
+                roadW, 
+                roadH),
+            MAXSPEED,
+            laneCount,
+            laneWidth);
+        this.vehicleDim = VEHICLE_DIM;
+        let startX = this.xOffset + this.road.getLaneWidth() *
+            (START_LANE) - this.vehicleDim - this.road.stripeWidth;
+        let startY = roadH - this.vehicleDim;
+        this.player = new PlayerVehicle(
+            new Rect(
+                new Vector2d(startX, startY), 
+                this.vehicleDim, 
+                this.vehicleDim),
+            new Rect(
+                new Vector2d(0,192), 
+                VEHICLE_DIM,
+                VEHICLE_DIM),
+            0,
+            START_LANE,
+            this.mainCarSS, 
+            this.audioCtrl);
+        this.dashboard = new Dashboard(
+            new Rect(
+                new Vector2d(0, this.road.getHeight()),
+                this.canvas.clientWidth, 
+                (this.canvas.clientHeight - roadH)),
+                '#8f563b');
+                
+        this.hud = new Hud(new Point2d(
+            this.xOffset, this.road.getHeight()),
+            VEHICLE_DIM,
+            VEHICLE_DIM,
+            { fps: '', mse: '', kbi: '', spd: this.road.speedIndex});
+    }
+
     handleMove(msePos) {
         if (!this.isDriving) return;
 
@@ -235,6 +252,8 @@ class SIT extends EngineBase {
         if (this.isGameOver) {
             drawGameOver();
         }
+
+        this.hud.draw(this.context);
 
         function drawGameOver() {
             this.context.fillStyle = "rgba(255, 255, 255, 0.5)";
