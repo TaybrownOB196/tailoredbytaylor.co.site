@@ -11,6 +11,12 @@ import {
     Road,
     VehiclesOrchestrator
 } from './gameobjects';
+import {
+    TextboxComponentSettings,
+    UIContainerFactory,
+    UIContainerSettings,
+    ButtonComponentSettings
+} from '../../../lib/gaming/ui/UIComponentFactory';
 
 import './../../../../sass/sit.scss';
 
@@ -76,8 +82,13 @@ class SIT extends EngineBase {
         this.pointerhandler = new Pointerhandler(this.canvas);
         this.pointerhandler.pubsub.subscribe('pointerdown', (ev) => {
             let msePos = this.getMousePosition(ev.layerX, ev.layerY);
-            this.isDriving = true;
-            this.handleMove(msePos);
+            if (this.modal.isShowing) {
+                this.isDriving = false;
+                this.modal.handleClick(msePos);
+            } else {
+                this.isDriving = true;
+                this.handleMove(msePos);
+            }
         });
         this.pointerhandler.pubsub.subscribe('pointerup', (ev) => {
             this.isDriving = false;
@@ -97,7 +108,7 @@ class SIT extends EngineBase {
         });
         
         this.keyboardhandler = new Keyboardhandler(window);
-        this.addKeyboardControls(this.keyboardhandler.pubsub);
+        // this.addKeyboardControls(this.keyboardhandler.pubsub);
         this.keyboardhandler.pubsub.subscribe('keydown', (ev) => {
             this.hud.update({kbi: ev.key});
             switch (ev.key) {
@@ -106,19 +117,17 @@ class SIT extends EngineBase {
                         this.endGame();
                     }
                     break;
-            case 'Escape':
-                if (this.isGameOver) {
-                    this.startGame();
-                }
-                break;
-            case 'f':
-                this.toggleFullscreen();
-                if (this.isFullscreen) {
+                case 'f':
+                    if (this.isFullscreen) {
+                        this.toggleFullscreen();
 
-                } else {
-                    this.resizeCanvas(360, 640);
-                }
-                break;
+                    } else {
+                        this.resizeCanvas(360, 640);
+                    }
+                    break;
+                case 'Escape':
+                    this.pauseGame();
+                    break;
             }
         });
     }
@@ -128,7 +137,6 @@ class SIT extends EngineBase {
     }
 
     init(width, height) {
-        console.log(`resize to ${width}x${height}`)
         let roadW = width * ROAD_WIDTH_MULTIPLIER;
         let roadH = height * ROAD_HEIGHT_MULTIPLIER;
         let laneWidth = 4;
@@ -171,7 +179,71 @@ class SIT extends EngineBase {
             this.xOffset, this.road.getHeight()),
             VEHICLE_DIM,
             VEHICLE_DIM,
-            { fps: '', mse: '', kbi: '', spd: this.road.speedIndex});
+            { 
+                fps: '', 
+                mse: '', 
+                kbi: '', 
+                spd: this.road.speedIndex
+            });
+
+        this.modalWidth = this.canvas.clientWidth * .8;
+        this.modalHeight = this.canvas.clientHeight * .8;
+        this.modal = UIContainerFactory.createContainer(new UIContainerSettings(
+            'modal',
+            this.modalWidth,
+            this.modalHeight,
+            '#000fff', 
+            '#fff000', 
+            '2',
+            'vertical', 10, 10, 10));
+        this.modal.addComponent('headerTxt', new TextboxComponentSettings(
+            '#f0f0f0', 
+            '#000', 
+            1, 
+            'PAUSED', 
+            '20px Arial',
+            '#fff'));
+        this.modal.addComponent('resumeBtn', new ButtonComponentSettings(
+            '#0f0f0f', 
+            '#fff', 
+            1, 
+            'RESUME', 
+            '16px Arial',
+            '#fff', 
+            () => {
+                this.modal.toggle(false);
+            },
+            '#000',
+            '#000'
+        ));
+        this.modal.addComponent('restartBtn', new ButtonComponentSettings(
+            '#0f0f0f', 
+            '#fff', 
+            1, 
+            'RESTART', 
+            '16px Arial',
+            '#fff', 
+            () => {
+                this.startGame();
+            },
+            '#000',
+            '#000'
+        ));
+        this.modal.addComponent('quitBtn', new ButtonComponentSettings(
+            '#0f0f0f', 
+            '#fff', 
+            1, 
+            'QUIT', 
+            '16px Arial',
+            '#fff', 
+            () => {
+                this.endGame();
+            },
+            '#000',
+            '#000'
+        ));
+        this.modal.build();
+        this.modal.toggle(false);
     }
 
     handleMove(msePos) {
@@ -206,6 +278,7 @@ class SIT extends EngineBase {
     }
     startGame() {
         this.isGameOver = false;
+        this.modal.toggle(false);
         this.dashboard.resetScore();
         let roadH = this.canvas.clientHeight * ROAD_HEIGHT_MULTIPLIER;
         let startX = this.xOffset + this.road.getLaneWidth() *
@@ -214,9 +287,14 @@ class SIT extends EngineBase {
         this.player.rect.position = new Vector2d(startX, startY);
         this.vehiclesOrchestrator.clearVehicles();
     }
+    pauseGame() {
+        this.isDriving = false;
+        this.modal.toggle(true);
+    }
     endGame() {
         this.isDriving = false;
         this.isGameOver = true;
+        this.modal.toggle(true);
     }
     update() {
         let fps = this.getFps();
@@ -254,6 +332,10 @@ class SIT extends EngineBase {
         }
 
         this.hud.draw(this.context);
+        this.modal.draw(this.context, 
+            new Vector2d(
+                (this.canvas.clientWidth-this.modalWidth)/2,
+                (this.canvas.clientHeight-this.modalHeight)/2));
 
         function drawGameOver() {
             this.context.fillStyle = "rgba(255, 255, 255, 0.5)";
