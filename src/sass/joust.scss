@@ -1,0 +1,20 @@
+#JoustComponent {
+    display: flex;
+    justify-content: center;
+
+    
+    #JoustContainer {
+        display: flex;
+        justify-content: center;
+    }
+    
+    canvas {
+        image-rendering: pixelated;
+        background-color: lightgrey;
+        background-color: #fff;
+    }
+
+    .tbt-spritesheet {
+        display: none;
+    }
+}

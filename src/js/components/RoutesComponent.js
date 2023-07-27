@@ -15,6 +15,7 @@ import Projects from './routes/Projects';
 import ContentComponent from './ContentComponent';
 import SandboxComponent from './games/Sandbox/SandboxComponent';
 import SITComponent from './games/SIT/SITComponent';
+import JoustComponent from './games/Joust/JoustComponent';
 import DeckComponent from './games/DeckComponent';
 import UserInfoComponent from './forms/UserInfoComponent';
 import UserLoginComponent from './forms/UserLoginComponent';
@@ -53,6 +54,7 @@ class RoutesComponent extends React.Component {
                             <Route path='sandbox' element={<SandboxComponent />} />
                             <Route path='deck' element={<DeckComponent />} />
                             <Route path='sit' element={<SITComponent />} />
+                            <Route path='joust' element={<JoustComponent />} />
 
                         </Route>
                     </Route>

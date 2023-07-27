@@ -155,7 +155,6 @@ class Spritesheet {
         context.drawImage(
             this.img, 
             clipRect.position.x, clipRect.position.y, clipRect.width, clipRect.height,
-            // rect.position.x, rect.position.y, rect.width, rect.height);
             rect.position.x, rect.position.y, rect.width, rect.height);
     }
 }
