@@ -11,13 +11,14 @@ import {
     UIContainerSettings,
     ButtonComponentSettings
 } from '../../../lib/gaming/ui/UIComponentFactory';
-import { Barrier, Jouster, Mount, Rider } from './gameobjects';
+import { Barrier, Battleaxe, Jouster, Lance, Mount, Rider } from './gameobjects';
 
-import spritesheet from './../../../../png/joust_00.png';
+import spritesheet from './../../../../png/joust_02.png';
 
 import './../../../../sass/joust.scss';
 
-const ISDEBUG = false;
+let ISDEBUG = false;
+let ISPAUSED = false;
 const HUD_DIM = 64;
 const PLYR_DIM = 96;
 const SPRT_DIM = 64;
@@ -28,6 +29,25 @@ class Joust extends EngineBase {
         this.spritesheet = new Spritesheet(spritesheet);
         this.isGameOver = false;
         this.init(this.canvas.clientWidth, this.canvas.clientHeight);
+        this.keyboardhandler = new Keyboardhandler(window);
+        this.keyboardhandler.pubsub.subscribe('keydown', (ev) => {
+            this.hud.update({kbi: ev.key});
+            switch (ev.key) {
+                case 'g':
+                    this.player.gallop();
+                    this.otherPlayer.gallop();
+                    break;
+                case '+':
+                    ISDEBUG = !ISDEBUG;
+                    break;
+                case 'a':
+                    this.player.attack();
+                    break;
+                case 'Escape':
+                    this.pauseGame();
+                    break;
+            }
+        });
     }
 
     onResize(width, height) {
@@ -38,7 +58,11 @@ class Joust extends EngineBase {
         const barrierWidth = width - (PLYR_DIM * 2);
         const barrierHeight = 128;
         const barrierX = (width - barrierWidth)/2;
-        const barrierY = (height - barrierHeight * .2)/2;
+        const barrierY = (height - barrierHeight * .5)/2;
+
+        const lance = new Lance(this.spritesheet);
+        const axe = new Battleaxe(this.spritesheet);
+
         this.barrier = new Barrier(
             new Rect(
                 new Vector2d(barrierX, barrierY), 
@@ -46,19 +70,31 @@ class Joust extends EngineBase {
                 barrierHeight));
 
         this.player = new Jouster(
-            new Rect(new Vector2d(0,0), PLYR_DIM, PLYR_DIM),
+            new Rect(
+                new Vector2d(
+                    this.barrier.rect.position.x - (PLYR_DIM / 2),
+                    this.barrier.rect.position.y + PLYR_DIM/2),
+                PLYR_DIM,
+                PLYR_DIM),
             new Rect(new Vector2d(0,0), SPRT_DIM, SPRT_DIM),
             this.spritesheet,
             new Rider(),
-            new Mount()
+            new Mount(1, 2)
         );
+        this.player.equipWeapon(lance)
 
         this.otherPlayer = new Jouster(
-            new Rect(new Vector2d(this.canvas.clientWidth - PLYR_DIM,0), PLYR_DIM, PLYR_DIM),
+            new Rect(
+                new Vector2d(
+                    this.barrier.rect.position.x + this.barrier.rect.width - (PLYR_DIM / 2),
+                    this.barrier.rect.position.y + PLYR_DIM/2),
+                PLYR_DIM,
+                PLYR_DIM),
             new Rect(new Vector2d(0,0), SPRT_DIM, SPRT_DIM),
             this.spritesheet,
             new Rider(),
-            new Mount()
+            new Mount(1, 2),
+            false
         );
 
         this.hud = new Hud(new Point2d(
@@ -146,6 +182,9 @@ class Joust extends EngineBase {
     update() {
         let fps = this.getFps();
         this.hud.update({fps: fps});
+
+        this.player.update(this.frameMultiplier, ISPAUSED);
+        this.otherPlayer.update(this.frameMultiplier, ISPAUSED);
     }
     draw() {
         drawGameOver = drawGameOver.bind(this);
@@ -153,9 +192,9 @@ class Joust extends EngineBase {
             drawGameOver();
         }
 
-        this.otherPlayer.draw(this.context);
-        this.barrier.draw(this.context);
-        this.player.draw(this.context);
+        this.otherPlayer.draw(this.context, ISPAUSED, ISDEBUG);
+        this.barrier.draw(this.context, ISPAUSED, ISDEBUG);
+        this.player.draw(this.context, ISPAUSED, ISDEBUG);
 
         this.hud.draw(this.context);
         this.modal.draw(this.context, 

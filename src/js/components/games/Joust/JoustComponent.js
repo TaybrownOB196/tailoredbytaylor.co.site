@@ -1,6 +1,7 @@
 import React from 'react';
 import Joust from './Index';
 import spritesheet from '../../../../png/joust_00.png';
+import spritesheet1 from '../../../../png/joust_01.png';
 
 const VERSION = '0.0.1';
 const DISPLAY_NONE = {
@@ -23,7 +24,7 @@ class JoustComponent extends React.Component {
         return (
             <div id='JoustComponent'>
                 <div id='JoustContainer'>
-                    <img className='tbt-spritesheet' src={spritesheet} />
+                    <img className='tbt-spritesheet' src={spritesheet1} />
                 </div>
                 <button id='JoustContainer-Start' onClick={this.onClickStart}>Start {VERSION}</button>
             </div>

@@ -10,7 +10,7 @@ class AnimationQueue {
         this.queue = [];
     }
 
-    animate(context, positionRect, isPaused = false) {
+    animate(context, positionRect, isPaused = false, showOffsetRect=false) {
         if (this.queue.length > 0 && this.queue.at(0).isCompleted()) {
             this.queue.shift().reset();
         }
@@ -21,8 +21,8 @@ class AnimationQueue {
 
         if (this.queue.length == 0) throw new Error('queue is empty');
         
-        let anim = this.queue.at(0);
-        anim.draw(context, positionRect, isPaused);
+        const anim = this.queue.at(0);
+        anim.draw(context, positionRect, isPaused, showOffsetRect);
     }
     
     setState(stateKey, isClear=false) {
@@ -30,7 +30,7 @@ class AnimationQueue {
             console.warn(`${stateKey} does not exist in animation map`);
         }
         
-        let anim = this.stateMap.get(stateKey);
+        const anim = this.stateMap.get(stateKey);
         if (isClear && this.queue.length > 0) {
             this.queue = this.queue.filter(x => x.order >= anim.order);
         }
@@ -87,7 +87,7 @@ class Animation {
         this.isBuilt = true;
     }
 
-    draw(context, positionRect, isPaused = false) {
+    draw(context, positionRect, isPaused = false, showOffsetRect=false) {
         getNext = getNext.bind(this);
         reset = reset.bind(this);
 
@@ -99,8 +99,18 @@ class Animation {
         }
 
         let frame = getNext(isPaused);
-        this.spritesheet.draw(context,
-            frame.offsetRect(positionRect),
+        let offsetRect = frame.offsetRect(positionRect);
+        if (showOffsetRect) {
+            context.strokeStyle = '#00ff00';
+            context.strokeRect(
+                offsetRect.position.x, 
+                offsetRect.position.y, 
+                offsetRect.width, 
+                offsetRect.height);
+        }
+        this.spritesheet.draw(
+            context,
+            positionRect,
             frame.spritesheetRect);
         
         function getNext(isPaused) {
@@ -156,18 +166,20 @@ class AnimationFrame {
 }
 
 class HitboxFrame extends AnimationFrame {
-    constructor(hitboxOffsetRect, spritesheetRect, isInterruptable=false, count=1) {
+    constructor(hitboxOffset, width, height, spritesheetRect, isInterruptable=false, count=1) {
         super(spritesheetRect, isInterruptable, count);
-        this.hitboxOffsetRect = hitboxOffsetRect;
+        this.hitboxOffset = hitboxOffset;
+        this.width = width;
+        this.height = height;
     }
 
     offsetRect(positionRect) {
         return new Rect(
             new Vector2d(
-                positionRect.position.x + this.hitboxOffsetRect.position.x,
-                positionRect.position.y + this.hitboxOffsetRect.position.y),
-            positionRect.width + this.hitboxOffsetRect.width,
-            positionRect.height + this.hitboxOffsetRect.height);
+                positionRect.position.x + this.hitboxOffset.x,
+                positionRect.position.y + this.hitboxOffset.y),
+            this.width,
+            this.height);
     }
 }
 
