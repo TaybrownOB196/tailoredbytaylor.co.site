@@ -7,6 +7,7 @@ const DEFAULT_CANVAS_HEIGHT = 150;
 class EngineBase extends EngineRunnerBase {
     constructor(name, containerID, canvasWidth=DEFAULT_CANVAS_WIDTH, canvasHeight=DEFAULT_CANVAS_HEIGHT) {
         super(name);
+        this.ISDEBUG = false;
         this.DEFAULT_CANVAS_WIDTH = DEFAULT_CANVAS_WIDTH;
         this.DEFAULT_CANVAS_HEIGHT = DEFAULT_CANVAS_HEIGHT;
         this.canvas = document.createElement('canvas');

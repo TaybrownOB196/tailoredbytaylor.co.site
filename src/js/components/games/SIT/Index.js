@@ -34,7 +34,6 @@ const MAXSPEED = 5;
 const MINSPEED = 1;
 const VEHICLE_SPAWN_SECONDS = 2000;
 const SCORE_INCREMENT_SECCONDS = 100;
-const ISDEBUG = false;
 const START_LANE = 1;
 const LANECOUNT = 3;
 const ROAD_WIDTH_MULTIPLIER = .7;
@@ -73,12 +72,6 @@ class SIT extends EngineBase {
                     this.dashboard.addScore(score);
                 }
             }, SCORE_INCREMENT_SECCONDS);
-                
-        this.player.pubsub.subscribe('collision', () => {
-            this.drivingScore = this.dashboard.drivingElapsed;
-            this.dashboard.addHit();
-            this.endGame();
-        });
 
         this.pointerhandler = new Pointerhandler(this.canvas);
         this.pointerhandler.pubsub.subscribe('pointerdown', (ev) => {
@@ -113,8 +106,8 @@ class SIT extends EngineBase {
         this.keyboardhandler.pubsub.subscribe('keydown', (ev) => {
             this.hud.update({kbi: ev.key});
             switch (ev.key) {
-                case 'd':
-                    if (ISDEBUG) {
+                case 'e':
+                    if (this.ISDEBUG) {
                         this.endGame();
                     }
                     break;
@@ -131,6 +124,9 @@ class SIT extends EngineBase {
                     break;
                 case '0':
                     this.pauseGame();
+                    break;
+                case 'd':
+                    this.ISDEBUG = !this.ISDEBUG;
                     break;
             }
         });
@@ -168,6 +164,11 @@ class SIT extends EngineBase {
             START_LANE,
             this.mainCarSS, 
             this.audioCtrl);
+        this.player.pubsub.subscribe('collision', () => {
+            this.drivingScore = this.dashboard.drivingElapsed;
+            this.dashboard.addHit();
+            this.endGame();
+        });
         this.dashboard = new Dashboard(
             new Rect(
                 new Vector2d(0, this.road.getHeight()),
@@ -255,7 +256,7 @@ class SIT extends EngineBase {
         if (this.road.speedValue > 0) {
             this.isDriving = true;
         }
-        this.hud.update({spd: this.road.speedValue});
+        this.hud.update({spd: Math.round(this.road.speedValue)});
 
         let mseY = msePos.y - this.player.rect.height;
         if (mseY >= 0 && mseY <= this.road.getHeight() - this.player.rect.height) {
@@ -324,19 +325,22 @@ class SIT extends EngineBase {
     }
     draw() {
         drawGameOver = drawGameOver.bind(this);
-        this.road.draw(this.context, ISDEBUG);
-        this.vehiclesOrchestrator.drawVehicles(this.context, ISDEBUG);       
-        this.player.draw(this.context, !this.isDriving, ISDEBUG);
-        this.dashboard.draw(this.context, ISDEBUG);
+        this.road.draw(this.context, this.ISDEBUG);
+        this.vehiclesOrchestrator.drawVehicles(this.context, this.ISDEBUG);       
+        this.player.draw(this.context, !this.isDriving, this.ISDEBUG);
+        this.dashboard.draw(this.context, this.ISDEBUG);
         if (this.isGameOver) {
             drawGameOver();
         }
 
-        this.hud.draw(this.context);
         this.modal.draw(this.context, 
             new Vector2d(
                 (this.canvas.clientWidth-this.modalWidth)/2,
                 (this.canvas.clientHeight-this.modalHeight)/2));
+
+        if (this.ISDEBUG) {
+            this.hud.draw(this.context);
+        }
 
         function drawGameOver() {
             this.context.fillStyle = "rgba(255, 255, 255, 0.5)";
