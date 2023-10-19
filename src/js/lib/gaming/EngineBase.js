@@ -3,21 +3,19 @@ import Rect from '../../lib/gaming/Rect';
 import EngineRunnerBase from './EngineRunnerBase';
 const DEFAULT_CANVAS_WIDTH = 300;
 const DEFAULT_CANVAS_HEIGHT = 150;
-const GAME_CONTAINER_CLASS = 'tbt-game-container_v1';
 
 class EngineBase extends EngineRunnerBase {
-    constructor(name, containerID, canvasWidth=DEFAULT_CANVAS_WIDTH, canvasHeight=DEFAULT_CANVAS_HEIGHT, isFullscreen=false) {
+    constructor(name, containerID, canvasWidth=DEFAULT_CANVAS_WIDTH, canvasHeight=DEFAULT_CANVAS_HEIGHT) {
         super(name);
         this.DEFAULT_CANVAS_WIDTH = DEFAULT_CANVAS_WIDTH;
         this.DEFAULT_CANVAS_HEIGHT = DEFAULT_CANVAS_HEIGHT;
         this.canvas = document.createElement('canvas');
-        this.canvas.style.width = canvasWidth;
-        this.canvas.style.height =  canvasHeight;
-        this.canvas.width = canvasWidth;
-        this.canvas.height = canvasHeight;
+        this.sizeCanvas(canvasWidth, canvasHeight);
         this.isHorizontal = this.canvas.clientWidth > this.canvas.clientHeight;
-        this.gameRect = new Rect(new Point2d(0, 0), this.canvas.style.width, this.canvas.style.height);
         this.context = this.canvas.getContext('2d');
+
+        this.prevWidth = canvasWidth;
+        this.prevHeight = canvasHeight;
 
         this.defaultContainer = document.getElementById(containerID);
         if (!this.defaultContainer) {
@@ -25,16 +23,8 @@ class EngineBase extends EngineRunnerBase {
             throw `unable to load "${name}" game using "${containerID}`;
         }
 
-        this.isFullscreen = isFullscreen;
-        this.fullscreenContainer = document.createElement('div');
-        document.body.append(this.fullscreenContainer);
-        
-        if (this.isFullscreen) {
-            this.fullscreenContainer.append(this.canvas);
-            this.fullscreenContainer.classList.add(GAME_CONTAINER_CLASS);
-        } else {
-            this.defaultContainer.append(this.canvas);
-        }
+        this.defaultContainer.append(this.canvas);
+        this.isFullscreen = false;
     }
 
     addKeyboardControls(keyboardListener) {
@@ -44,39 +34,50 @@ class EngineBase extends EngineRunnerBase {
             });
         }
     }
-    
+
     toggleFullscreen() {
-        if (this.isFullscreen) {
-            this.defaultContainer.append(this.canvas);
-            this.fullscreenContainer.classList.remove(GAME_CONTAINER_CLASS);
+        if (document.fullscreenElement) {
+            this.isFullscreen = false;
+            return document.exitFullscreen();
         } else {
-            this.fullscreenContainer.append(this.canvas);
-            this.fullscreenContainer.classList.add(GAME_CONTAINER_CLASS);
+            return this.defaultContainer
+                .requestFullscreen()
+                .then(_ => this.isFullscreen = true)
         }
-        this.isFullscreen = !this.isFullscreen;
     }
 
-    resizeCanvas(width, height) {
+    sizeCanvas(width, height) {
+        this.prevWidth = this.canvas.width;
+        this.prevHeight = this.canvas.height;
+        
         this.canvas.width = width;
         this.canvas.height = height;
-        this.onResize(width, height);
-    }
+        this.canvas.style.width =  width;
+        this.canvas.style.height =  height;
 
-    onResize(width, height) {}
+        this.gameRect = new Rect(new Point2d(0, 0), width, height);
+    }
 
     getMousePosition(x, y) {
         if (this.isFullscreen) {
-            let fullscreenOffsetX = (this.fullscreenContainer.clientWidth-this.canvas.width)/2;
-            let fullscreenOffsetY = (this.fullscreenContainer.clientHeight-this.canvas.height)/2;
-            return new Point2d(
-                x - fullscreenOffsetX,
-                y - fullscreenOffsetY);
+            return new Point2d(x, y);
         } else {
             return new Point2d(
                 x - this.defaultContainer.offsetLeft,
                 y - this.defaultContainer.offsetTop);
-        }
-        
+        }        
+    }
+
+    getMousePositionV2(event) {
+        if (this.isFullscreen) {
+            return new Point2d(
+                Math.round(event.offsetX),
+                Math.round(event.offsetY));
+        } else {
+            return new Point2d(
+                Math.round(event.layerX - this.defaultContainer.offsetLeft),
+                Math.round(event.layerY - this.defaultContainer.offsetTop));
+        }        
     }
 
     run() {
