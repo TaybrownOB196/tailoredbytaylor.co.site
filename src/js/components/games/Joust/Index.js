@@ -37,6 +37,9 @@ class Joust extends EngineBase {
                     this.player.gallop();
                     this.otherPlayer.gallop();
                     break;
+                case 'f':
+                    this.toggleFullscreen();
+                    break;
                 case '+':
                     ISDEBUG = !ISDEBUG;
                     break;
@@ -81,7 +84,7 @@ class Joust extends EngineBase {
             new Rider(),
             new Mount(1, 2)
         );
-        this.player.equipWeapon(lance)
+        this.player.equipWeapon(axe)
 
         this.otherPlayer = new Jouster(
             new Rect(
@@ -96,6 +99,7 @@ class Joust extends EngineBase {
             new Mount(1, 2),
             false
         );
+        this.otherPlayer.equipWeapon(lance);
 
         this.hud = new Hud(new Point2d(
             0, 0),
