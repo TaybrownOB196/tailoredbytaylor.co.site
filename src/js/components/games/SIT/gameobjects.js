@@ -270,90 +270,76 @@ class PlayerVehicle extends Vehicle {
         let rearCollisionAnim = new Animation(this.spriteSheet, 5, false);
 
         idleAnim.addFrame(
-            new HitboxFrame(
-                new Rect(new Vector2d(0,0), 0,0), 
+            new HitboxFrame(new Vector2d(0,0), 0,0, 
                 new Rect(new Vector2d(0,0), 64,64),
                 true, 
                 10));
         idleAnim.addFrame(
-            new HitboxFrame(
-                new Rect(new Vector2d(0,0), 0,0), 
+            new HitboxFrame(new Vector2d(0,0), 0,0, 
                 new Rect(new Vector2d(64,0), 64,64),
                 true, 
                 10));
 
         turnLeftAnim.addFrame(
-            new HitboxFrame(
-                new Rect(new Vector2d(0,0), 0,0), 
+            new HitboxFrame(new Vector2d(0,0), 0,0, 
                 new Rect(new Vector2d(128,0), 64,64),
                 true, 
                 LANE_CHANGE_FRAME_TICKER_COUNT));
         turnLeftAnim.addFrame(
-            new HitboxFrame(
-                new Rect(new Vector2d(0,0), 0,0), 
+            new HitboxFrame(new Vector2d(0,0), 0,0, 
                 new Rect(new Vector2d(192,0), 64,64),
                 true, 
                 LANE_CHANGE_FRAME_TICKER_COUNT));
         turnLeftAnim.addFrame(
-            new HitboxFrame(
-                new Rect(new Vector2d(0,0), 0,0), 
+            new HitboxFrame(new Vector2d(0,0), 0,0, 
                 new Rect(new Vector2d(256,0), 64,64),
                 true, 
                 LANE_CHANGE_FRAME_TICKER_COUNT));
 
         turnRightAnim.addFrame(
-            new HitboxFrame(
-                new Rect(new Vector2d(0,0), 0,0), 
+            new HitboxFrame(new Vector2d(0,0), 0,0, 
                 new Rect(new Vector2d(320,0), 64,64),
                 true, 
                 LANE_CHANGE_FRAME_TICKER_COUNT));
         turnRightAnim.addFrame(
-            new HitboxFrame(
-                new Rect(new Vector2d(0,0), 0,0), 
+            new HitboxFrame(new Vector2d(0,0), 0,0, 
                 new Rect(new Vector2d(384,0), 64,64),
                 true, 
                 LANE_CHANGE_FRAME_TICKER_COUNT));
         turnRightAnim.addFrame(
-            new HitboxFrame(
-                new Rect(new Vector2d(0,0), 0,0), 
+            new HitboxFrame(new Vector2d(0,0), 0,0, 
                 new Rect(new Vector2d(448,0), 64,64),
                 true, 
                 LANE_CHANGE_FRAME_TICKER_COUNT));
         
         frontCollisionAnim.addFrame(
-            new HitboxFrame(
-                new Rect(new Vector2d(0,0), 0,0), 
+            new HitboxFrame(new Vector2d(0,0), 0,0, 
                 new Rect(new Vector2d(512,0), 64,64),
                 true, 
                 COLLISION_FRAME_TICKER_COUNT));
         frontCollisionAnim.addFrame(
-            new HitboxFrame(
-                new Rect(new Vector2d(0,0), 0,0), 
+            new HitboxFrame(new Vector2d(0,0), 0,0, 
                 new Rect(new Vector2d(576,0), 64,64),
                 true, 
                 COLLISION_FRAME_TICKER_COUNT));
         frontCollisionAnim.addFrame(
-            new HitboxFrame(
-                new Rect(new Vector2d(0,0), 0,0), 
+            new HitboxFrame(new Vector2d(0,0), 0,0, 
                 new Rect(new Vector2d(640,0), 64,64),
                 true, 
                 COLLISION_FRAME_TICKER_COUNT));
 
         rearCollisionAnim.addFrame(
-            new HitboxFrame(
-                new Rect(new Vector2d(0,0), 0,0), 
+            new HitboxFrame(new Vector2d(0,0), 0,0, 
                 new Rect(new Vector2d(704,0), 64,64),
                 true, 
                 COLLISION_FRAME_TICKER_COUNT));
         rearCollisionAnim.addFrame(
-            new HitboxFrame(
-                new Rect(new Vector2d(0,0), 0,0), 
+            new HitboxFrame(new Vector2d(0,0), 0,0, 
                 new Rect(new Vector2d(768,0), 64,64),
                 true, 
                 COLLISION_FRAME_TICKER_COUNT));
         rearCollisionAnim.addFrame(
-            new HitboxFrame(
-                new Rect(new Vector2d(0,0), 0,0), 
+            new HitboxFrame(new Vector2d(0,0), 0,0, 
                 new Rect(new Vector2d(832,0), 64,64),
                 true, 
                 COLLISION_FRAME_TICKER_COUNT));
@@ -367,7 +353,7 @@ class PlayerVehicle extends Vehicle {
     }
 
     draw(context, isPaused, isDebug) {
-        this.animQueue.animate(context, this.rect, isPaused);
+        this.animQueue.animate(context, this.rect.position, isPaused);
         this.rageMeter.draw(context, 
             new Vector2d(this.rect.position.x, this.rect.position.y + this.rageMeter.height/2));
     }

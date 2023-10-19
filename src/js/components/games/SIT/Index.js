@@ -49,6 +49,7 @@ class SIT extends EngineBase {
         this.audio = new Audio();
         this.audioCtrl = new AudioController(document.getElementById('SITAudio_0'));
         this.audioCtrl.setClip('swerve', new AudioClip(.5, .6));
+
         this.init(this.canvas.clientWidth, this.canvas.clientHeight);        
         this.drivingScore = 0;
         this.scoreCooldown = 0;
@@ -81,7 +82,7 @@ class SIT extends EngineBase {
 
         this.pointerhandler = new Pointerhandler(this.canvas);
         this.pointerhandler.pubsub.subscribe('pointerdown', (ev) => {
-            let msePos = this.getMousePosition(ev.layerX, ev.layerY);
+            let msePos = this.getMousePositionV2(ev);
             if (this.modal.isShowing) {
                 this.isDriving = false;
                 this.modal.handleClick(msePos);
@@ -94,13 +95,13 @@ class SIT extends EngineBase {
             this.isDriving = false;
         });
         this.pointerhandler.pubsub.subscribe('pointermove', (ev) => {
-            let msePos = this.getMousePosition(ev.layerX, ev.layerY);
+            let msePos = this.getMousePositionV2(ev);
             this.hud.update({mse: `(${msePos.x},${msePos.y})`});
             
             this.handleMove(msePos);
         });
         this.pointerhandler.pubsub.subscribe('pointerenter', (ev) => {
-            let msePos = this.getMousePosition(ev.layerX, ev.layerY);
+            let msePos = this.getMousePositionV2(ev);
             this.hud.update({mse: `(${msePos.x},${msePos.y})`});
         });
         this.pointerhandler.pubsub.subscribe('pointerleave', (ev) => {
@@ -118,30 +119,29 @@ class SIT extends EngineBase {
                     }
                     break;
                 case 'f':
-                    if (this.isFullscreen) {
-                        this.toggleFullscreen();
-
-                    } else {
-                        this.resizeCanvas(360, 640);
-                    }
+                    this.toggleFullscreen()
+                        .then(_ => {
+                            if (this.isFullscreen) {
+                                this.sizeCanvas(this.canvas.clientWidth, this.canvas.clientHeight);
+                            } else {
+                                this.sizeCanvas(this.prevWidth, this.prevHeight);
+                            }
+                            this.init(this.canvas.clientWidth, this.canvas.clientHeight);
+                        });
                     break;
-                case 'Escape':
+                case '0':
                     this.pauseGame();
                     break;
             }
         });
     }
 
-    onResize(width, height) {
-        this.init(width, height);
-    }
-
     init(width, height) {
+        console.log(width)
         let roadW = width * ROAD_WIDTH_MULTIPLIER;
         let roadH = height * ROAD_HEIGHT_MULTIPLIER;
-        let laneWidth = 4;
+        let stripeWidth = 4;
         let laneCount = LANECOUNT;
-        
         this.xOffset = (width - roadW) / 2;
         this.road = new Road(
             new Rect(
@@ -150,7 +150,7 @@ class SIT extends EngineBase {
                 roadH),
             MAXSPEED,
             laneCount,
-            laneWidth);
+            stripeWidth);
         this.vehicleDim = VEHICLE_DIM;
         let startX = this.xOffset + this.road.getLaneWidth() *
             (START_LANE) - this.vehicleDim - this.road.stripeWidth;
@@ -171,23 +171,24 @@ class SIT extends EngineBase {
         this.dashboard = new Dashboard(
             new Rect(
                 new Vector2d(0, this.road.getHeight()),
-                this.canvas.clientWidth, 
-                (this.canvas.clientHeight - roadH)),
+                width, 
+                (height - roadH)),
                 '#8f563b');
                 
         this.hud = new Hud(new Point2d(
             this.xOffset, this.road.getHeight()),
             VEHICLE_DIM,
             VEHICLE_DIM,
-            { 
+            {
                 fps: '', 
                 mse: '', 
-                kbi: '', 
+                kbi: '',
+                fs: false,
                 spd: this.road.speedIndex
             });
 
-        this.modalWidth = this.canvas.clientWidth * .8;
-        this.modalHeight = this.canvas.clientHeight * .8;
+        this.modalWidth = width * .8;
+        this.modalHeight = height * .8;
         this.modal = UIContainerFactory.createContainer(new UIContainerSettings(
             'modal',
             this.modalWidth,
@@ -294,11 +295,11 @@ class SIT extends EngineBase {
     endGame() {
         this.isDriving = false;
         this.isGameOver = true;
-        this.modal.toggle(true);
+        //this.modal.toggle(true);
     }
     update() {
         let fps = this.getFps();
-        this.hud.update({fps: fps});
+        this.hud.update({fps: fps, fs: this.isFullscreen});
 
         if (!this.isDriving) return;
         this.dashboard.update(this.road.speedValue, this.tickDelta);
