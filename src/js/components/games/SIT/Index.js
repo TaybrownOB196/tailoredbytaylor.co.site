@@ -114,12 +114,16 @@ class SIT extends EngineBase {
                 case 'f':
                     this.toggleFullscreen()
                         .then(_ => {
+                            let width = 0, height = 0;
                             if (this.isFullscreen) {
-                                this.sizeCanvas(this.canvas.clientWidth, this.canvas.clientHeight);
+                                width = this.canvas.clientWidth;
+                                height = this.canvas.clientHeight;
                             } else {
-                                this.sizeCanvas(this.prevWidth, this.prevHeight);
+                                width = this.prevWidth;
+                                height = this.prevHeight;
                             }
-                            this.init(this.canvas.clientWidth, this.canvas.clientHeight);
+                            this.sizeCanvas(width, height);
+                            this.init(width, height);
                         });
                     break;
                 case '0':
@@ -133,11 +137,10 @@ class SIT extends EngineBase {
     }
 
     init(width, height) {
-        console.log(width)
-        let roadW = width * ROAD_WIDTH_MULTIPLIER;
-        let roadH = height * ROAD_HEIGHT_MULTIPLIER;
-        let stripeWidth = 4;
-        let laneCount = LANECOUNT;
+        const roadW = width * ROAD_WIDTH_MULTIPLIER;
+        const roadH = height * ROAD_HEIGHT_MULTIPLIER;
+        const stripeWidth = 4;
+        const laneCount = LANECOUNT;
         this.xOffset = (width - roadW) / 2;
         this.road = new Road(
             new Rect(
@@ -147,10 +150,13 @@ class SIT extends EngineBase {
             MAXSPEED,
             laneCount,
             stripeWidth);
-        this.vehicleDim = VEHICLE_DIM;
-        let startX = this.xOffset + this.road.getLaneWidth() *
+        const laneWidth = this.road.getLaneWidth();
+
+        this.vehicleDim = VEHICLE_DIM * (laneWidth >= 128 ? 2 : 1);
+        const startX = this.xOffset + this.road.getLaneWidth() *
             (START_LANE) - this.vehicleDim - this.road.stripeWidth;
-        let startY = roadH - this.vehicleDim;
+        const startY = roadH - this.vehicleDim;
+        console.log(this.vehicleDim)
         this.player = new PlayerVehicle(
             new Rect(
                 new Vector2d(startX, startY), 
@@ -158,12 +164,13 @@ class SIT extends EngineBase {
                 this.vehicleDim),
             new Rect(
                 new Vector2d(0,192), 
-                VEHICLE_DIM,
-                VEHICLE_DIM),
+                64,
+                64),
             0,
             START_LANE,
             this.mainCarSS, 
             this.audioCtrl);
+        this.drivingScore = 0;
         this.player.pubsub.subscribe('collision', () => {
             this.drivingScore = this.dashboard.drivingElapsed;
             this.dashboard.addHit();
@@ -178,8 +185,8 @@ class SIT extends EngineBase {
                 
         this.hud = new Hud(new Point2d(
             this.xOffset, this.road.getHeight()),
-            VEHICLE_DIM,
-            VEHICLE_DIM,
+            64,
+            64,
             {
                 fps: '', 
                 mse: '', 

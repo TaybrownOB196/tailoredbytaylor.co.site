@@ -10,7 +10,7 @@ class AnimationQueue {
     this.queue = [];
   }
 
-  animate(context, position, isPaused=false, isDebug=false) {
+  animate(context, position, width, height, isPaused=false, isDebug=false) {
     if (this.queue.length > 0 && this.queue.at(0).isCompleted()) {
       this.queue.shift().reset();
     }
@@ -87,7 +87,7 @@ class Animation {
     this.isBuilt = true;
   }
 
-  draw(context, position, isPaused=false, isDebug=false) {
+  draw(context, position, width=null, height=null, isPaused=false, isDebug=false) {
     getNext = getNext.bind(this);
     reset = reset.bind(this);
 
@@ -99,7 +99,7 @@ class Animation {
     }
 
     let frame = getNext(isPaused);
-    return frame.draw(context, this.spritesheet, position, isDebug);
+    return frame.draw(context, this.spritesheet, position, width, height, isDebug);
   
     function getNext(isPaused) {
       let toReturn = this.frames[this.frameIndex];
@@ -147,10 +147,13 @@ class AnimationFrame {
     this.isInterruptable = isInterruptable;
     this.count = count;
   }
-  draw(context, spritesheet, position, isDebug) {
+  draw(context, spritesheet, position, width, height, isDebug=false) {
     spritesheet.draw(
       context,
-      new Rect(position, this.spritesheetRect.width, this.spritesheetRect.height),
+      new Rect(
+        position, 
+        width || this.spritesheetRect.width, 
+        height || this.spritesheetRect.height),
       this.spritesheetRect);
   }
 }
@@ -172,8 +175,8 @@ class HitboxFrame extends AnimationFrame {
       this.height);
   }
 
-  draw(context, spritesheet, position, isDebug) {
-    super.draw(context, spritesheet, position, isDebug);
+  draw(context, spritesheet, position, width, height, isDebug=false) {
+    super.draw(context, spritesheet, position, width, height, isDebug);
 
     const hitbox = this.#getHitbox(position);
     if (isDebug) {
