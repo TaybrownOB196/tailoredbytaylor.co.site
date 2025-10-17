@@ -280,15 +280,9 @@ p {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-top: 1rem;
-
-    a {
-        font-size: small;
-    }
-
-    img {
-        height: auto;
-        width: 25%;
+    background-color: #2D3155;
+    h3 a {
+        color: gold;
     }
 }
 

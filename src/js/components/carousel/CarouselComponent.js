@@ -36,7 +36,7 @@ class CarouselComponent extends React.Component {
 }
 
 const headerStyle = {
-    textAlign: 'center',
+    textAlign: '-webkit-center',
 }
 
 export default CarouselComponent;

@@ -1,6 +1,6 @@
 import React from 'react';
-
 import profile_img from './../../jpg/20220716_113150.jpg'
+import resume from './../../staticfiles/TaybrownResume.pdf';
 import SocialMediaTray from './banners/SocialMediaTray';
 
 function ProfileComponent() {
@@ -8,7 +8,7 @@ function ProfileComponent() {
         <div id='profileComponent'>
             <header id='header-container'>
                 <h2>Taylor Brown</h2>
-                <h4>Software Developer</h4>
+                <h5>Full Stack .NET Engineer</h5>
             </header>
 
             <div id='profileImage-container'>
@@ -19,13 +19,21 @@ function ProfileComponent() {
                 <div id='profileImageBubble'></div>
             </div>
             
-            <div id='socialMediaTray-container'>
+            <div id='socialMediaTray-container' className='profile-content-container'>
                 <SocialMediaTray />
             </div>
 
-            <div id='intro-container'>
-                <p>Hello, World! My name is Taylor Brown and I am a software developer.</p>
+            <div id='intro-container' className='profile-content-container'>
+                <p style={{textAlign:"-webkit-center"}}>Hello World!</p> 
+                <p style={{textAlign:"-webkit-center"}}>I develop web applications professionally and design video games as a hobby.</p>
             </div>
+
+            <div id='resumeContainer' className='profile-content-container'>
+                <h3>
+                    <a href={resume} download='TaylorBrownResume' >R&#233;sum&#233;</a>
+                </h3>
+            </div>
+
         
         </div>
     );

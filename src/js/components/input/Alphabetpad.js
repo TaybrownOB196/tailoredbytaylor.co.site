@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-
 import Keypad from './Keypad';
 
 import './Alphabetpad.css';

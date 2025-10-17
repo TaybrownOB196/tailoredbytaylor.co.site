@@ -5,12 +5,20 @@ function About() {
         <>
             <div id='about' className='opaque-bg-container'>
                 <br />
-                <h4>Earn Young, Live Mature, Die Old.</h4>
+                <h4>Developer. Father. GameDev.</h4>
                 <br />
-                <h5>Everything is inbetween.</h5>
                 <br />
                 <p>
-                    Hello, World! My name is Taylor, and I am hard working and self motivated .NET developer with a desire to learn. I have 8+ years of industry experience in WebAPI/MVC app development. I also dabble in web development primarily using ReactJS (or vanilla javascript). Some of my hobbies include playing basketball, game development and cooking. As an aspiring entrepreneur, I am always looking for an opportunity to partner with other devs and tech thinkers; so drop a line if you want to collaborate.
+                    I’m a Full Stack Software Engineer with over a decade of experience designing, building, and optimizing software solutions across enterprise and mid-size environments. My work centers on creating scalable, high-performance systems using modern technologies such as .NET, React, Azure, and microservices.
+                    <br/>
+                    <br/>
+                    Throughout my career, I’ve earned a reputation for being both a hands-on problem solver and a collaborative team member. I’ve maintained and enhanced critical business applications, optimized APIs for sub-second response times, and developed solutions that streamline workflows and improve data integrity. Beyond coding, I take pride in mentoring junior developers, promoting best practices, and fostering environments where teams can grow together.
+                    <br/>
+                    <br/>
+                    I’m passionate about writing clean, efficient code and building reliable systems that deliver measurable business value. I enjoy bridging the gap between technical and non-technical teams — ensuring that what gets delivered not only works but aligns with the organization’s goals.
+                    <br/>
+                    <br/>
+                    I’m currently exploring opportunities where I can continue to drive technical excellence, contribute to architecture decisions, and help teams deliver high-impact software that makes a real difference.
                 </p>
                 <br />
                 <div className='opaque-bg'></div>

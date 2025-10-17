@@ -15,6 +15,10 @@ $shade-3: #2D3155;
     justify-content: center;
 }
 
+#header-container {
+    height: 45px;
+}
+
 #deck-container {
     display: flex;
     align-content: center;
@@ -77,6 +81,12 @@ body {
     padding: 0;
     font-family: Copperplate;// Brush Script MT, Brush Script Std, cursive;
     //   box-sizing: border-box;
+}
+
+.profile-content-container {
+    padding: 1rem 0rem;
+    border-radius: 24px;
+    width: 95%;
 }
 
 .opaque-bg {
@@ -171,12 +181,13 @@ body {
     header {
         width: 100%;
         background-color: $shade-0;
-        text-align: center;
+        text-align: -webkit-center;
     }
 
     p {
         text-align: justify;
-        font-size: .88em;
+        font-size: 1em;
+
     }
 
     #profileImage-container {
@@ -202,7 +213,7 @@ body {
     }
     
     .navbar {
-        display: flex;
+        display: none;
         width: 100%;
         justify-content: space-evenly;
         height: inherit;
@@ -231,6 +242,8 @@ body {
         left: 33%;
         width: 67%;
         height: 45px;
+        margin-top: 250px;
+
 
         #content-container {
             #about {
@@ -295,20 +308,23 @@ body {
     #profileComponent {
         align-items: center;
         background-color: $shade-2;
-        border-bottom-right-radius: 64px;
-        border-bottom-left-radius: 64px;
         display: flex;
         flex-direction: column;
         gap: 2rem;
-        height: 99%;
+        height: 100%;
         position: absolute;
         width: 33%;
         min-width: 33%;
 
+        > :first-child {
+            margin-top: 250px;
+        }
+
         #intro-container {
             background-color: $shade-0;
-            padding: 1rem;
-            border-radius: 24px;
+            p {
+                font-size: .88em;
+            }
         }
 
         #profileImage {
@@ -332,10 +348,7 @@ body {
 
         #socialMediaTray-container {
             background-color: $shade-0;
-            border-radius: 24px;
             height: 48px;
-            padding: .5rem 0rem;
-            width: 100%;
     
             .socialMediaTray {
                 justify-content: space-evenly;
@@ -345,9 +358,6 @@ body {
 }
 
 @media only screen and (max-height: 600px) {
-    * {
-        // background: red;
-    }
 }
 
 @media only screen and (max-width: 650px) {
@@ -364,6 +374,9 @@ body {
             flex-direction: row;
             gap: 0rem;
             position: relative;
+            > :first-child {
+                margin-top: initial;
+            }
 
             .socialMediaTray {
                 justify-content: flex-start;
@@ -376,11 +389,12 @@ body {
             }
 
             #header-container {
+                height: 45px;
                 grid-column: 1/2;
                 grid-row: 1;
                 align-self: baseline;
                 padding-bottom: .5rem;
-                h2, h4 {
+                h2, h4, h5 {
                     padding-left: 200px;
                 }
             }
@@ -390,6 +404,21 @@ body {
                 background-color: initial;
                 grid-column: 1;
                 grid-row: 2;
+            }
+
+            #resumeContainer {
+                position: absolute;
+                top: 100px;
+                width: 100%;
+                padding-left: 200px;
+                display: initial;
+                flex-direction: initial;
+                align-items: initial;
+                border-radius: initial;
+                background-color: initial;
+                h3 a {
+                    color: gold;
+                }
             }
 
             #profileImage-container {
@@ -417,6 +446,7 @@ body {
         }
 
         .navbar {
+            display: none;
             height: 2rem;
 
             a:first-of-type {
@@ -428,7 +458,8 @@ body {
             align-self: flex-end;
         }
 
-        #nav-container {            
+        #nav-container {      
+            margin-top: 50px;
             position: initial;
             left: initial;
             width: 100%;

@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
+import { useEffect, useState } from 'react';
 import GridrowComponent from '../GridrowComponent';
 import Utility from '../../../lib/Utility';
 import Alphabetpad from '../../../components/input/Alphabetpad';

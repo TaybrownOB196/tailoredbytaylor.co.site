@@ -90,16 +90,11 @@ class GTW extends EngineBase {
             let click = new Vector2d(
                 (ev.x - this.canvas.offsetLeft)/(this.gameRect.width/this.DEFAULT_CANVAS_WIDTH), 
                 (ev.y - this.canvas.offsetTop)/(this.gameRect.height/this.DEFAULT_CANVAS_HEIGHT));             
-            //console.log(this.canvas, this.canvas.offsetLeft);
             let wordSlot = this.WordGuess.getAt(click);
             if (wordSlot) {
                 console.log(wordSlot);
                 if (this.held.value == wordSlot.value) {
-                    // console.log(`${this.held.value} match ${this.wordSlots[idx].value}`);
                     wordSlot.match();
-                } else {
-                    // console.log(`${this.held.value} don\'t match ${this.wordSlots[idx].value}`);
-    
                 }
             }
 

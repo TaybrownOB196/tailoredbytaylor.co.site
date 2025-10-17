@@ -6,12 +6,7 @@ class Projects extends React.Component {
         super(props);
 
         this.links = [
-            { ref: 'sandbox', text: 'Sandbox' }
             ,{ ref: 'sit', text: 'S.I.T.' }
-            ,{ ref: 'deck', text: 'Deck(WIP)' }
-            ,{ ref: 'userform', text: 'UserForm' }
-            ,{ ref: 'loginform', text: 'LoginForm' }
-            ,{ ref: 'worksheet', text: 'Worksheet' }
         ];
     }
 
