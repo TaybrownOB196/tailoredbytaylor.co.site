@@ -5,13 +5,12 @@ import RouterLinkNavbarComponent from './nav/RouterLinkNavbarComponent';
 function ContentComponent() {
     return (
         <>
-            <RouterLinkNavbarComponent links={[
-                { ref: '', text: 'Profile', class: '' }
-            ]}/>
-
-            <div id='content-container'>
-                <Outlet />
+            <div className='height-offset'>
+                <div id='content-container'>
+                    <Outlet />
+                </div>
             </div>
+            
         </>
     );
 }

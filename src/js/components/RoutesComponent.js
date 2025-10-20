@@ -23,7 +23,7 @@ class RoutesComponent extends React.Component {
     }
 
     render() {
-        return (<div id='nav-container'>
+        return (<div id='right-container'>
             <Router id='router'>
                 <Routes id='routes'>
                     <Route id='home' path='/' element={<ContentComponent />}>

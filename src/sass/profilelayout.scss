@@ -15,6 +15,10 @@ $shade-3: #2D3155;
     justify-content: center;
 }
 
+.top-gap-16 {
+    margin-top: 16px;
+}
+
 #header-container {
     height: 45px;
 }
@@ -31,6 +35,18 @@ $shade-3: #2D3155;
         align-items: center;
         background-color: orange;
     }
+}
+
+.height-offset {
+    position: inherit;
+    top: 10%;
+}
+
+.center-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
 }
 
 .card {
@@ -237,20 +253,17 @@ body {
         }
     }
 
-    #nav-container {
+    #right-container {
         position: absolute;
         left: 33%;
         width: 67%;
-        height: 45px;
-        margin-top: 250px;
-
+        height: 100%;
 
         #content-container {
             #about {
                 display: flex;
                 flex-direction: column;
                 align-items: center;
-                margin-top: 1rem;
 
                 h1,h2,h3,h4,h5,h6 {
                     color: $shade-3;
@@ -305,7 +318,7 @@ body {
         align-self: center;
     }
 
-    #profileComponent {
+    #left-container {
         align-items: center;
         background-color: $shade-2;
         display: flex;
@@ -315,10 +328,6 @@ body {
         position: absolute;
         width: 33%;
         min-width: 33%;
-
-        > :first-child {
-            margin-top: 250px;
-        }
 
         #intro-container {
             background-color: $shade-0;
@@ -357,14 +366,27 @@ body {
     }
 }
 
-@media only screen and (max-height: 600px) {
+@media only screen and (min-height: 1000px) {
+    .height-offset {
+        top: 20%;
+    }
 }
 
 @media only screen and (max-width: 650px) {
+    .top-gap-16 {
+        margin-top: initial;
+    }
+
+    .height-offset {
+        position: inherit;
+        top: initial;
+        padding-bottom: 10%;
+    }
+
     #root {
         align-items: center;
         
-        #profileComponent {
+        #left-container {
             min-width: 33%;
             width: 100%;
             height: 192px;
@@ -374,9 +396,6 @@ body {
             flex-direction: row;
             gap: 0rem;
             position: relative;
-            > :first-child {
-                margin-top: initial;
-            }
 
             .socialMediaTray {
                 justify-content: flex-start;
@@ -395,7 +414,7 @@ body {
                 align-self: baseline;
                 padding-bottom: .5rem;
                 h2, h4, h5 {
-                    padding-left: 200px;
+                    padding-left: 16px;
                 }
             }
 
@@ -410,7 +429,7 @@ body {
                 position: absolute;
                 top: 100px;
                 width: 100%;
-                padding-left: 200px;
+                padding-left: 16px;
                 display: initial;
                 flex-direction: initial;
                 align-items: initial;
@@ -425,6 +444,9 @@ body {
                 grid-column: 1;
                 grid-row: 1;
                 z-index: 100;
+                position: absolute;
+                top: 0;
+                right: 0;
             }
             
             #socialMediaTray-container {
@@ -440,25 +462,12 @@ body {
                 .socialMediaTray {
                     justify-content: flex-start;
                     gap: 1rem;
-                    padding-left: 200px;
+                    padding-left: 16px;
                 }
             }
         }
 
-        .navbar {
-            display: none;
-            height: 2rem;
-
-            a:first-of-type {
-                padding-left: 100px;
-            }
-        }
-
-        #toggleViewLink {
-            align-self: flex-end;
-        }
-
-        #nav-container {      
+        #right-container {      
             margin-top: 50px;
             position: initial;
             left: initial;
