@@ -1,0 +1,86 @@
+@use 'colors';
+
+.bubble-image {
+  border-radius: inherit;
+  object-fit: contain;
+  height: 200px;
+  width: 200px;
+}
+
+.background-bubble {
+  border-radius: 50%;
+  height: 200px;
+  width: 200px;
+  background-color: colors.$shade-3;
+}
+
+.bubble-image-wrapper {
+  border-radius: 50%;
+  position: absolute;
+}
+
+.social-media-tray {
+  align-content: baseline;
+  display: flex;
+  height: 64px;
+  width: -webkit-fill-available;
+  justify-content: space-evenly;
+  gap: .5rem;
+  background-color: colors.$shade-0;
+  padding: 16px 16px;
+  border-radius: 24px;
+
+  input[type='image'] {
+    height: auto;
+  }
+}
+
+body {
+  display: flex;
+  margin: 0px;
+}
+
+#head {
+  background-color: white;
+  width: 100%;
+  grid-area: head;
+}
+#bust { grid-area: bust; }
+#socials { grid-area: socials; }
+#intro { grid-area: intro; }
+#resume { grid-area: resume; }
+
+#root {
+  height: 100%;
+
+  #left-container {
+    width: 25%;
+    height: 100%;
+    position: absolute;
+    background-color: colors.$shade-2;
+    * {
+      justify-items: center;
+    }
+
+    a {
+      color: gold;
+    }
+  }
+
+  #right-container {
+    left: 25%;
+    width: 75%;
+    height: 100%;
+    position: absolute;
+    background-color: colors.$shade-1;
+  }
+
+  * {
+      justify-items: center;
+  }
+
+  #about {
+    margin: 0px 64px;
+    text-align: center;
+  }
+}
