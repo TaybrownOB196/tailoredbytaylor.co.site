@@ -3,6 +3,7 @@ import PictureBubble from '../components/PictureBubble.jsx';
 
 import colors from '../styles/colors.module.scss';
 import img from '../assets/20220716_113150.jpg';
+import resumePdf from '../assets/TaybrownResume.pdf';
 
 export default function Profile() {
   return (
@@ -32,7 +33,7 @@ export default function Profile() {
 
       <div id='resume'>
         <h3>
-          <a href='src/assets/TaybrownResume.pdf' download='TaylorBrownResume'>R&#233;sum&#233;</a>
+          <a href={resumePdf} download='TaylorBrownResume'>R&#233;sum&#233;</a>
         </h3>
       </div>
     </>        
