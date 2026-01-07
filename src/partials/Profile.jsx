@@ -2,6 +2,7 @@ import SocialMediaTray from '../components/SocialMediaTray.jsx';
 import PictureBubble from '../components/PictureBubble.jsx';
 
 import colors from '../styles/colors.module.scss';
+import img from '../assets/20220716_113150.jpg';
 
 export default function Profile() {
   return (
@@ -13,7 +14,7 @@ export default function Profile() {
 
       <div id='bust' style={{marginBottom: '8px'}}>
         <PictureBubble
-          imgSrc='src/assets/20220716_113150.jpg'
+          imgSrc={img}
           bgColor={colors.shade_3}
           dims={{x: '200px', y: '200px'}}
           />
