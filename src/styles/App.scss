@@ -1,16 +1,12 @@
-@use 'colors';
+@use 'colors.module';
 
 .bubble-image {
   border-radius: inherit;
   object-fit: contain;
-  height: 200px;
-  width: 200px;
 }
 
 .background-bubble {
   border-radius: 50%;
-  height: 200px;
-  width: 200px;
   background-color: colors.$shade-3;
 }
 
@@ -43,12 +39,7 @@ body {
 #head {
   background-color: white;
   width: 100%;
-  grid-area: head;
 }
-#bust { grid-area: bust; }
-#socials { grid-area: socials; }
-#intro { grid-area: intro; }
-#resume { grid-area: resume; }
 
 #root {
   height: 100%;
@@ -64,6 +55,10 @@ body {
 
     a {
       color: gold;
+    }
+
+    #resume {
+      margin-top: -16px;
     }
   }
 

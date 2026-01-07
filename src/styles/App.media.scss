@@ -1,88 +1,17 @@
-@use 'colors';
+@use 'colors.module';
 
-@media only screen and (min-height: 1000px) {
-
-}
-
-@media only screen and (max-width: 769px) {
-  $bust-dim: 150px;
-
-  .social-media-tray {
-    height: 48px;
+@media screen and (max-width: 769px) {
+  body {
+    background-color: darkgray;
   }
 
-  .bubble-image {
-    border-radius: inherit;
-    object-fit: contain;
-    height: $bust-dim;
-    width: $bust-dim;
+  #left-container {
+    width: 34%;
+    left: 33%;
+    min-width: 334px;
   }
 
-  .background-bubble {
-    border-radius: 50%;
-    height: $bust-dim;
-    width: $bust-dim;
-    background-color: colors.$shade-3;
-  }
-
-  #root {
-    height: 100%;
-    
-    #left-container {
-      width: 100%;
-      position: absolute;
-      top: 0px;
-      height: 200px;      
-      background-color: colors.$shade-2;
-      align-items: center;
-
-      display: grid;
-      grid-template-areas:
-        'head head head'
-        'bust socials ...'
-        'bust socials resume';
-      align-content: center;
-      #intro {
-        display: none;
-      }
-        
-      #head {
-        display: flex;
-        justify-items: left;
-        z-index: 1;
-        background-color: colors.$shade-0;
-        width: 100%;
-        align-items: flex-end;
-        h2, h5 {
-          float: left;
-          padding-left: 24px;
-        }
-      }
-
-      #resume {
-        
-      }
-
-      a {
-        color: gold;
-      }
-    }
-
-    #right-container {
-      left: initial;
-      width: 100%;
-      top: 200px;
-      height: -webkit-fill-available;
-      position: absolute;
-      background-color: colors.$shade-1;
-    }
-
-    * {
-        justify-items: center;
-    }
-
-    #about {
-      text-align: center;
-    }
+  #right-container {
+    display: none
   }
 }

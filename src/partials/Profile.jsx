@@ -1,4 +1,7 @@
 import SocialMediaTray from '../components/SocialMediaTray.jsx';
+import PictureBubble from '../components/PictureBubble.jsx';
+
+import colors from '../styles/colors.module.scss';
 
 export default function Profile() {
   return (
@@ -9,10 +12,11 @@ export default function Profile() {
       </header>
 
       <div id='bust' style={{marginBottom: '8px'}}>
-        <div className='bubble-image-wrapper'>
-          <img className='bubble-image' src='src/assets/20220716_113150.jpg'></img>
-        </div>
-        <div className='background-bubble'></div>
+        <PictureBubble
+          imgSrc='src/assets/20220716_113150.jpg'
+          bgColor={colors.shade_3}
+          dims={{x: '200px', y: '200px'}}
+          />
       </div>
         
       <div id='socials'>
@@ -20,9 +24,9 @@ export default function Profile() {
       </div>
 
       <div id='intro' style={{margin: '0px 8px'}}>
-        <p>Hello World!</p> 
+        <h4>Hello World!</h4> 
         <p style={{textAlign:'-webkit-center'}}>I develop web applications professionally and design video games as a hobbyist</p>
-        <p>Check out my</p>
+        <h5 style={{color:'gold'}}>Check out my</h5>
       </div>
 
       <div id='resume'>
